@@ -1,0 +1,22 @@
+[
+    {
+        "id": "SKU-1001",
+        "name": "Work Gloves",
+        "price": 14.99,
+        "category": "Safety",
+        "inStock": true,
+        "quantity": 22,
+        "image": "images/gloves.png",
+        "description": "Durable grip, breathable back."
+    },
+    {
+        "id": "SKU-2003",
+        "name": "16oz Claw Hammer",
+        "price": 18.5,
+        "category": "Tools",
+        "inStock": false,
+        "quantity": 0,
+        "image": "images/hammer.jpg",
+        "description": "Balanced steel head, comfortable handle."
+    }
+]

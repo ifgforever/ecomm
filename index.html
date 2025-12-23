@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Jojin’s Kitty Thrift Store</title>
+    <meta name="description"
+        content="Jojin’s Kitty Thrift Store — happy thrift finds with a sprinkle of holiday magic." />
+
+    <style>
+        :root {
+            --ink: #1f2937;
+            --muted: #6b7280;
+
+            --paper: #fffaf3;
+            --paper2: #f6fbff;
+            --card: rgba(255, 255, 255, .78);
+            --card2: rgba(255, 255, 255, .92);
+            --line: rgba(31, 41, 55, .10);
+
+            --mint: #bdf7de;
+            --pink: #ffd2ea;
+            --sky: #cfe9ff;
+            --gold: #ffd789;
+
+            --holly: #1f8a5a;
+            --berry: #e23b5b;
+
+            --candy: #ff4f7a;
+            --candy2: #2bb8ff;
+
+            --shadow: 0 18px 50px rgba(17, 24, 39, .14);
+            --shadow2: 0 10px 22px rgba(17, 24, 39, .10);
+
+            --r: 22px;
+            --r2: 16px;
+
+            --font: ui-rounded, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            font-family: var(--font);
+            color: var(--ink);
+            background:
+                radial-gradient(900px 420px at 14% 0%, var(--pink), transparent 55%),
+                radial-gradient(900px 520px at 86% 10%, var(--sky), transparent 55%),
+                radial-gradient(1000px 600px at 45% 110%, var(--mint), transparent 60%),
+                linear-gradient(180deg, var(--paper), var(--paper2));
+            overflow-x: hidden;
+        }
+
+        /* subtle snow */
+        .snow,
+        .snow:before,
+        .snow:after {
+            position: fixed;
+            inset: 0;
+            content: "";
+            pointer-events: none;
+            background-image:
+                radial-gradient(2px 2px at 12% 20%, rgba(255, 255, 255, .9) 55%, transparent 56%),
+                radial-gradient(2px 2px at 36% 66%, rgba(255, 255, 255, .75) 55%, transparent 56%),
+                radial-gradient(1.5px 1.5px at 80% 30%, rgba(255, 255, 255, .9) 55%, transparent 56%),
+                radial-gradient(2px 2px at 70% 82%, rgba(255, 255, 255, .7) 55%, transparent 56%),
+                radial-gradient(1.5px 1.5px at 22% 88%, rgba(255, 255, 255, .85) 55%, transparent 56%),
+                radial-gradient(1px 1px at 55% 16%, rgba(255, 255, 255, .85) 55%, transparent 56%);
+            background-size: 320px 320px;
+            opacity: .55;
+            filter: blur(.2px);
+            transform: translateY(-40%);
+            animation: snow 18s linear infinite;
+        }
+
+        .snow:before {
+            opacity: .4;
+            background-size: 520px 520px;
+            animation-duration: 28s;
+        }
+
+        .snow:after {
+            opacity: .25;
+            background-size: 760px 760px;
+            animation-duration: 42s;
+        }
+
+        @keyframes snow {
+            to {
+                transform: translateY(40%);
+            }
+        }
+
+        .wrap {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            padding: 18px 0 14px;
+            backdrop-filter: blur(10px);
+            background: linear-gradient(180deg, rgba(255, 255, 255, .72), rgba(255, 255, 255, .45));
+            border-bottom: 1px solid rgba(31, 41, 55, .10);
+        }
+
+        .topRow {
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .brand {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            background:
+                radial-gradient(18px 18px at 35% 35%, #fff, rgba(255, 255, 255, 0) 60%),
+                radial-gradient(120px 80px at 20% 0%, rgba(255, 255, 255, .65), transparent 60%),
+                linear-gradient(135deg, rgba(255, 79, 122, .35), rgba(43, 184, 255, .30));
+            border: 1px solid rgba(31, 41, 55, .12);
+            box-shadow: var(--shadow2);
+            display: grid;
+            place-items: center;
+            font-size: 22px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 26px;
+            letter-spacing: .2px;
+            line-height: 1.1;
+        }
+
+        .sub {
+            margin: 6px 0 0;
+            color: var(--muted);
+            line-height: 1.35;
+            font-size: 13.5px;
+            max-width: 620px;
+        }
+
+        .bar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-top: 14px;
+        }
+
+        input,
+        select {
+            font-family: inherit;
+            background: rgba(255, 255, 255, .75);
+            color: var(--ink);
+            border: 1px solid rgba(31, 41, 55, .14);
+            padding: 11px 12px;
+            border-radius: 14px;
+            outline: none;
+            box-shadow: 0 6px 16px rgba(17, 24, 39, .06);
+        }
+
+        input {
+            flex: 1 1 260px;
+        }
+
+        select {
+            flex: 0 0 220px;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: rgba(255, 79, 122, .55);
+            box-shadow: 0 0 0 4px rgba(255, 79, 122, .18);
+        }
+
+        .pill {
+            display: inline-flex;
+            gap: 10px;
+            align-items: center;
+            padding: 8px 10px;
+            border-radius: 999px;
+            background:
+                repeating-linear-gradient(135deg,
+                    rgba(255, 79, 122, .16) 0px,
+                    rgba(255, 79, 122, .16) 10px,
+                    rgba(43, 184, 255, .14) 10px,
+                    rgba(43, 184, 255, .14) 20px);
+            border: 1px solid rgba(31, 41, 55, .12);
+            box-shadow: 0 8px 18px rgba(17, 24, 39, .08);
+            white-space: nowrap;
+        }
+
+        .pill strong {
+            color: var(--berry);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border-radius: 14px;
+            border: 1px solid rgba(31, 41, 55, .14);
+            background: rgba(255, 255, 255, .75);
+            color: var(--ink);
+            text-decoration: none;
+            font-weight: 800;
+            box-shadow: 0 8px 18px rgba(17, 24, 39, .08);
+            transition: transform .08s ease, box-shadow .12s ease, background .12s ease, border-color .12s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            border-color: rgba(255, 79, 122, .38);
+            background: rgba(255, 255, 255, .92);
+            box-shadow: 0 12px 26px rgba(17, 24, 39, .12);
+        }
+
+        .count {
+            margin-left: auto;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        main {
+            padding: 18px 0 50px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(235px, 1fr));
+            gap: 14px;
+            margin-top: 14px;
+        }
+
+        .card {
+            background: linear-gradient(180deg, rgba(255, 255, 255, .92), rgba(255, 255, 255, .74));
+            border: 1px solid rgba(31, 41, 55, .12);
+            border-radius: var(--r);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        /* tiny festive corner ribbon */
+        .card:before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 76px;
+            height: 76px;
+            background:
+                repeating-linear-gradient(135deg, rgba(226, 59, 91, .45) 0 9px, rgba(255, 255, 255, .9) 9px 18px);
+            clip-path: polygon(100% 0, 0 0, 100% 100%);
+            opacity: .35;
+        }
+
+        .img {
+            height: 155px;
+            background:
+                radial-gradient(140px 90px at 30% 10%, rgba(255, 215, 137, .85), transparent 55%),
+                radial-gradient(140px 90px at 80% 30%, rgba(207, 233, 255, .85), transparent 55%),
+                linear-gradient(135deg, rgba(189, 247, 222, .7), rgba(255, 210, 234, .6));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border-bottom: 1px solid rgba(31, 41, 55, .10);
+        }
+
+        .img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .noimg {
+            color: rgba(31, 41, 55, .65);
+            font-weight: 800;
+            background: rgba(255, 255, 255, .55);
+            border: 1px dashed rgba(31, 41, 55, .20);
+            padding: 10px 12px;
+            border-radius: 14px;
+        }
+
+        .content {
+            padding: 12px;
+        }
+
+        .meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: center;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .price {
+            font-weight: 900;
+            font-size: 15px;
+            color: var(--ink);
+            background: rgba(255, 215, 137, .55);
+            border: 1px solid rgba(31, 41, 55, .10);
+            padding: 6px 10px;
+            border-radius: 999px;
+        }
+
+        .name {
+            font-weight: 950;
+            margin: 10px 0 6px;
+            letter-spacing: .1px;
+        }
+
+        .desc {
+            margin: 10px 0 0;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.35;
+            min-height: 34px;
+        }
+
+        .tags {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .stock {
+            font-size: 12px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(31, 41, 55, .14);
+            color: var(--muted);
+            background: rgba(255, 255, 255, .55);
+            font-weight: 800;
+        }
+
+        .stock.good {
+            border-color: rgba(31, 138, 90, .30);
+            color: #166534;
+            background: rgba(189, 247, 222, .60);
+        }
+
+        .stock.bad {
+            border-color: rgba(226, 59, 91, .30);
+            color: #9f1239;
+            background: rgba(255, 210, 234, .55);
+        }
+
+        footer {
+            padding: 18px 0;
+            border-top: 1px solid rgba(31, 41, 55, .10);
+            color: var(--muted);
+            background: rgba(255, 255, 255, .45);
+        }
+
+        .small {
+            font-size: 12.5px;
+            line-height: 1.5;
+        }
+
+        /* make sticky header less tall on small screens */
+        @media (max-width: 520px) {
+            h1 {
+                font-size: 22px;
+            }
+
+            select {
+                flex: 1 1 220px;
+            }
+
+            .pill {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .count {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="snow" aria-hidden="true"></div>
+
+    <header>
+        <div class="wrap">
+            <div class="topRow">
+                <div>
+                    <div class="brand">
+                        <div class="logo" aria-hidden="true">🐾</div>
+                        <div>
+                            <h1>Jojin’s Kitty Thrift Store</h1>
+                            <p class="sub">Happy thrift finds + holiday cheer. Browse the goodies here — calling is the
+                                fastest way to confirm availability and reserve an item. 🎄✨</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bar">
+                <input id="q" type="search" placeholder="Search (name, SKU, description)..." />
+                <select id="cat">
+                    <option value="">All categories</option>
+                </select>
+
+                <span class="pill" title="Tap to call on mobile">
+                    <strong>Call:</strong>
+                    <a class="btn" id="callTop" href="tel:+1-312-555-0123">+1 (312) 610-0123</a>
+                </span>
+
+                <span class="count" id="count"></span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="wrap">
+            <div class="grid" id="grid"></div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="wrap small">
+            <div><strong>Store hours:</strong> Mon–Sat 11am–4pm • Calls outside of this time leave a message or text •
+                <strong>Location:</strong> 4100 N. Pulaski Rd.,
+                Chicago, IL</div>
+            <div>Inventory may change quickly — call to reserve an item. Happy holidays! 🎁</div>
+        </div>
+    </footer>
+
+    <script>
+        const STORE_PHONE = "+13125550123"; // digits preferred for tel:
+        const grid = document.getElementById("grid");
+        const q = document.getElementById("q");
+        const cat = document.getElementById("cat");
+        const count = document.getElementById("count");
+        const callTop = document.getElementById("callTop");
+
+        callTop.href = `tel:${STORE_PHONE}`;
+
+        let PRODUCTS = [];
+
+        const money = (n) => new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(n);
+
+        function uniqueCategories(items) {
+            return [...new Set(items.map(p => (p.category || "").trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+        }
+
+        function populateCategories(items) {
+            const cats = uniqueCategories(items);
+            for (const c of cats) {
+                const opt = document.createElement("option");
+                opt.value = c;
+                opt.textContent = c;
+                cat.appendChild(opt);
+            }
+        }
+
+        function matches(p, queryText, category) {
+            const qt = queryText.trim().toLowerCase();
+            if (category && (p.category || "") !== category) return false;
+            if (!qt) return true;
+            const blob = `${p.name} ${p.id} ${p.description} ${p.category}`.toLowerCase();
+            return blob.includes(qt);
+        }
+
+        function render(items) {
+            grid.innerHTML = "";
+            count.textContent = `${items.length} item${items.length === 1 ? "" : "s"}`;
+
+            for (const p of items) {
+                const inStock = !!p.inStock && (p.quantity ?? 1) > 0;
+
+                const card = document.createElement("div");
+                card.className = "card";
+                card.innerHTML = `
+          <div class="img">
+            ${p.image ? `<img src="${p.image}" alt="${escapeHtml(p.name)}">` : `<div class="noimg">No image yet ✨</div>`}
+          </div>
+          <div class="content">
+            <div class="meta">
+              <div><span style="opacity:.95">${escapeHtml(p.category || "Uncategorized")}</span></div>
+              <div class="price">${money(Number(p.price || 0))}</div>
+            </div>
+
+            <p class="name">${escapeHtml(p.name || "Unnamed Product")}</p>
+
+            <div class="meta">
+              <div><strong>SKU:</strong> ${escapeHtml(p.id || "—")}</div>
+              <div><strong>Qty:</strong> ${(p.quantity ?? "—")}</div>
+            </div>
+
+            <p class="desc">${escapeHtml(p.description || "")}</p>
+
+            <div class="tags">
+              <span class="stock ${inStock ? "good" : "bad"}">${inStock ? "In stock 🎀" : "Call to confirm 📞"}</span>
+              <a class="btn" href="tel:${STORE_PHONE}" aria-label="Call to order ${escapeHtml(p.name)}">
+                Call to order
+              </a>
+            </div>
+
+            <div style="margin-top:10px; color: var(--muted); font-size:12px;">
+              When you call, mention: <strong>${escapeHtml(p.id || "")}</strong>
+            </div>
+          </div>
+        `;
+                grid.appendChild(card);
+            }
+        }
+
+        function escapeHtml(str) {
+            return String(str ?? "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+        function applyFilters() {
+            const items = PRODUCTS.filter(p => matches(p, q.value, cat.value));
+            render(items);
+        }
+
+        async function init() {
+            const res = await fetch("products.json", { cache: "no-store" });
+            PRODUCTS = await res.json();
+            populateCategories(PRODUCTS);
+            render(PRODUCTS);
+
+            q.addEventListener("input", applyFilters);
+            cat.addEventListener("change", applyFilters);
+        }
+
+        init().catch(err => {
+            console.error(err);
+            grid.innerHTML = `<div style="color:#b91c1c; background: rgba(255,255,255,.65); padding:12px; border-radius:14px; border:1px solid rgba(31,41,55,.12)">
+        Could not load <strong>products.json</strong>. Check the file path and JSON formatting.
+      </div>`;
+        });
+    </script>
+</body>
+
+</html>

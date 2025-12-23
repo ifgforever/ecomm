@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Inventory Admin</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+            margin: 0;
+            background: #0b0f19;
+            color: #e5e7eb
+        }
+
+        .wrap {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px
+        }
+
+        .card {
+            background: #111827;
+            border: 1px solid rgba(255, 255, 255, .10);
+            border-radius: 14px;
+            padding: 14px
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            background: #0f172a;
+            color: #e5e7eb;
+            border: 1px solid rgba(255, 255, 255, .10);
+            border-radius: 12px;
+            padding: 10px 12px;
+            box-sizing: border-box
+        }
+
+        textarea {
+            min-height: 90px;
+            resize: vertical
+        }
+
+        .btn {
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, .12);
+            background: rgba(255, 255, 255, .06);
+            color: #e5e7eb;
+            text-decoration: none;
+            font-weight: 700;
+            cursor: pointer
+        }
+
+        .btn:hover {
+            border-color: rgba(96, 165, 250, .45);
+            background: rgba(96, 165, 250, .12)
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse
+        }
+
+        th,
+        td {
+            border-bottom: 1px solid rgba(255, 255, 255, .08);
+            padding: 10px;
+            text-align: left;
+            font-size: 13px
+        }
+
+        th {
+            color: #9ca3af;
+            font-weight: 700
+        }
+
+        .muted {
+            color: #9ca3af;
+            font-size: 13px;
+            line-height: 1.4
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <h1 style="margin:0 0 6px;">Inventory Admin</h1>
+        <p class="muted">Add/edit products and download an updated <strong>products.json</strong>. Keep this page
+            private (it’s not a secure login system).</p>
+
+        <div class="row">
+            <div class="card">
+                <h3 style="margin-top:0;">Add / Update product</h3>
+                <label class="muted">SKU / ID</label>
+                <input id="id" placeholder="SKU-1234" />
+                <div style="height:10px"></div>
+
+                <label class="muted">Name</label>
+                <input id="name" placeholder="Product name" />
+                <div style="height:10px"></div>
+
+                <label class="muted">Price</label>
+                <input id="price" type="number" step="0.01" placeholder="19.99" />
+                <div style="height:10px"></div>
+
+                <label class="muted">Category</label>
+                <input id="category" placeholder="Tools" />
+                <div style="height:10px"></div>
+
+                <label class="muted">Quantity</label>
+                <input id="quantity" type="number" step="1" placeholder="10" />
+                <div style="height:10px"></div>
+
+                <label class="muted">In Stock</label>
+                <input id="inStock" placeholder="true/false" />
+                <div style="height:10px"></div>
+
+                <label class="muted">Image path</label>
+                <input id="image" placeholder="images/product.jpg" />
+                <div style="height:10px"></div>
+
+                <label class="muted">Description</label>
+                <textarea id="description" placeholder="Short description"></textarea>
+
+                <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
+                    <button class="btn" id="save">Save product</button>
+                    <button class="btn" id="clear">Clear</button>
+                    <button class="btn" id="download">Download products.json</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-top:0;">Current inventory</h3>
+                <div class="muted" id="stats"></div>
+                <div style="overflow:auto; margin-top:10px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>SKU</th>
+                                <th>Name</th>
+                                <th>Price</th>
+                                <th>Cat</th>
+                                <th>Qty</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="list"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let PRODUCTS = [];
+
+        const els = {
+            id: document.getElementById("id"),
+            name: document.getElementById("name"),
+            price: document.getElementById("price"),
+            category: document.getElementById("category"),
+            quantity: document.getElementById("quantity"),
+            inStock: document.getElementById("inStock"),
+            image: document.getElementById("image"),
+            description: document.getElementById("description"),
+            list: document.getElementById("list"),
+            stats: document.getElementById("stats"),
+        };
+
+        async function load() {
+            try {
+                const res = await fetch("products.json", { cache: "no-store" });
+                PRODUCTS = await res.json();
+            } catch {
+                PRODUCTS = [];
+            }
+            render();
+        }
+
+        function render() {
+            els.list.innerHTML = "";
+            els.stats.textContent = `${PRODUCTS.length} product(s)`;
+
+            for (const p of PRODUCTS) {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+        <td>${esc(p.id)}</td>
+        <td>${esc(p.name)}</td>
+        <td>$${Number(p.price || 0).toFixed(2)}</td>
+        <td>${esc(p.category || "")}</td>
+        <td>${p.quantity ?? ""}</td>
+        <td style="white-space:nowrap;">
+          <button class="btn" data-edit="${esc(p.id)}" style="padding:6px 10px;">Edit</button>
+          <button class="btn" data-del="${esc(p.id)}" style="padding:6px 10px;">Del</button>
+        </td>
+      `;
+                els.list.appendChild(tr);
+            }
+
+            els.list.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", () => edit(b.dataset.edit)));
+            els.list.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => del(b.dataset.del)));
+        }
+
+        function esc(s) {
+            return String(s ?? "")
+                .replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+        }
+
+        function clearForm() {
+            els.id.value = "";
+            els.name.value = "";
+            els.price.value = "";
+            els.category.value = "";
+            els.quantity.value = "";
+            els.inStock.value = "true";
+            els.image.value = "";
+            els.description.value = "";
+        }
+
+        function edit(id) {
+            const p = PRODUCTS.find(x => x.id === id);
+            if (!p) return;
+            els.id.value = p.id || "";
+            els.name.value = p.name || "";
+            els.price.value = p.price ?? "";
+            els.category.value = p.category || "";
+            els.quantity.value = p.quantity ?? "";
+            els.inStock.value = String(!!p.inStock);
+            els.image.value = p.image || "";
+            els.description.value = p.description || "";
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        function del(id) {
+            PRODUCTS = PRODUCTS.filter(x => x.id !== id);
+            render();
+        }
+
+        function save() {
+            const id = els.id.value.trim();
+            if (!id) return alert("SKU/ID is required.");
+
+            const p = {
+                id,
+                name: els.name.value.trim(),
+                price: Number(els.price.value || 0),
+                category: els.category.value.trim(),
+                quantity: Number(els.quantity.value || 0),
+                inStock: String(els.inStock.value).toLowerCase() === "true",
+                image: els.image.value.trim(),
+                description: els.description.value.trim()
+            };
+
+            const idx = PRODUCTS.findIndex(x => x.id === id);
+            if (idx >= 0) PRODUCTS[idx] = p;
+            else PRODUCTS.unshift(p);
+
+            render();
+            clearForm();
+        }
+
+        function download() {
+            const blob = new Blob([JSON.stringify(PRODUCTS, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "products.json";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+        }
+
+        document.getElementById("save").addEventListener("click", save);
+        document.getElementById("clear").addEventListener("click", clearForm);
+        document.getElementById("download").addEventListener("click", download);
+
+        load();
+    </script>
+</body>
+
+</html>

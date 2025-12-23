@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>My Store Inventory</title>
+    <meta name="description" content="Browse our inventory online. Call to order or ask questions." />
+    <style>
+        :root {
+            --bg: #0b0f19;
+            --card: #111827;
+            --text: #e5e7eb;
+            --muted: #9ca3af;
+            --accent: #60a5fa;
+            --good: #34d399;
+            --bad: #f87171;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+            background: linear-gradient(180deg, #070a12, var(--bg));
+            color: var(--text);
+        }
+
+        header {
+            padding: 28px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, .08);
+        }
+
+        .wrap {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            margin: 0 0 6px;
+            font-size: 26px;
+            letter-spacing: .2px;
+        }
+
+        .sub {
+            color: var(--muted);
+            margin: 0 0 14px;
+            line-height: 1.4;
+        }
+
+        .bar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        input,
+        select {
+            background: #0f172a;
+            color: var(--text);
+            border: 1px solid rgba(255, 255, 255, .10);
+            padding: 10px 12px;
+            border-radius: 12px;
+            outline: none;
+        }
+
+        input {
+            flex: 1 1 260px;
+        }
+
+        select {
+            flex: 0 0 200px;
+        }
+
+        .pill {
+            display: inline-flex;
+            gap: 10px;
+            align-items: center;
+            background: rgba(96, 165, 250, .12);
+            border: 1px solid rgba(96, 165, 250, .35);
+            padding: 10px 12px;
+            border-radius: 999px;
+        }
+
+        .pill strong {
+            color: var(--accent);
+        }
+
+        main {
+            padding: 18px 16px 50px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 14px;
+            margin-top: 14px;
+        }
+
+        .card {
+            background: radial-gradient(1200px 600px at 10% 0%, rgba(96, 165, 250, .10), transparent 40%), var(--card);
+            border: 1px solid rgba(255, 255, 255, .08);
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, .25);
+        }
+
+        .img {
+            height: 150px;
+            background: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .content {
+            padding: 12px;
+        }
+
+        .name {
+            font-weight: 700;
+            margin: 0 0 6px;
+        }
+
+        .meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: center;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .price {
+            font-weight: 800;
+            color: #fff;
+            font-size: 15px;
+        }
+
+        .desc {
+            margin: 10px 0 0;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.35;
+            min-height: 34px;
+        }
+
+        .tags {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .stock {
+            font-size: 12px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, .10);
+            color: var(--muted);
+        }
+
+        .stock.good {
+            border-color: rgba(52, 211, 153, .35);
+            color: var(--good);
+            background: rgba(52, 211, 153, .08);
+        }
+
+        .stock.bad {
+            border-color: rgba(248, 113, 113, .35);
+            color: var(--bad);
+            background: rgba(248, 113, 113, .08);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, .12);
+            background: rgba(255, 255, 255, .06);
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .btn:hover {
+            border-color: rgba(96, 165, 250, .45);
+            background: rgba(96, 165, 250, .12);
+        }
+
+        footer {
+            padding: 18px 16px;
+            border-top: 1px solid rgba(255, 255, 255, .08);
+            color: var(--muted);
+        }
+
+        .small {
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .count {
+            margin-left: auto;
+            color: var(--muted);
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="wrap">
+            <h1>My Store Inventory</h1>
+            <p class="sub">Browse our products online. To order or ask questions, call the store—fastest way to confirm
+                availability.</p>
+
+            <div class="bar">
+                <input id="q" type="search" placeholder="Search products (name, SKU, description)..." />
+                <select id="cat">
+                    <option value="">All categories</option>
+                </select>
+
+                <span class="pill" title="Tap to call on mobile">
+                    <strong>Call:</strong>
+                    <a class="btn" id="callTop" href="tel:+1-312-555-0123">+1 (312) 555-0123</a>
+                </span>
+
+                <span class="count" id="count"></span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="wrap">
+            <div class="grid" id="grid"></div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="wrap small">
+            <div><strong>Store hours:</strong> Mon–Sat 9am–6pm • <strong>Location:</strong> Chicago, IL</div>
+            <div>Inventory shown here may change. Calling is the best way to reserve an item.</div>
+        </div>
+    </footer>
+
+    <script>
+        const STORE_PHONE = "+13125550123"; // digits preferred for tel:
+        const grid = document.getElementById("grid");
+        const q = document.getElementById("q");
+        const cat = document.getElementById("cat");
+        const count = document.getElementById("count");
+        const callTop = document.getElementById("callTop");
+
+        callTop.href = `tel:${STORE_PHONE}`;
+
+        let PRODUCTS = [];
+
+        const money = (n) => new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(n);
+
+        function uniqueCategories(items) {
+            return [...new Set(items.map(p => (p.category || "").trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+        }
+
+        function populateCategories(items) {
+            const cats = uniqueCategories(items);
+            for (const c of cats) {
+                const opt = document.createElement("option");
+                opt.value = c;
+                opt.textContent = c;
+                cat.appendChild(opt);
+            }
+        }
+
+        function matches(p, queryText, category) {
+            const qt = queryText.trim().toLowerCase();
+            if (category && (p.category || "") !== category) return false;
+            if (!qt) return true;
+            const blob = `${p.name} ${p.id} ${p.description} ${p.category}`.toLowerCase();
+            return blob.includes(qt);
+        }
+
+        function render(items) {
+            grid.innerHTML = "";
+            count.textContent = `${items.length} item${items.length === 1 ? "" : "s"}`;
+
+            for (const p of items) {
+                const inStock = !!p.inStock && (p.quantity ?? 1) > 0;
+
+                // “Call to order” button includes product name/SKU in the prompt via a prefilled SMS on iOS/Android? (varies)
+                // Tel can’t carry text reliably, so we show the SKU clearly and encourage saying it.
+                const card = document.createElement("div");
+                card.className = "card";
+                card.innerHTML = `
+        <div class="img">
+          ${p.image ? `<img src="${p.image}" alt="${escapeHtml(p.name)}">` : `<div style="color:#64748b">No image</div>`}
+        </div>
+        <div class="content">
+          <div class="meta">
+            <div><span style="opacity:.9">${escapeHtml(p.category || "Uncategorized")}</span></div>
+            <div class="price">${money(Number(p.price || 0))}</div>
+          </div>
+
+          <p class="name">${escapeHtml(p.name || "Unnamed Product")}</p>
+          <div class="meta">
+            <div><strong>SKU:</strong> ${escapeHtml(p.id || "—")}</div>
+            <div><strong>Qty:</strong> ${(p.quantity ?? "—")}</div>
+          </div>
+
+          <p class="desc">${escapeHtml(p.description || "")}</p>
+
+          <div class="tags">
+            <span class="stock ${inStock ? "good" : "bad"}">${inStock ? "In stock" : "Call to confirm"}</span>
+            <a class="btn" href="tel:${STORE_PHONE}" aria-label="Call to order ${escapeHtml(p.name)}">
+              Call to order
+            </a>
+          </div>
+
+          <div style="margin-top:10px; color:#9ca3af; font-size:12px;">
+            When you call, mention: <strong>${escapeHtml(p.id || "")}</strong>
+          </div>
+        </div>
+      `;
+                grid.appendChild(card);
+            }
+        }
+
+        function escapeHtml(str) {
+            return String(str ?? "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+        function applyFilters() {
+            const items = PRODUCTS.filter(p => matches(p, q.value, cat.value));
+            render(items);
+        }
+
+        async function init() {
+            const res = await fetch("products.json", { cache: "no-store" });
+            PRODUCTS = await res.json();
+            populateCategories(PRODUCTS);
+            render(PRODUCTS);
+
+            q.addEventListener("input", applyFilters);
+            cat.addEventListener("change", applyFilters);
+        }
+
+        init().catch(err => {
+            console.error(err);
+            grid.innerHTML = `<div style="color:#fca5a5">Could not load products.json. Check the file path and JSON formatting.</div>`;
+        });
+    </script>
+</body>
+
+</html>

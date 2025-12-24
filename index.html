@@ -4,9 +4,9 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Jojin’s Kitty Thrift Store</title>
+    <title>Jojin's Kitty Thrift Store</title>
     <meta name="description"
-        content="Jojin’s Kitty Thrift Store — happy thrift finds with a sprinkle of holiday magic." />
+        content="Jojin's Kitty Thrift Store — happy thrift finds with a sprinkle of holiday magic." />
 
     <style>
         :root {
@@ -419,7 +419,7 @@
                     <div class="brand">
                         <div class="logo" aria-hidden="true">🐾</div>
                         <div>
-                            <h1>Jojin’s Kitty Thrift Store</h1>
+                            <h1>Jojin's Kitty Thrift Store</h1>
                             <p class="sub">Happy thrift finds + holiday cheer. Browse the goodies here — calling is the
                                 fastest way to confirm availability and reserve an item. 🎄✨</p>
                         </div>
@@ -435,7 +435,7 @@
 
                 <span class="pill" title="Tap to call on mobile">
                     <strong>Call:</strong>
-                    <a class="btn" id="callTop" href="tel:+1-312-555-0123">+1 (312) 610-0123</a>
+                    <a class="btn" id="callTop" href="tel:+1-312-610-0123">+1 (312) 610-0123</a>
                 </span>
 
                 <span class="count" id="count"></span>
@@ -459,7 +459,7 @@
     </footer>
 
     <script>
-        const STORE_PHONE = "+13125550123"; // digits preferred for tel:
+        const STORE_PHONE = "+13126100123";
         const grid = document.getElementById("grid");
         const q = document.getElementById("q");
         const cat = document.getElementById("cat");
@@ -553,8 +553,20 @@
         }
 
         async function init() {
-            const res = await fetch("products.json", { cache: "no-store" });
-            PRODUCTS = await res.json();
+            // Try API first (Cloudflare KV), fallback to static JSON
+            try {
+                const res = await fetch("/api/products", { cache: "no-store" });
+                if (res.ok) {
+                    PRODUCTS = await res.json();
+                } else {
+                    throw new Error("API not available");
+                }
+            } catch {
+                // Fallback to static file
+                const res = await fetch("products.json", { cache: "no-store" });
+                PRODUCTS = await res.json();
+            }
+
             populateCategories(PRODUCTS);
             render(PRODUCTS);
 
@@ -565,7 +577,7 @@
         init().catch(err => {
             console.error(err);
             grid.innerHTML = `<div style="color:#b91c1c; background: rgba(255,255,255,.65); padding:12px; border-radius:14px; border:1px solid rgba(31,41,55,.12)">
-        Could not load <strong>products.json</strong>. Check the file path and JSON formatting.
+        Could not load products. Check your connection or try again later.
       </div>`;
         });
     </script>

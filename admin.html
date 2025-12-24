@@ -25,6 +25,12 @@
             gap: 14px
         }
 
+        @media (max-width: 768px) {
+            .row {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .card {
             background: #111827;
             border: 1px solid rgba(255, 255, 255, .10);
@@ -68,6 +74,15 @@
             background: rgba(96, 165, 250, .12)
         }
 
+        .btn.primary {
+            background: rgba(34, 197, 94, .2);
+            border-color: rgba(34, 197, 94, .4);
+        }
+
+        .btn.primary:hover {
+            background: rgba(34, 197, 94, .3);
+        }
+
         table {
             width: 100%;
             border-collapse: collapse
@@ -91,14 +106,53 @@
             font-size: 13px;
             line-height: 1.4
         }
+
+        .status {
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-bottom: 14px;
+            font-size: 13px;
+        }
+
+        .status.success {
+            background: rgba(34, 197, 94, .15);
+            border: 1px solid rgba(34, 197, 94, .3);
+            color: #86efac;
+        }
+
+        .status.error {
+            background: rgba(239, 68, 68, .15);
+            border: 1px solid rgba(239, 68, 68, .3);
+            color: #fca5a5;
+        }
+
+        .status.info {
+            background: rgba(59, 130, 246, .15);
+            border: 1px solid rgba(59, 130, 246, .3);
+            color: #93c5fd;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        select {
+            width: 100%;
+            background: #0f172a;
+            color: #e5e7eb;
+            border: 1px solid rgba(255, 255, 255, .10);
+            border-radius: 12px;
+            padding: 10px 12px;
+        }
     </style>
 </head>
 
 <body>
     <div class="wrap">
         <h1 style="margin:0 0 6px;">Inventory Admin</h1>
-        <p class="muted">Add/edit products and download an updated <strong>products.json</strong>. Keep this page
-            private (it’s not a secure login system).</p>
+        <p class="muted">Add/edit products. Changes save to Cloudflare KV automatically.</p>
+
+        <div id="statusMsg" class="status hidden"></div>
 
         <div class="row">
             <div class="card">
@@ -124,7 +178,10 @@
                 <div style="height:10px"></div>
 
                 <label class="muted">In Stock</label>
-                <input id="inStock" placeholder="true/false" />
+                <select id="inStock">
+                    <option value="true">Yes - In Stock</option>
+                    <option value="false">No - Out of Stock</option>
+                </select>
                 <div style="height:10px"></div>
 
                 <label class="muted">Image path</label>
@@ -135,9 +192,9 @@
                 <textarea id="description" placeholder="Short description"></textarea>
 
                 <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
-                    <button class="btn" id="save">Save product</button>
-                    <button class="btn" id="clear">Clear</button>
-                    <button class="btn" id="download">Download products.json</button>
+                    <button class="btn primary" id="save">💾 Save product</button>
+                    <button class="btn" id="clear">Clear form</button>
+                    <button class="btn" id="download">⬇ Download JSON</button>
                 </div>
             </div>
 
@@ -178,16 +235,52 @@
             description: document.getElementById("description"),
             list: document.getElementById("list"),
             stats: document.getElementById("stats"),
+            statusMsg: document.getElementById("statusMsg"),
         };
+
+        function showStatus(message, type = "info") {
+            els.statusMsg.textContent = message;
+            els.statusMsg.className = `status ${type}`;
+            setTimeout(() => {
+                els.statusMsg.className = "status hidden";
+            }, 4000);
+        }
 
         async function load() {
             try {
-                const res = await fetch("products.json", { cache: "no-store" });
+                // Try API first (Cloudflare KV), fallback to static JSON
+                let res;
+                try {
+                    res = await fetch("/api/products", { cache: "no-store" });
+                    if (!res.ok) throw new Error("API not available");
+                } catch {
+                    res = await fetch("products.json", { cache: "no-store" });
+                }
                 PRODUCTS = await res.json();
             } catch {
                 PRODUCTS = [];
             }
             render();
+        }
+
+        async function saveToCloud() {
+            try {
+                const res = await fetch("/api/products", {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(PRODUCTS)
+                });
+
+                if (res.ok) {
+                    showStatus("✓ Saved to cloud!", "success");
+                    return true;
+                } else {
+                    throw new Error("Save failed");
+                }
+            } catch (error) {
+                showStatus("⚠ Cloud save failed - download JSON to backup", "error");
+                return false;
+            }
         }
 
         function render() {
@@ -197,16 +290,16 @@
             for (const p of PRODUCTS) {
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
-        <td>${esc(p.id)}</td>
-        <td>${esc(p.name)}</td>
-        <td>$${Number(p.price || 0).toFixed(2)}</td>
-        <td>${esc(p.category || "")}</td>
-        <td>${p.quantity ?? ""}</td>
-        <td style="white-space:nowrap;">
-          <button class="btn" data-edit="${esc(p.id)}" style="padding:6px 10px;">Edit</button>
-          <button class="btn" data-del="${esc(p.id)}" style="padding:6px 10px;">Del</button>
-        </td>
-      `;
+                    <td>${esc(p.id)}</td>
+                    <td>${esc(p.name)}</td>
+                    <td>$${Number(p.price || 0).toFixed(2)}</td>
+                    <td>${esc(p.category || "")}</td>
+                    <td>${p.quantity ?? ""}</td>
+                    <td style="white-space:nowrap;">
+                        <button class="btn" data-edit="${esc(p.id)}" style="padding:6px 10px;">Edit</button>
+                        <button class="btn" data-del="${esc(p.id)}" style="padding:6px 10px;">Del</button>
+                    </td>
+                `;
                 els.list.appendChild(tr);
             }
 
@@ -245,12 +338,14 @@
             window.scrollTo({ top: 0, behavior: "smooth" });
         }
 
-        function del(id) {
+        async function del(id) {
+            if (!confirm(`Delete product ${id}?`)) return;
             PRODUCTS = PRODUCTS.filter(x => x.id !== id);
             render();
+            await saveToCloud();
         }
 
-        function save() {
+        async function save() {
             const id = els.id.value.trim();
             if (!id) return alert("SKU/ID is required.");
 
@@ -260,7 +355,7 @@
                 price: Number(els.price.value || 0),
                 category: els.category.value.trim(),
                 quantity: Number(els.quantity.value || 0),
-                inStock: String(els.inStock.value).toLowerCase() === "true",
+                inStock: els.inStock.value === "true",
                 image: els.image.value.trim(),
                 description: els.description.value.trim()
             };
@@ -271,6 +366,7 @@
 
             render();
             clearForm();
+            await saveToCloud();
         }
 
         function download() {

@@ -18,7 +18,7 @@ export async function onRequestPut(context) {
     try {
         const products = await context.request.json();
         await context.env.PRODUCTS_KV.put("products", JSON.stringify(products));
-        return new Response(JSON.stringify({ success: true }), {
+     return new Response(JSON.stringify({ success: true }), {
             headers: {
                 "Content-Type": "application/json",
                 "Access-Control-Allow-Origin": "*"

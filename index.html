@@ -386,6 +386,117 @@
             line-height: 1.5;
         }
 
+        /* Lightbox modal */
+        .lightbox {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(0, 0, 0, .85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity .25s ease, visibility .25s ease;
+        }
+
+        .lightbox.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .lightbox-content {
+            position: relative;
+            max-width: 90vw;
+            max-height: 85vh;
+            transform: scale(.92);
+            transition: transform .25s ease;
+        }
+
+        .lightbox.open .lightbox-content {
+            transform: scale(1);
+        }
+
+        .lightbox-content img {
+            max-width: 100%;
+            max-height: 85vh;
+            border-radius: var(--r);
+            box-shadow: 0 25px 80px rgba(0, 0, 0, .5);
+            object-fit: contain;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: -16px;
+            right: -16px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .95);
+            border: 1px solid rgba(31, 41, 55, .15);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .25);
+            font-size: 22px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform .12s ease, background .12s ease;
+        }
+
+        .lightbox-close:hover {
+            transform: scale(1.1);
+            background: #fff;
+        }
+
+        .lightbox-info {
+            position: absolute;
+            bottom: -50px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: rgba(255, 255, 255, .9);
+            font-weight: 700;
+            font-size: 15px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, .5);
+        }
+
+        .img.has-image {
+            cursor: pointer;
+            transition: transform .15s ease;
+            position: relative;
+        }
+
+        .img.has-image:hover {
+            transform: scale(1.02);
+        }
+
+        .img.has-image:hover img {
+            filter: brightness(1.05);
+        }
+
+        .img.has-image::after {
+            content: "🔍 Click to enlarge";
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, .6);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 999px;
+            opacity: 0;
+            transition: opacity .15s ease;
+            pointer-events: none;
+        }
+
+        .img.has-image:hover::after {
+            opacity: 1;
+        }
+
         /* make sticky header less tall on small screens */
         @media (max-width: 520px) {
             h1 {
@@ -411,6 +522,15 @@
 
 <body>
     <div class="snow" aria-hidden="true"></div>
+
+    <!-- Lightbox Modal -->
+    <div class="lightbox" id="lightbox">
+        <div class="lightbox-content">
+            <button class="lightbox-close" id="lightbox-close" aria-label="Close">✕</button>
+            <img id="lightbox-img" src="" alt="" />
+            <div class="lightbox-info" id="lightbox-info"></div>
+        </div>
+    </div>
 
     <header>
         <div class="wrap">
@@ -466,11 +586,39 @@
         const count = document.getElementById("count");
         const callTop = document.getElementById("callTop");
 
+        // Lightbox elements
+        const lightbox = document.getElementById("lightbox");
+        const lightboxImg = document.getElementById("lightbox-img");
+        const lightboxInfo = document.getElementById("lightbox-info");
+        const lightboxClose = document.getElementById("lightbox-close");
+
         callTop.href = `tel:${STORE_PHONE}`;
 
         let PRODUCTS = [];
 
         const money = (n) => new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(n);
+
+        // Lightbox functions
+        function openLightbox(imageSrc, productName) {
+            lightboxImg.src = imageSrc;
+            lightboxImg.alt = productName;
+            lightboxInfo.textContent = productName;
+            lightbox.classList.add("open");
+            document.body.style.overflow = "hidden";
+        }
+
+        function closeLightbox() {
+            lightbox.classList.remove("open");
+            document.body.style.overflow = "";
+        }
+
+        lightboxClose.addEventListener("click", closeLightbox);
+        lightbox.addEventListener("click", (e) => {
+            if (e.target === lightbox) closeLightbox();
+        });
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") closeLightbox();
+        });
 
         function uniqueCategories(items) {
             return [...new Set(items.map(p => (p.category || "").trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
@@ -504,7 +652,7 @@
                 const card = document.createElement("div");
                 card.className = "card";
                 card.innerHTML = `
-          <div class="img">
+          <div class="img ${p.image ? 'has-image' : ''}" ${p.image ? `data-image="${escapeHtml(p.image)}" data-name="${escapeHtml(p.name)}"` : ''}>
             ${p.image ? `<img src="${p.image}" alt="${escapeHtml(p.name)}">` : `<div class="noimg">No image yet ✨</div>`}
           </div>
           <div class="content">
@@ -534,6 +682,15 @@
             </div>
           </div>
         `;
+                
+                // Add click listener for lightbox
+                const imgDiv = card.querySelector(".img.has-image");
+                if (imgDiv) {
+                    imgDiv.addEventListener("click", () => {
+                        openLightbox(imgDiv.dataset.image, imgDiv.dataset.name);
+                    });
+                }
+                
                 grid.appendChild(card);
             }
         }

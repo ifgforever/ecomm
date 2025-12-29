@@ -296,6 +296,8 @@
             height: 100%;
             object-fit: cover;
             display: block;
+            /* Fix for mobile photo orientation - respects EXIF data */
+            image-orientation: from-image;
         }
 
         .noimg {
@@ -425,6 +427,8 @@
             border-radius: var(--r);
             box-shadow: 0 25px 80px rgba(0, 0, 0, .5);
             object-fit: contain;
+            /* Fix for mobile photo orientation in lightbox */
+            image-orientation: from-image;
         }
 
         .lightbox-close {

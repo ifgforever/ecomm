@@ -1,0 +1,1019 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Jojin's Kitty Thrift Store — New Year 2026</title>
+    <meta name="description"
+        content="Jojin's Kitty Thrift Store — Celebrate 2026 and America's 250th with us!" />
+    <meta property="og:title" content="Jojin's Kitty Thrift Store" />
+    <meta property="og:description" content="Ring in 2026 with happy thrift finds!" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32'>🐾</text></svg>">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Sans+3:wght@400;600;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --ink: #0a1628;
+            --ink-light: #1e3a5f;
+            --muted: #7a8ca3;
+
+            --midnight: #0a0e1a;
+            --navy: #0f1729;
+            --deep-blue: #162036;
+            
+            --gold: #ffd700;
+            --gold-soft: #ffe566;
+            --gold-dark: #b8960f;
+            
+            --red: #bf0a30;
+            --red-glow: #ff2d55;
+            
+            --silver: #c0c0c0;
+            --white-star: #fff8e7;
+            
+            --blue-usa: #002868;
+            --red-usa: #bf0a30;
+
+            --card: rgba(15, 23, 41, .85);
+            --card-border: rgba(255, 215, 0, .15);
+            --card-glow: rgba(255, 215, 0, .08);
+
+            --shadow: 0 20px 60px rgba(0, 0, 0, .4);
+            --shadow-gold: 0 0 40px rgba(255, 215, 0, .15);
+
+            --r: 16px;
+            --r2: 12px;
+
+            --font-display: 'Playfair Display', Georgia, serif;
+            --font-body: 'Source Sans 3', system-ui, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            font-family: var(--font-body);
+            color: var(--white-star);
+            background: linear-gradient(180deg, var(--midnight) 0%, var(--navy) 50%, var(--deep-blue) 100%);
+            background-attachment: fixed;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Starfield background */
+        .stars {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,.9) 50%, transparent 51%),
+                radial-gradient(1.5px 1.5px at 25% 35%, rgba(255,255,255,.7) 50%, transparent 51%),
+                radial-gradient(1px 1px at 45% 10%, rgba(255,255,255,.8) 50%, transparent 51%),
+                radial-gradient(2px 2px at 60% 45%, rgba(255,215,0,.6) 50%, transparent 51%),
+                radial-gradient(1px 1px at 75% 20%, rgba(255,255,255,.9) 50%, transparent 51%),
+                radial-gradient(1.5px 1.5px at 85% 60%, rgba(255,255,255,.7) 50%, transparent 51%),
+                radial-gradient(1px 1px at 15% 70%, rgba(255,255,255,.8) 50%, transparent 51%),
+                radial-gradient(1px 1px at 35% 85%, rgba(255,215,0,.5) 50%, transparent 51%),
+                radial-gradient(1.5px 1.5px at 55% 75%, rgba(255,255,255,.7) 50%, transparent 51%),
+                radial-gradient(1px 1px at 90% 85%, rgba(255,255,255,.8) 50%, transparent 51%);
+            background-size: 200px 200px;
+            animation: twinkle 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        /* Fireworks canvas */
+        #fireworks {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* USA 250 banner */
+        .usa-banner {
+            background: linear-gradient(90deg, var(--blue-usa) 0%, var(--blue-usa) 40%, var(--red-usa) 60%, var(--red-usa) 100%);
+            text-align: center;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--gold);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .usa-banner::before {
+            content: "★";
+            position: absolute;
+            left: 20%;
+            color: var(--gold);
+            animation: pulse-star 2s ease-in-out infinite;
+        }
+
+        .usa-banner::after {
+            content: "★";
+            position: absolute;
+            right: 20%;
+            color: var(--gold);
+            animation: pulse-star 2s ease-in-out infinite 0.5s;
+        }
+
+        @keyframes pulse-star {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .wrap {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 16px;
+            position: relative;
+            z-index: 2;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            padding: 20px 0 16px;
+            backdrop-filter: blur(20px);
+            background: linear-gradient(180deg, rgba(10, 14, 26, .95), rgba(10, 14, 26, .85));
+            border-bottom: 1px solid var(--card-border);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, .3);
+        }
+
+        .topRow {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .brand {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+        }
+
+        .logo {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            background: 
+                radial-gradient(circle at 30% 30%, rgba(255,215,0,.4), transparent 50%),
+                linear-gradient(135deg, var(--blue-usa), var(--red-usa));
+            border: 2px solid var(--gold);
+            box-shadow: 0 0 20px rgba(255, 215, 0, .3), var(--shadow);
+            display: grid;
+            place-items: center;
+            font-size: 26px;
+            position: relative;
+        }
+
+        .logo::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 215, 0, .2);
+        }
+
+        h1 {
+            margin: 0;
+            font-family: var(--font-display);
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            line-height: 1.1;
+            background: linear-gradient(135deg, var(--white-star) 0%, var(--gold) 50%, var(--white-star) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sub {
+            margin: 6px 0 0;
+            color: var(--muted);
+            line-height: 1.4;
+            font-size: 14px;
+            max-width: 600px;
+        }
+
+        .sub strong {
+            color: var(--gold);
+        }
+
+        .bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-top: 16px;
+        }
+
+        input, select {
+            font-family: inherit;
+            background: rgba(255, 255, 255, .05);
+            color: var(--white-star);
+            border: 1px solid rgba(255, 215, 0, .2);
+            padding: 12px 14px;
+            border-radius: var(--r2);
+            outline: none;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, .2);
+            transition: all .2s ease;
+        }
+
+        input {
+            flex: 1 1 260px;
+        }
+
+        select {
+            flex: 0 0 200px;
+            cursor: pointer;
+        }
+
+        input::placeholder {
+            color: var(--muted);
+        }
+
+        input:focus, select:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, .15), inset 0 2px 4px rgba(0, 0, 0, .2);
+        }
+
+        .pill {
+            display: inline-flex;
+            gap: 10px;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, rgba(0, 40, 104, .6), rgba(191, 10, 48, .6));
+            border: 1px solid var(--gold);
+            box-shadow: 0 0 15px rgba(255, 215, 0, .2);
+            white-space: nowrap;
+        }
+
+        .pill strong {
+            color: var(--gold);
+            font-weight: 700;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: var(--r2);
+            border: 1px solid rgba(255, 215, 0, .3);
+            background: linear-gradient(135deg, rgba(255, 215, 0, .15), rgba(255, 215, 0, .05));
+            color: var(--gold);
+            text-decoration: none;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, .2);
+            transition: all .15s ease;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            border-color: var(--gold);
+            background: linear-gradient(135deg, rgba(255, 215, 0, .25), rgba(255, 215, 0, .1));
+            box-shadow: 0 8px 25px rgba(255, 215, 0, .2);
+        }
+
+        .count {
+            margin-left: auto;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        main {
+            padding: 24px 0 60px;
+        }
+
+        .celebration-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--blue-usa), var(--red-usa));
+            padding: 10px 18px;
+            border-radius: 999px;
+            border: 2px solid var(--gold);
+            box-shadow: 0 0 30px rgba(255, 215, 0, .2);
+            margin-bottom: 20px;
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+
+        .celebration-badge span {
+            color: var(--gold);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 18px;
+            margin-top: 18px;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: var(--r);
+            overflow: hidden;
+            box-shadow: var(--shadow), var(--shadow-gold);
+            position: relative;
+            transition: all .25s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow), 0 0 50px rgba(255, 215, 0, .15);
+            border-color: rgba(255, 215, 0, .3);
+        }
+
+        /* Decorative corner stars */
+        .card::before {
+            content: "★";
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            color: var(--gold);
+            font-size: 14px;
+            opacity: 0.6;
+            z-index: 5;
+        }
+
+        .img {
+            height: 170px;
+            background: 
+                radial-gradient(ellipse at 30% 20%, rgba(255, 215, 0, .15), transparent 50%),
+                radial-gradient(ellipse at 70% 80%, rgba(191, 10, 48, .1), transparent 50%),
+                linear-gradient(135deg, var(--navy), var(--deep-blue));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border-bottom: 1px solid var(--card-border);
+            position: relative;
+        }
+
+        .img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform .3s ease;
+        }
+
+        .card:hover .img img {
+            transform: scale(1.05);
+        }
+
+        .noimg {
+            color: var(--muted);
+            font-weight: 700;
+            background: rgba(255, 215, 0, .05);
+            border: 1px dashed rgba(255, 215, 0, .3);
+            padding: 12px 16px;
+            border-radius: var(--r2);
+        }
+
+        .img.has-image {
+            cursor: pointer;
+        }
+
+        .img.has-image::after {
+            content: "🔍 Enlarge";
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, .7);
+            color: var(--gold);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 215, 0, .3);
+            opacity: 0;
+            transition: opacity .2s ease;
+        }
+
+        .img.has-image:hover::after {
+            opacity: 1;
+        }
+
+        .content {
+            padding: 14px;
+        }
+
+        .meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: center;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .category-tag {
+            background: rgba(0, 40, 104, .4);
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 215, 0, .2);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .price {
+            font-weight: 900;
+            font-size: 16px;
+            color: var(--gold);
+            background: rgba(255, 215, 0, .1);
+            border: 1px solid rgba(255, 215, 0, .3);
+            padding: 6px 12px;
+            border-radius: 999px;
+        }
+
+        .name {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 18px;
+            margin: 12px 0 8px;
+            letter-spacing: 0.2px;
+            color: var(--white-star);
+        }
+
+        .desc {
+            margin: 10px 0 0;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.45;
+            min-height: 38px;
+        }
+
+        .tags {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .stock {
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-weight: 700;
+        }
+
+        .stock.good {
+            border: 1px solid rgba(52, 211, 153, .4);
+            color: #34d399;
+            background: rgba(52, 211, 153, .1);
+        }
+
+        .stock.bad {
+            border: 1px solid rgba(255, 45, 85, .4);
+            color: var(--red-glow);
+            background: rgba(255, 45, 85, .1);
+        }
+
+        .sku-hint {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 215, 0, .1);
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .sku-hint strong {
+            color: var(--gold);
+        }
+
+        footer {
+            padding: 24px 0;
+            border-top: 1px solid var(--card-border);
+            color: var(--muted);
+            background: rgba(10, 14, 26, .8);
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 2;
+        }
+
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .small {
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .small strong {
+            color: var(--gold);
+        }
+
+        .footer-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--blue-usa), var(--red-usa));
+            padding: 8px 14px;
+            border-radius: var(--r2);
+            border: 1px solid var(--gold);
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        /* Lightbox modal */
+        .lightbox {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(0, 0, 0, .92);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity .3s ease, visibility .3s ease;
+        }
+
+        .lightbox.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .lightbox-content {
+            position: relative;
+            max-width: 90vw;
+            max-height: 85vh;
+            transform: scale(.9);
+            transition: transform .3s ease;
+        }
+
+        .lightbox.open .lightbox-content {
+            transform: scale(1);
+        }
+
+        .lightbox-content img {
+            max-width: 100%;
+            max-height: 85vh;
+            border-radius: var(--r);
+            border: 2px solid var(--gold);
+            box-shadow: 0 0 60px rgba(255, 215, 0, .2), 0 30px 80px rgba(0, 0, 0, .5);
+            object-fit: contain;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: -18px;
+            right: -18px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--gold);
+            border: none;
+            color: var(--midnight);
+            font-size: 24px;
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, .4);
+            transition: transform .15s ease;
+        }
+
+        .lightbox-close:hover {
+            transform: scale(1.1);
+        }
+
+        .lightbox-info {
+            position: absolute;
+            bottom: -45px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: var(--gold);
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 16px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, .5);
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            h1 { font-size: 22px; }
+            select { flex: 1 1 180px; }
+            .pill { width: 100%; justify-content: space-between; }
+            .count { margin-left: 0; width: 100%; text-align: center; }
+            .grid { grid-template-columns: 1fr; }
+            .usa-banner::before, .usa-banner::after { display: none; }
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            .stars { animation: none; opacity: 0.7; }
+            .usa-banner::before, .usa-banner::after { animation: none; }
+            #fireworks { display: none; }
+            .card { transition: none; }
+            .card:hover { transform: none; }
+        }
+
+        /* Accessibility: visible focus */
+        a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+            outline: 2px solid var(--gold);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="stars" aria-hidden="true"></div>
+    <canvas id="fireworks" aria-hidden="true"></canvas>
+
+    <div class="usa-banner">
+        🎆 Happy New Year 2026 — Celebrating America's 250th! 🎆
+    </div>
+
+    <!-- Lightbox Modal -->
+    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged product image">
+        <div class="lightbox-content">
+            <button class="lightbox-close" id="lightbox-close" aria-label="Close enlarged image">✕</button>
+            <img id="lightbox-img" src="" alt="" />
+            <div class="lightbox-info" id="lightbox-info"></div>
+        </div>
+    </div>
+
+    <header>
+        <div class="wrap">
+            <div class="topRow">
+                <div>
+                    <div class="brand">
+                        <div class="logo" aria-hidden="true">🐾</div>
+                        <div>
+                            <h1>Jojin's Kitty Thrift Store</h1>
+                            <p class="sub">Ring in <strong>2026</strong> with happy thrift finds! Call to confirm availability and reserve items. <span aria-hidden="true">🎇✨</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bar">
+                <label for="q" class="sr-only">Search products</label>
+                <input id="q" type="search" placeholder="Search (name, SKU, description)..." />
+                
+                <label for="cat" class="sr-only">Filter by category</label>
+                <select id="cat">
+                    <option value="">All categories</option>
+                </select>
+
+                <span class="pill" title="Tap to call on mobile">
+                    <strong>Call:</strong>
+                    <a class="btn" id="callTop" href="tel:+1-312-610-0123">+1 (312) 610-0123</a>
+                </span>
+
+                <span class="count" id="count"></span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="wrap">
+            <div class="celebration-badge">
+                <span>★</span> America 250 — 1776 to 2026 <span>★</span>
+            </div>
+            <div class="grid" id="grid"></div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="wrap">
+            <div class="footer-content">
+                <div class="small">
+                    <div><strong>Store hours:</strong> Mon–Sat 11am–4pm • Leave a message or text outside hours</div>
+                    <div><strong>Location:</strong> 4100 N. Pulaski Rd., Chicago, IL</div>
+                    <div>Inventory changes quickly — call to reserve. Happy New Year! 🎊</div>
+                </div>
+                <div class="footer-badge">
+                    <span>★</span> 2026 <span>★</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Screen reader only class -->
+    <style>.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }</style>
+
+    <script>
+        const STORE_PHONE = "+13126100123";
+        const grid = document.getElementById("grid");
+        const q = document.getElementById("q");
+        const cat = document.getElementById("cat");
+        const count = document.getElementById("count");
+        const callTop = document.getElementById("callTop");
+
+        // Lightbox elements
+        const lightbox = document.getElementById("lightbox");
+        const lightboxImg = document.getElementById("lightbox-img");
+        const lightboxInfo = document.getElementById("lightbox-info");
+        const lightboxClose = document.getElementById("lightbox-close");
+
+        callTop.href = `tel:${STORE_PHONE}`;
+
+        let PRODUCTS = [];
+
+        const money = (n) => new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(n);
+
+        // === FIREWORKS ANIMATION ===
+        const canvas = document.getElementById("fireworks");
+        const ctx = canvas.getContext("2d");
+        let fireworks = [];
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener("resize", resizeCanvas);
+
+        class Firework {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height;
+                this.targetY = Math.random() * (canvas.height * 0.4) + 50;
+                this.speed = 3 + Math.random() * 2;
+                this.color = ["#ffd700", "#ff2d55", "#fff8e7", "#00bfff", "#bf0a30"][Math.floor(Math.random() * 5)];
+                this.trail = [];
+            }
+
+            update() {
+                this.trail.push({ x: this.x, y: this.y });
+                if (this.trail.length > 8) this.trail.shift();
+                this.y -= this.speed;
+                if (this.y <= this.targetY) {
+                    this.explode();
+                    return false;
+                }
+                return true;
+            }
+
+            explode() {
+                const particleCount = 60 + Math.floor(Math.random() * 40);
+                for (let i = 0; i < particleCount; i++) {
+                    const angle = (Math.PI * 2 / particleCount) * i;
+                    const speed = 2 + Math.random() * 3;
+                    particles.push({
+                        x: this.x,
+                        y: this.y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        color: this.color,
+                        life: 1,
+                        decay: 0.015 + Math.random() * 0.01
+                    });
+                }
+            }
+
+            draw() {
+                // Trail
+                for (let i = 0; i < this.trail.length; i++) {
+                    const t = this.trail[i];
+                    ctx.beginPath();
+                    ctx.arc(t.x, t.y, 2 * (i / this.trail.length), 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 215, 0, ${i / this.trail.length * 0.5})`;
+                    ctx.fill();
+                }
+                // Head
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+        }
+
+        function animateFireworks() {
+            ctx.fillStyle = "rgba(10, 14, 26, 0.15)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Spawn new firework occasionally
+            if (Math.random() < 0.02) {
+                fireworks.push(new Firework());
+            }
+
+            // Update & draw fireworks
+            fireworks = fireworks.filter(fw => {
+                fw.draw();
+                return fw.update();
+            });
+
+            // Update & draw particles
+            particles = particles.filter(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.05; // gravity
+                p.life -= p.decay;
+
+                if (p.life > 0) {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 2 * p.life, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color.replace(")", `, ${p.life})`).replace("rgb", "rgba").replace("#", "");
+                    // Simple hex to rgba
+                    const alpha = p.life;
+                    ctx.globalAlpha = alpha;
+                    ctx.fillStyle = p.color;
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                    return true;
+                }
+                return false;
+            });
+
+            requestAnimationFrame(animateFireworks);
+        }
+
+        // Check for reduced motion preference
+        if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            animateFireworks();
+        }
+
+        // === LIGHTBOX ===
+        function openLightbox(imageSrc, productName) {
+            lightboxImg.src = imageSrc;
+            lightboxImg.alt = productName;
+            lightboxInfo.textContent = productName;
+            lightbox.classList.add("open");
+            document.body.style.overflow = "hidden";
+            lightboxClose.focus();
+        }
+
+        function closeLightbox() {
+            lightbox.classList.remove("open");
+            document.body.style.overflow = "";
+        }
+
+        lightboxClose.addEventListener("click", closeLightbox);
+        lightbox.addEventListener("click", (e) => {
+            if (e.target === lightbox) closeLightbox();
+        });
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") closeLightbox();
+        });
+
+        // === PRODUCT LOGIC ===
+        function uniqueCategories(items) {
+            return [...new Set(items.map(p => (p.category || "").trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+        }
+
+        function populateCategories(items) {
+            const cats = uniqueCategories(items);
+            for (const c of cats) {
+                const opt = document.createElement("option");
+                opt.value = c;
+                opt.textContent = c;
+                cat.appendChild(opt);
+            }
+        }
+
+        function matches(p, queryText, category) {
+            const qt = queryText.trim().toLowerCase();
+            if (category && (p.category || "") !== category) return false;
+            if (!qt) return true;
+            const blob = `${p.name} ${p.id} ${p.description} ${p.category}`.toLowerCase();
+            return blob.includes(qt);
+        }
+
+        function render(items) {
+            grid.innerHTML = "";
+            count.textContent = `${items.length} item${items.length === 1 ? "" : "s"}`;
+
+            for (const p of items) {
+                const inStock = !!p.inStock && (p.quantity ?? 1) > 0;
+
+                const card = document.createElement("article");
+                card.className = "card";
+                card.innerHTML = `
+                    <div class="img ${p.image ? 'has-image' : ''}" ${p.image ? `data-image="${escapeHtml(p.image)}" data-name="${escapeHtml(p.name)}"` : ''}>
+                        ${p.image ? `<img src="${p.image}" alt="${escapeHtml(p.name)}" loading="lazy">` : `<div class="noimg">No image yet ✨</div>`}
+                    </div>
+                    <div class="content">
+                        <div class="meta">
+                            <span class="category-tag">${escapeHtml(p.category || "Uncategorized")}</span>
+                            <span class="price">${money(Number(p.price || 0))}</span>
+                        </div>
+
+                        <h2 class="name">${escapeHtml(p.name || "Unnamed Product")}</h2>
+
+                        <div class="meta">
+                            <span><strong>SKU:</strong> ${escapeHtml(p.id || "—")}</span>
+                            <span><strong>Qty:</strong> ${(p.quantity ?? "—")}</span>
+                        </div>
+
+                        <p class="desc">${escapeHtml(p.description || "")}</p>
+
+                        <div class="tags">
+                            <span class="stock ${inStock ? "good" : "bad"}">${inStock ? "✓ In stock" : "Call to confirm"}</span>
+                            <a class="btn" href="tel:${STORE_PHONE}" aria-label="Call to order ${escapeHtml(p.name)}">
+                                📞 Call
+                            </a>
+                        </div>
+
+                        <div class="sku-hint">
+                            When you call, mention: <strong>${escapeHtml(p.id || "")}</strong>
+                        </div>
+                    </div>
+                `;
+                
+                // Lightbox click handler
+                const imgDiv = card.querySelector(".img.has-image");
+                if (imgDiv) {
+                    imgDiv.addEventListener("click", () => {
+                        openLightbox(imgDiv.dataset.image, imgDiv.dataset.name);
+                    });
+                }
+                
+                grid.appendChild(card);
+            }
+        }
+
+        function escapeHtml(str) {
+            return String(str ?? "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+        // Debounced search
+        let searchTimeout;
+        function applyFilters() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const items = PRODUCTS.filter(p => matches(p, q.value, cat.value));
+                render(items);
+            }, 150);
+        }
+
+        async function init() {
+            // Try API first (Cloudflare KV), fallback to static JSON
+            try {
+                const res = await fetch("/api/products", { cache: "no-store" });
+                if (res.ok) {
+                    PRODUCTS = await res.json();
+                } else {
+                    throw new Error("API not available");
+                }
+            } catch {
+                const res = await fetch("products.json", { cache: "no-store" });
+                PRODUCTS = await res.json();
+            }
+
+            populateCategories(PRODUCTS);
+            render(PRODUCTS);
+
+            q.addEventListener("input", applyFilters);
+            cat.addEventListener("change", applyFilters);
+        }
+
+        init().catch(err => {
+            console.error(err);
+            grid.innerHTML = `<div style="color:#ff6b6b; background: rgba(255,107,107,.1); padding:16px; border-radius:12px; border:1px solid rgba(255,107,107,.3); text-align:center;">
+                <strong>Could not load products.</strong><br>Check your connection or try again later.
+            </div>`;
+        });
+    </script>
+</body>
+
+</html>

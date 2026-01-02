@@ -36,7 +36,8 @@
             overflow-x: auto;
         }
 
-        input[type="number"] {
+        /* Text input styling for price */
+        input[type="text"].price-input {
             width: 90px;
             background: #0f172a;
             color: #e5e7eb;
@@ -48,18 +49,55 @@
             text-align: right;
         }
 
-        input[type="number"]:focus {
+        input[type="text"].price-input:focus {
             outline: none;
             border-color: rgba(96, 165, 250, .6);
             box-shadow: 0 0 0 2px rgba(96, 165, 250, .2);
         }
 
-        input[type="number"].changed {
+        input[type="text"].price-input.changed {
             border-color: rgba(251, 191, 36, .6);
             background: rgba(251, 191, 36, .08);
         }
 
-        input[type="number"].invalid {
+        input[type="text"].price-input.invalid {
+            border-color: rgba(239, 68, 68, .6);
+            background: rgba(239, 68, 68, .08);
+        }
+
+        /* Number input styling for quantity (with hidden spinners) */
+        input[type="number"].qty-input {
+            width: 70px;
+            background: #0f172a;
+            color: #e5e7eb;
+            border: 1px solid rgba(255, 255, 255, .10);
+            border-radius: 8px;
+            padding: 8px 10px;
+            box-sizing: border-box;
+            font-size: 14px;
+            text-align: right;
+            /* Hide spinners */
+            -moz-appearance: textfield;
+        }
+
+        input[type="number"].qty-input::-webkit-outer-spin-button,
+        input[type="number"].qty-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"].qty-input:focus {
+            outline: none;
+            border-color: rgba(96, 165, 250, .6);
+            box-shadow: 0 0 0 2px rgba(96, 165, 250, .2);
+        }
+
+        input[type="number"].qty-input.changed {
+            border-color: rgba(251, 191, 36, .6);
+            background: rgba(251, 191, 36, .08);
+        }
+
+        input[type="number"].qty-input.invalid {
             border-color: rgba(239, 68, 68, .6);
             background: rgba(239, 68, 68, .08);
         }
@@ -554,14 +592,65 @@
             return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
         }
 
+        // === PRICE INPUT SANITIZATION & FORMATTING ===
+        
+        // Sanitize price input as user types - strips invalid chars, limits decimals
+        function sanitizePriceInput(input) {
+            let value = input.value;
+            
+            // Remove any character that isn't a digit or decimal point
+            value = value.replace(/[^\d.]/g, '');
+            
+            // Ensure only one decimal point
+            const parts = value.split('.');
+            if (parts.length > 2) {
+                value = parts[0] + '.' + parts.slice(1).join('');
+            }
+            
+            // Limit to 2 decimal places while typing
+            if (parts.length === 2 && parts[1].length > 2) {
+                value = parts[0] + '.' + parts[1].slice(0, 2);
+            }
+            
+            input.value = value;
+        }
+
+        // Format price to 2 decimals on blur (e.g., "25" → "25.00", "25.5" → "25.50")
+        function formatPriceOnBlur(input) {
+            let value = input.value.trim();
+            
+            // If empty or just a decimal, set to 0.00
+            if (value === '' || value === '.') {
+                input.value = '0.00';
+                return;
+            }
+            
+            // Parse and format to 2 decimal places
+            const num = parseFloat(value);
+            if (!isNaN(num) && num >= 0) {
+                input.value = num.toFixed(2);
+            } else {
+                input.value = '0.00';
+            }
+        }
+
         // === VALIDATION ===
         function validatePrice(value) {
-            const num = parseFloat(value);
+            // Handle empty or whitespace
+            const trimmed = String(value).trim();
+            if (trimmed === '' || trimmed === '.') {
+                return { valid: true, value: 0 };
+            }
+            
+            const num = parseFloat(trimmed);
             if (isNaN(num)) return { valid: false, error: "Must be a number" };
             if (num < 0) return { valid: false, error: "Cannot be negative" };
-            if (!/^\d+(\.\d{0,2})?$/.test(value.toString())) {
+            
+            // Check for max 2 decimal places
+            if (!/^\d*\.?\d{0,2}$/.test(trimmed)) {
                 return { valid: false, error: "Max 2 decimal places" };
             }
+            
             return { valid: true, value: Math.round(num * 100) / 100 };
         }
 
@@ -704,9 +793,9 @@
                     </td>
                     <td style="text-align: right;">
                         <input 
-                            type="number" 
-                            step="0.01" 
-                            min="0" 
+                            type="text"
+                            inputmode="decimal"
+                            autocomplete="off"
                             value="${Number(p.price || 0).toFixed(2)}"
                             data-id="${esc(p.id)}"
                             data-field="price"
@@ -717,13 +806,13 @@
                     <td style="text-align: center;">
                         <input 
                             type="number" 
+                            inputmode="numeric"
                             step="1" 
                             min="0" 
                             value="${p.quantity ?? 0}"
                             data-id="${esc(p.id)}"
                             data-field="quantity"
                             class="qty-input ${isChanged && CHANGES.get(p.id)?.quantity !== undefined ? 'changed' : ''}"
-                            style="width: 70px;"
                         />
                     </td>
                     <td style="text-align: center;">
@@ -747,9 +836,12 @@
         }
 
         function attachInputListeners() {
-            // Price inputs
+            // Price inputs (text type with sanitization and formatting)
             document.querySelectorAll(".price-input").forEach(input => {
+                // Sanitize as user types
                 input.addEventListener("input", (e) => {
+                    sanitizePriceInput(e.target);
+                    
                     const id = e.target.dataset.id;
                     const validation = validatePrice(e.target.value);
                     
@@ -758,6 +850,28 @@
                         trackChange(id, "price", validation.value);
                     } else {
                         e.target.classList.add("invalid");
+                    }
+                    
+                    // Update changed class
+                    const change = CHANGES.get(id);
+                    if (change?.price !== undefined) {
+                        e.target.classList.add("changed");
+                    } else {
+                        e.target.classList.remove("changed");
+                    }
+                });
+                
+                // Format to 2 decimals on blur
+                input.addEventListener("blur", (e) => {
+                    formatPriceOnBlur(e.target);
+                    
+                    // Re-validate and track after formatting
+                    const id = e.target.dataset.id;
+                    const validation = validatePrice(e.target.value);
+                    
+                    if (validation.valid) {
+                        e.target.classList.remove("invalid");
+                        trackChange(id, "price", validation.value);
                     }
                     
                     // Update changed class

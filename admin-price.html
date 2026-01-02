@@ -1,0 +1,966 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Price Admin — Jojin's Kitty Thrift Store</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+            margin: 0;
+            background: #0b0f19;
+            color: #e5e7eb
+        }
+
+        .wrap {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px
+        }
+
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: #111827;
+            border: 1px solid rgba(255, 255, 255, .10);
+            border-radius: 14px;
+            padding: 18px;
+            overflow-x: auto;
+        }
+
+        input[type="number"] {
+            width: 90px;
+            background: #0f172a;
+            color: #e5e7eb;
+            border: 1px solid rgba(255, 255, 255, .10);
+            border-radius: 8px;
+            padding: 8px 10px;
+            box-sizing: border-box;
+            font-size: 14px;
+            text-align: right;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: rgba(96, 165, 250, .6);
+            box-shadow: 0 0 0 2px rgba(96, 165, 250, .2);
+        }
+
+        input[type="number"].changed {
+            border-color: rgba(251, 191, 36, .6);
+            background: rgba(251, 191, 36, .08);
+        }
+
+        input[type="number"].invalid {
+            border-color: rgba(239, 68, 68, .6);
+            background: rgba(239, 68, 68, .08);
+        }
+
+        select {
+            background: #0f172a;
+            color: #e5e7eb;
+            border: 1px solid rgba(255, 255, 255, .10);
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        select.changed {
+            border-color: rgba(251, 191, 36, .6);
+            background: rgba(251, 191, 36, .08);
+        }
+
+        .btn {
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, .12);
+            background: rgba(255, 255, 255, .06);
+            color: #e5e7eb;
+            text-decoration: none;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all .15s ease;
+        }
+
+        .btn:hover {
+            border-color: rgba(96, 165, 250, .45);
+            background: rgba(96, 165, 250, .12)
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn.primary {
+            background: rgba(34, 197, 94, .2);
+            border-color: rgba(34, 197, 94, .4);
+        }
+
+        .btn.primary:hover:not(:disabled) {
+            background: rgba(34, 197, 94, .3);
+        }
+
+        .btn.warning {
+            background: rgba(251, 191, 36, .2);
+            border-color: rgba(251, 191, 36, .4);
+        }
+
+        .btn.warning:hover:not(:disabled) {
+            background: rgba(251, 191, 36, .3);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        th,
+        td {
+            border-bottom: 1px solid rgba(255, 255, 255, .08);
+            padding: 12px 10px;
+            text-align: left;
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        th {
+            color: #9ca3af;
+            font-weight: 700;
+            position: sticky;
+            top: 0;
+            background: #111827;
+            z-index: 1;
+        }
+
+        tr.changed-row {
+            background: rgba(251, 191, 36, .05);
+        }
+
+        .muted {
+            color: #9ca3af;
+            font-size: 13px;
+            line-height: 1.4
+        }
+
+        .status {
+            padding: 10px 14px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status.success {
+            background: rgba(34, 197, 94, .15);
+            border: 1px solid rgba(34, 197, 94, .3);
+            color: #86efac;
+        }
+
+        .status.error {
+            background: rgba(239, 68, 68, .15);
+            border: 1px solid rgba(239, 68, 68, .3);
+            color: #fca5a5;
+        }
+
+        .status.info {
+            background: rgba(59, 130, 246, .15);
+            border: 1px solid rgba(59, 130, 246, .3);
+            color: #93c5fd;
+        }
+
+        .status.warning {
+            background: rgba(251, 191, 36, .15);
+            border: 1px solid rgba(251, 191, 36, .3);
+            color: #fcd34d;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Thumbnail */
+        .thumb-cell {
+            width: 60px;
+        }
+
+        .thumb {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, .1);
+            cursor: pointer;
+            transition: transform .15s ease, box-shadow .15s ease;
+        }
+
+        .thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, .4);
+        }
+
+        .no-thumb {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            background: #1e293b;
+            border: 1px dashed rgba(255, 255, 255, .2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #4b5563;
+        }
+
+        /* Product info */
+        .product-name {
+            font-weight: 600;
+            color: #f3f4f6;
+            margin-bottom: 2px;
+        }
+
+        .product-sku {
+            font-size: 11px;
+            color: #6b7280;
+            font-family: monospace;
+        }
+
+        .product-desc {
+            font-size: 11px;
+            color: #6b7280;
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            background: rgba(99, 102, 241, .15);
+            border: 1px solid rgba(99, 102, 241, .3);
+            border-radius: 6px;
+            font-size: 11px;
+            color: #a5b4fc;
+        }
+
+        .stock-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .stock-badge.in-stock {
+            background: rgba(34, 197, 94, .15);
+            border: 1px solid rgba(34, 197, 94, .3);
+            color: #86efac;
+        }
+
+        .stock-badge.out-of-stock {
+            background: rgba(239, 68, 68, .15);
+            border: 1px solid rgba(239, 68, 68, .3);
+            color: #fca5a5;
+        }
+
+        /* Price display */
+        .original-price {
+            font-size: 11px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        /* Lightbox */
+        .lightbox {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(0, 0, 0, .9);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity .2s ease, visibility .2s ease;
+        }
+
+        .lightbox.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .lightbox-content {
+            position: relative;
+            max-width: 90vw;
+            max-height: 85vh;
+        }
+
+        .lightbox-content img {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, .2);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .5);
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: -14px;
+            right: -14px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #ef4444;
+            border: none;
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lightbox-info {
+            text-align: center;
+            margin-top: 12px;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        /* Summary bar */
+        .summary-bar {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+            padding: 14px 18px;
+            background: rgba(30, 41, 59, .5);
+            border-radius: 10px;
+            margin-bottom: 16px;
+        }
+
+        .summary-stat {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .summary-stat .label {
+            font-size: 11px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .summary-stat .value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #f3f4f6;
+        }
+
+        .summary-stat .value.highlight {
+            color: #fbbf24;
+        }
+
+        .action-buttons {
+            margin-left: auto;
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .wrap {
+                padding: 12px;
+            }
+
+            .header-row {
+                flex-direction: column;
+            }
+
+            .action-buttons {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .action-buttons .btn {
+                flex: 1;
+            }
+        }
+
+        /* Lock icon for read-only fields */
+        .locked {
+            position: relative;
+        }
+
+        .locked::after {
+            content: "🔒";
+            font-size: 10px;
+            margin-left: 4px;
+            opacity: 0.5;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, .2);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="header-row">
+            <div>
+                <h1 style="margin:0 0 6px;">💰 Price Admin</h1>
+                <p class="muted">Edit prices only. Other fields are locked. Changes merge safely with latest data.</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <a href="admin.html" class="btn">← Full Admin</a>
+                <a href="index.html" class="btn">🏪 Store</a>
+            </div>
+        </div>
+
+        <div id="statusMsg" class="status hidden"></div>
+
+        <div class="summary-bar">
+            <div class="summary-stat">
+                <span class="label">Total Products</span>
+                <span class="value" id="totalCount">—</span>
+            </div>
+            <div class="summary-stat">
+                <span class="label">Changed</span>
+                <span class="value highlight" id="changedCount">0</span>
+            </div>
+            <div class="summary-stat">
+                <span class="label">Last Loaded</span>
+                <span class="value" id="lastLoaded" style="font-size: 13px;">—</span>
+            </div>
+            <div class="action-buttons">
+                <button class="btn" id="refreshBtn">🔄 Refresh</button>
+                <button class="btn" id="discardBtn" disabled>↩ Discard</button>
+                <button class="btn primary" id="saveAllBtn" disabled>💾 Save All Changes</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="thumb-cell">Image</th>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th style="text-align: right;">Price ($)</th>
+                        <th style="text-align: center;">Qty</th>
+                        <th style="text-align: center;">In Stock</th>
+                    </tr>
+                </thead>
+                <tbody id="productList"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Lightbox Modal -->
+    <div class="lightbox" id="lightbox">
+        <div class="lightbox-content">
+            <button class="lightbox-close" id="lightboxClose">✕</button>
+            <img id="lightboxImg" src="" alt="" />
+            <div class="lightbox-info" id="lightboxInfo"></div>
+        </div>
+    </div>
+
+    <script>
+        // === STATE ===
+        let PRODUCTS = [];           // Current working data
+        let ORIGINAL = [];           // Original data from last load (for change detection)
+        let CHANGES = new Map();     // Map of productId -> { price?, quantity?, inStock? }
+
+        // === DOM ELEMENTS ===
+        const els = {
+            productList: document.getElementById("productList"),
+            statusMsg: document.getElementById("statusMsg"),
+            totalCount: document.getElementById("totalCount"),
+            changedCount: document.getElementById("changedCount"),
+            lastLoaded: document.getElementById("lastLoaded"),
+            refreshBtn: document.getElementById("refreshBtn"),
+            discardBtn: document.getElementById("discardBtn"),
+            saveAllBtn: document.getElementById("saveAllBtn"),
+            lightbox: document.getElementById("lightbox"),
+            lightboxImg: document.getElementById("lightboxImg"),
+            lightboxInfo: document.getElementById("lightboxInfo"),
+            lightboxClose: document.getElementById("lightboxClose"),
+        };
+
+        // === UTILITIES ===
+        function esc(s) {
+            return String(s ?? "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+        function money(n) {
+            return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
+        }
+
+        function showStatus(message, type = "info", duration = 4000) {
+            els.statusMsg.innerHTML = message;
+            els.statusMsg.className = `status ${type}`;
+            if (duration > 0) {
+                setTimeout(() => {
+                    els.statusMsg.className = "status hidden";
+                }, duration);
+            }
+        }
+
+        function hideStatus() {
+            els.statusMsg.className = "status hidden";
+        }
+
+        function formatTime(date) {
+            return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+        }
+
+        // === VALIDATION ===
+        function validatePrice(value) {
+            const num = parseFloat(value);
+            if (isNaN(num)) return { valid: false, error: "Must be a number" };
+            if (num < 0) return { valid: false, error: "Cannot be negative" };
+            if (!/^\d+(\.\d{0,2})?$/.test(value.toString())) {
+                return { valid: false, error: "Max 2 decimal places" };
+            }
+            return { valid: true, value: Math.round(num * 100) / 100 };
+        }
+
+        function validateQuantity(value) {
+            const num = parseInt(value, 10);
+            if (isNaN(num)) return { valid: false, error: "Must be a number" };
+            if (num < 0) return { valid: false, error: "Cannot be negative" };
+            return { valid: true, value: num };
+        }
+
+        // === DATA LOADING ===
+        async function loadProducts() {
+            try {
+                showStatus('<span class="spinner"></span> Loading products...', "info", 0);
+                
+                let res;
+                try {
+                    res = await fetch("/api/products", { cache: "no-store" });
+                    if (!res.ok) throw new Error("API not available");
+                } catch {
+                    res = await fetch("products.json", { cache: "no-store" });
+                }
+                
+                PRODUCTS = await res.json();
+                ORIGINAL = JSON.parse(JSON.stringify(PRODUCTS)); // Deep clone
+                CHANGES.clear();
+                
+                els.lastLoaded.textContent = formatTime(new Date());
+                hideStatus();
+                render();
+                updateSummary();
+                
+            } catch (err) {
+                console.error(err);
+                showStatus("❌ Failed to load products. Check connection.", "error", 0);
+                PRODUCTS = [];
+                render();
+            }
+        }
+
+        // === CHANGE TRACKING ===
+        function trackChange(productId, field, newValue) {
+            const original = ORIGINAL.find(p => p.id === productId);
+            if (!original) return;
+
+            let originalValue;
+            if (field === "price") {
+                originalValue = Number(original.price || 0);
+            } else if (field === "quantity") {
+                originalValue = Number(original.quantity || 0);
+            } else if (field === "inStock") {
+                originalValue = !!original.inStock;
+            }
+
+            // Get or create change record
+            let change = CHANGES.get(productId) || {};
+
+            // Check if value differs from original
+            if (newValue !== originalValue) {
+                change[field] = newValue;
+            } else {
+                delete change[field];
+            }
+
+            // Update or remove from CHANGES map
+            if (Object.keys(change).length > 0) {
+                CHANGES.set(productId, change);
+            } else {
+                CHANGES.delete(productId);
+            }
+
+            // Update working PRODUCTS array
+            const product = PRODUCTS.find(p => p.id === productId);
+            if (product) {
+                product[field] = newValue;
+            }
+
+            updateSummary();
+            updateRowHighlight(productId);
+        }
+
+        function updateRowHighlight(productId) {
+            const row = document.querySelector(`tr[data-id="${productId}"]`);
+            if (row) {
+                if (CHANGES.has(productId)) {
+                    row.classList.add("changed-row");
+                } else {
+                    row.classList.remove("changed-row");
+                }
+            }
+        }
+
+        function updateSummary() {
+            els.totalCount.textContent = PRODUCTS.length;
+            els.changedCount.textContent = CHANGES.size;
+            
+            const hasChanges = CHANGES.size > 0;
+            els.discardBtn.disabled = !hasChanges;
+            els.saveAllBtn.disabled = !hasChanges;
+        }
+
+        // === RENDERING ===
+        function render() {
+            els.productList.innerHTML = "";
+
+            if (PRODUCTS.length === 0) {
+                els.productList.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 40px; color: #6b7280;">
+                            No products found
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            for (const p of PRODUCTS) {
+                const inStock = !!p.inStock;
+                const hasImage = !!p.image;
+                const isChanged = CHANGES.has(p.id);
+
+                const tr = document.createElement("tr");
+                tr.dataset.id = p.id;
+                if (isChanged) tr.classList.add("changed-row");
+
+                tr.innerHTML = `
+                    <td class="thumb-cell">
+                        ${hasImage 
+                            ? `<img src="${esc(p.image)}" alt="${esc(p.name)}" class="thumb" data-image="${esc(p.image)}" data-name="${esc(p.name)}" />`
+                            : `<div class="no-thumb">📦</div>`
+                        }
+                    </td>
+                    <td>
+                        <div class="product-name locked">${esc(p.name || "Unnamed")}</div>
+                        <div class="product-sku">SKU: ${esc(p.id)}</div>
+                        ${p.description ? `<div class="product-desc" title="${esc(p.description)}">${esc(p.description)}</div>` : ""}
+                    </td>
+                    <td>
+                        <span class="category-badge locked">${esc(p.category || "—")}</span>
+                    </td>
+                    <td style="text-align: right;">
+                        <input 
+                            type="number" 
+                            step="0.01" 
+                            min="0" 
+                            value="${Number(p.price || 0).toFixed(2)}"
+                            data-id="${esc(p.id)}"
+                            data-field="price"
+                            class="price-input ${isChanged && CHANGES.get(p.id)?.price !== undefined ? 'changed' : ''}"
+                        />
+                        <div class="original-price">Was: ${money(Number(ORIGINAL.find(o => o.id === p.id)?.price || 0))}</div>
+                    </td>
+                    <td style="text-align: center;">
+                        <input 
+                            type="number" 
+                            step="1" 
+                            min="0" 
+                            value="${p.quantity ?? 0}"
+                            data-id="${esc(p.id)}"
+                            data-field="quantity"
+                            class="qty-input ${isChanged && CHANGES.get(p.id)?.quantity !== undefined ? 'changed' : ''}"
+                            style="width: 70px;"
+                        />
+                    </td>
+                    <td style="text-align: center;">
+                        <select 
+                            data-id="${esc(p.id)}"
+                            data-field="inStock"
+                            class="stock-select ${isChanged && CHANGES.get(p.id)?.inStock !== undefined ? 'changed' : ''}"
+                        >
+                            <option value="true" ${inStock ? "selected" : ""}>✓ Yes</option>
+                            <option value="false" ${!inStock ? "selected" : ""}>✗ No</option>
+                        </select>
+                    </td>
+                `;
+
+                els.productList.appendChild(tr);
+            }
+
+            // Attach event listeners
+            attachInputListeners();
+            attachThumbnailListeners();
+        }
+
+        function attachInputListeners() {
+            // Price inputs
+            document.querySelectorAll(".price-input").forEach(input => {
+                input.addEventListener("input", (e) => {
+                    const id = e.target.dataset.id;
+                    const validation = validatePrice(e.target.value);
+                    
+                    if (validation.valid) {
+                        e.target.classList.remove("invalid");
+                        trackChange(id, "price", validation.value);
+                    } else {
+                        e.target.classList.add("invalid");
+                    }
+                    
+                    // Update changed class
+                    const change = CHANGES.get(id);
+                    if (change?.price !== undefined) {
+                        e.target.classList.add("changed");
+                    } else {
+                        e.target.classList.remove("changed");
+                    }
+                });
+            });
+
+            // Quantity inputs
+            document.querySelectorAll(".qty-input").forEach(input => {
+                input.addEventListener("input", (e) => {
+                    const id = e.target.dataset.id;
+                    const validation = validateQuantity(e.target.value);
+                    
+                    if (validation.valid) {
+                        e.target.classList.remove("invalid");
+                        trackChange(id, "quantity", validation.value);
+                    } else {
+                        e.target.classList.add("invalid");
+                    }
+                    
+                    const change = CHANGES.get(id);
+                    if (change?.quantity !== undefined) {
+                        e.target.classList.add("changed");
+                    } else {
+                        e.target.classList.remove("changed");
+                    }
+                });
+            });
+
+            // Stock selects
+            document.querySelectorAll(".stock-select").forEach(select => {
+                select.addEventListener("change", (e) => {
+                    const id = e.target.dataset.id;
+                    const value = e.target.value === "true";
+                    trackChange(id, "inStock", value);
+                    
+                    const change = CHANGES.get(id);
+                    if (change?.inStock !== undefined) {
+                        e.target.classList.add("changed");
+                    } else {
+                        e.target.classList.remove("changed");
+                    }
+                });
+            });
+        }
+
+        function attachThumbnailListeners() {
+            document.querySelectorAll(".thumb").forEach(img => {
+                img.addEventListener("click", () => {
+                    openLightbox(img.dataset.image, img.dataset.name);
+                });
+            });
+        }
+
+        // === LIGHTBOX ===
+        function openLightbox(imageSrc, productName) {
+            els.lightboxImg.src = imageSrc;
+            els.lightboxImg.alt = productName;
+            els.lightboxInfo.textContent = productName;
+            els.lightbox.classList.add("open");
+        }
+
+        function closeLightbox() {
+            els.lightbox.classList.remove("open");
+        }
+
+        els.lightboxClose.addEventListener("click", closeLightbox);
+        els.lightbox.addEventListener("click", (e) => {
+            if (e.target === els.lightbox) closeLightbox();
+        });
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") closeLightbox();
+        });
+
+        // === SAVE WITH MERGE ===
+        async function saveChanges() {
+            if (CHANGES.size === 0) {
+                showStatus("No changes to save.", "info");
+                return;
+            }
+
+            // Check for invalid inputs
+            const invalidInputs = document.querySelectorAll(".invalid");
+            if (invalidInputs.length > 0) {
+                showStatus("❌ Please fix invalid values before saving.", "error");
+                invalidInputs[0].focus();
+                return;
+            }
+
+            try {
+                els.saveAllBtn.disabled = true;
+                els.saveAllBtn.innerHTML = '<span class="spinner"></span> Saving...';
+                showStatus('<span class="spinner"></span> Fetching latest data for safe merge...', "info", 0);
+
+                // Step 1: Re-fetch latest data from server
+                let latestProducts;
+                try {
+                    const res = await fetch("/api/products", { cache: "no-store" });
+                    if (!res.ok) throw new Error("API not available");
+                    latestProducts = await res.json();
+                } catch {
+                    const res = await fetch("products.json", { cache: "no-store" });
+                    latestProducts = await res.json();
+                }
+
+                // Step 2: Merge only our changed fields into the latest data
+                for (const [productId, changes] of CHANGES) {
+                    const latestProduct = latestProducts.find(p => p.id === productId);
+                    if (latestProduct) {
+                        // Only apply our allowed field changes
+                        if (changes.price !== undefined) {
+                            latestProduct.price = changes.price;
+                        }
+                        if (changes.quantity !== undefined) {
+                            latestProduct.quantity = changes.quantity;
+                        }
+                        if (changes.inStock !== undefined) {
+                            latestProduct.inStock = changes.inStock;
+                        }
+                    } else {
+                        // Product was deleted in main admin - skip it
+                        console.warn(`Product ${productId} no longer exists, skipping.`);
+                    }
+                }
+
+                showStatus('<span class="spinner"></span> Saving merged data...', "info", 0);
+
+                // Step 3: Save the merged data back
+                const saveRes = await fetch("/api/products", {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(latestProducts)
+                });
+
+                if (!saveRes.ok) {
+                    throw new Error("Save failed");
+                }
+
+                // Step 4: Update local state
+                PRODUCTS = latestProducts;
+                ORIGINAL = JSON.parse(JSON.stringify(latestProducts));
+                CHANGES.clear();
+
+                showStatus(`✓ Saved ${CHANGES.size || "all"} changes successfully!`, "success");
+                els.lastLoaded.textContent = formatTime(new Date());
+                render();
+                updateSummary();
+
+            } catch (err) {
+                console.error(err);
+                showStatus("❌ Save failed. Try again or use Full Admin to download backup.", "error");
+            } finally {
+                els.saveAllBtn.disabled = false;
+                els.saveAllBtn.innerHTML = "💾 Save All Changes";
+                updateSummary();
+            }
+        }
+
+        // === DISCARD CHANGES ===
+        function discardChanges() {
+            if (CHANGES.size === 0) return;
+            
+            if (!confirm(`Discard ${CHANGES.size} unsaved change(s)?`)) return;
+
+            // Reset to original
+            PRODUCTS = JSON.parse(JSON.stringify(ORIGINAL));
+            CHANGES.clear();
+            
+            showStatus("Changes discarded.", "info");
+            render();
+            updateSummary();
+        }
+
+        // === EVENT HANDLERS ===
+        els.refreshBtn.addEventListener("click", async () => {
+            if (CHANGES.size > 0) {
+                if (!confirm(`You have ${CHANGES.size} unsaved changes. Refresh anyway?`)) {
+                    return;
+                }
+            }
+            await loadProducts();
+            showStatus("✓ Refreshed from server.", "success");
+        });
+
+        els.discardBtn.addEventListener("click", discardChanges);
+        els.saveAllBtn.addEventListener("click", saveChanges);
+
+        // Warn before leaving with unsaved changes
+        window.addEventListener("beforeunload", (e) => {
+            if (CHANGES.size > 0) {
+                e.preventDefault();
+                e.returnValue = "";
+            }
+        });
+
+        // === INIT ===
+        loadProducts();
+    </script>
+</body>
+
+</html>

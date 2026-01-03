@@ -4,7 +4,6 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <!-- Valentine theme changes: Updated title and meta for Valentine's season -->
     <title>Jojin's Kitty Thrift Shop — Valentine's Season 💕</title>
     <meta name="description"
         content="Jojin's Kitty Thrift Shop — Spread the love with unique thrift finds!" />
@@ -14,70 +13,44 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Valentine theme changes: Added Cormorant Garamond for a romantic, boutique feel -->
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* Valentine theme changes: Complete color palette overhaul */
         :root {
-            /* Base tones - warm and romantic */
             --ink: #4a3728;
             --ink-light: #6b5344;
             --muted: #9a8578;
-
-            /* Valentine backgrounds - soft creams and blush */
             --cream: #fdf8f5;
             --cream-warm: #faf3ee;
             --blush-light: #fff5f5;
             --blush: #ffe8e8;
-            
-            /* Valentine accent colors */
             --rose: #e8a0a0;
             --rose-deep: #d4797a;
             --berry: #c45c6a;
             --berry-dark: #a04555;
-            
-            /* Soft gold accents */
             --gold: #d4a574;
             --gold-soft: #e8c9a8;
             --gold-dark: #b8956a;
-            
-            /* Pink spectrum */
             --pink-soft: #f5d5d5;
             --pink-medium: #e8b4b4;
             --pink-deep: #d48a8a;
-            
-            /* Heart red */
             --heart: #e57373;
             --heart-glow: #ff8a8a;
-
-            /* Card styling */
             --card: rgba(255, 253, 250, .95);
             --card-border: rgba(212, 121, 122, .2);
             --card-glow: rgba(228, 160, 160, .15);
-
-            /* Shadows - soft and plush */
             --shadow: 0 12px 40px rgba(164, 69, 85, .08);
             --shadow-rose: 0 0 30px rgba(228, 160, 160, .2);
             --shadow-soft: 0 4px 20px rgba(164, 69, 85, .06);
-
             --r: 20px;
             --r2: 14px;
-
-            /* Valentine theme changes: New romantic font stack */
             --font-display: 'Cormorant Garamond', Georgia, serif;
             --font-body: 'Nunito', system-ui, sans-serif;
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
+        html, body { height: 100%; }
 
-        html, body {
-            height: 100%;
-        }
-
-        /* Valentine theme changes: Warm cream gradient background */
         body {
             margin: 0;
             font-family: var(--font-body);
@@ -88,7 +61,6 @@
             min-height: 100vh;
         }
 
-        /* Valentine theme changes: Replaced starfield with soft bokeh/sparkles */
         .stars {
             position: fixed;
             inset: 0;
@@ -114,7 +86,6 @@
             50% { opacity: 0.8; }
         }
 
-        /* Valentine theme changes: Renamed from #fireworks to #hearts for floating hearts */
         #hearts {
             position: fixed;
             inset: 0;
@@ -122,7 +93,6 @@
             z-index: 1;
         }
 
-        /* Valentine theme changes: Romantic banner styling */
         .valentine-banner {
             background: linear-gradient(90deg, var(--blush) 0%, var(--pink-soft) 50%, var(--blush) 100%);
             text-align: center;
@@ -163,7 +133,6 @@
             z-index: 2;
         }
 
-        /* Valentine theme changes: Soft cream header with rose border */
         header {
             position: sticky;
             top: 0;
@@ -189,7 +158,6 @@
             align-items: center;
         }
 
-        /* Valentine theme changes: Rose-tinted logo with heart gradient */
         .logo {
             width: 60px;
             height: 60px;
@@ -232,8 +200,81 @@
             max-width: 600px;
         }
 
-        .sub strong {
-            color: var(--berry);
+        .sub strong { color: var(--berry); }
+
+        /* User controls in header */
+        .user-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: var(--r2);
+            border: 1px solid var(--rose);
+            background: linear-gradient(135deg, var(--cream), var(--blush-light));
+            color: var(--berry-dark);
+            text-decoration: none;
+            font-weight: 700;
+            font-family: inherit;
+            font-size: 14px;
+            box-shadow: var(--shadow-soft);
+            transition: all .2s ease;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            border-color: var(--berry);
+            background: linear-gradient(135deg, var(--blush-light), var(--pink-soft));
+            box-shadow: 0 8px 25px rgba(196, 92, 106, .15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--rose), var(--berry));
+            color: var(--cream);
+            border-color: var(--berry);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--rose-deep), var(--berry-dark));
+        }
+
+        .btn-small {
+            padding: 8px 12px;
+            font-size: 13px;
+        }
+
+        .user-greeting {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 14px;
+            background: linear-gradient(135deg, var(--blush), var(--pink-soft));
+            border-radius: 999px;
+            border: 1px solid var(--rose);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--berry-dark);
+        }
+
+        .user-greeting .avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--rose), var(--berry));
+            color: var(--cream);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 800;
         }
 
         .bar {
@@ -244,7 +285,6 @@
             margin-top: 16px;
         }
 
-        /* Valentine theme changes: Soft, romantic input styling */
         input, select {
             font-family: inherit;
             background: var(--cream);
@@ -257,25 +297,15 @@
             transition: all .2s ease;
         }
 
-        input {
-            flex: 1 1 260px;
-        }
-
-        select {
-            flex: 0 0 200px;
-            cursor: pointer;
-        }
-
-        input::placeholder {
-            color: var(--muted);
-        }
+        input { flex: 1 1 260px; }
+        select { flex: 0 0 200px; cursor: pointer; }
+        input::placeholder { color: var(--muted); }
 
         input:focus, select:focus {
             border-color: var(--rose);
             box-shadow: 0 0 0 3px rgba(228, 160, 160, .2), inset 0 2px 4px rgba(164, 69, 85, .04);
         }
 
-        /* Valentine theme changes: Gift ribbon styled pill */
         .pill {
             display: inline-flex;
             gap: 10px;
@@ -289,7 +319,6 @@
             position: relative;
         }
 
-        /* Valentine theme changes: Tiny ribbon bow effect */
         .pill::before {
             content: "🎀";
             position: absolute;
@@ -299,35 +328,7 @@
             font-size: 14px;
         }
 
-        .pill strong {
-            color: var(--berry);
-            font-weight: 700;
-        }
-
-        /* Valentine theme changes: Gift-wrapped button styling */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 10px 16px;
-            border-radius: var(--r2);
-            border: 1px solid var(--rose);
-            background: linear-gradient(135deg, var(--cream), var(--blush-light));
-            color: var(--berry-dark);
-            text-decoration: none;
-            font-weight: 700;
-            box-shadow: var(--shadow-soft);
-            transition: all .2s ease;
-            cursor: pointer;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            border-color: var(--berry);
-            background: linear-gradient(135deg, var(--blush-light), var(--pink-soft));
-            box-shadow: 0 8px 25px rgba(196, 92, 106, .15);
-        }
+        .pill strong { color: var(--berry); font-weight: 700; }
 
         .count {
             margin-left: auto;
@@ -336,11 +337,35 @@
             font-weight: 600;
         }
 
-        main {
-            padding: 24px 0 60px;
+        /* Wishlist toggle button */
+        .wishlist-toggle {
+            position: relative;
         }
 
-        /* Valentine theme changes: Love-themed celebration badge */
+        .wishlist-toggle .badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: var(--heart);
+            color: white;
+            font-size: 10px;
+            font-weight: 800;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--cream);
+        }
+
+        .wishlist-toggle .badge:empty,
+        .wishlist-toggle .badge[data-count="0"] {
+            display: none;
+        }
+
+        main { padding: 24px 0 60px; }
+
         .celebration-badge {
             display: inline-flex;
             align-items: center;
@@ -357,8 +382,38 @@
             color: var(--berry-dark);
         }
 
-        .celebration-badge span {
-            color: var(--heart);
+        .celebration-badge span { color: var(--heart); }
+
+        /* Wishlist filter bar */
+        .view-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .view-btn {
+            padding: 10px 18px;
+            border-radius: 999px;
+            border: 1px solid var(--pink-soft);
+            background: var(--cream);
+            color: var(--muted);
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all .2s ease;
+            font-family: inherit;
+        }
+
+        .view-btn:hover {
+            border-color: var(--rose);
+            color: var(--berry);
+        }
+
+        .view-btn.active {
+            background: linear-gradient(135deg, var(--rose), var(--berry));
+            color: var(--cream);
+            border-color: var(--berry);
         }
 
         .grid {
@@ -368,7 +423,6 @@
             margin-top: 18px;
         }
 
-        /* Valentine theme changes: Soft, plush card styling */
         .card {
             background: var(--card);
             border: 1px solid var(--card-border);
@@ -385,26 +439,54 @@
             border-color: var(--rose);
         }
 
-        /* Valentine theme changes: Subtle heart corner decoration */
-        .card::before {
-            content: "♡";
+        /* Save/Wishlist Heart Button */
+        .save-btn {
             position: absolute;
             top: 10px;
-            right: 14px;
+            right: 12px;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: rgba(255, 253, 250, .9);
+            border: 1px solid var(--pink-soft);
             color: var(--rose);
-            font-size: 16px;
-            opacity: 0.5;
+            font-size: 18px;
+            cursor: pointer;
             z-index: 5;
             transition: all .2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
         }
 
-        .card:hover::before {
-            opacity: 0.8;
-            color: var(--heart);
+        .save-btn:hover {
             transform: scale(1.1);
+            border-color: var(--heart);
+            color: var(--heart);
+            box-shadow: 0 4px 15px rgba(229, 115, 115, .3);
         }
 
-        /* Valentine theme changes: Warm, romantic image container */
+        .save-btn.saved {
+            background: var(--heart);
+            border-color: var(--heart);
+            color: white;
+        }
+
+        .save-btn.saved:hover {
+            background: var(--heart-glow);
+        }
+
+        @keyframes heart-pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        .save-btn.pop {
+            animation: heart-pop .3s ease;
+        }
+
         .img {
             height: 180px;
             background: 
@@ -427,9 +509,7 @@
             transition: transform .3s ease;
         }
 
-        .card:hover .img img {
-            transform: scale(1.05);
-        }
+        .card:hover .img img { transform: scale(1.05); }
 
         .noimg {
             color: var(--muted);
@@ -440,9 +520,7 @@
             border-radius: var(--r2);
         }
 
-        .img.has-image {
-            cursor: pointer;
-        }
+        .img.has-image { cursor: pointer; }
 
         .img.has-image::after {
             content: "🔍 Enlarge";
@@ -461,13 +539,9 @@
             transition: opacity .2s ease;
         }
 
-        .img.has-image:hover::after {
-            opacity: 1;
-        }
+        .img.has-image:hover::after { opacity: 1; }
 
-        .content {
-            padding: 16px;
-        }
+        .content { padding: 16px; }
 
         .meta {
             display: flex;
@@ -478,7 +552,6 @@
             font-size: 13px;
         }
 
-        /* Valentine theme changes: Soft category tag */
         .category-tag {
             background: var(--blush);
             padding: 5px 12px;
@@ -491,7 +564,6 @@
             color: var(--berry);
         }
 
-        /* Valentine theme changes: Heart-highlighted price */
         .price {
             font-weight: 800;
             font-size: 17px;
@@ -528,7 +600,6 @@
             margin-top: 14px;
         }
 
-        /* Valentine theme changes: Soft stock indicators */
         .stock {
             font-size: 12px;
             padding: 6px 14px;
@@ -556,11 +627,8 @@
             font-size: 12px;
         }
 
-        .sku-hint strong {
-            color: var(--berry);
-        }
+        .sku-hint strong { color: var(--berry); }
 
-        /* Valentine theme changes: Warm, loving footer */
         footer {
             padding: 28px 0;
             border-top: 1px solid var(--card-border);
@@ -584,11 +652,8 @@
             line-height: 1.7;
         }
 
-        .small strong {
-            color: var(--berry);
-        }
+        .small strong { color: var(--berry); }
 
-        /* Valentine theme changes: Heart-themed footer badge */
         .footer-badge {
             display: flex;
             align-items: center;
@@ -602,7 +667,7 @@
             color: var(--berry-dark);
         }
 
-        /* Valentine theme changes: Romantic lightbox styling */
+        /* Lightbox */
         .lightbox {
             position: fixed;
             inset: 0;
@@ -631,9 +696,7 @@
             transition: transform .3s ease;
         }
 
-        .lightbox.open .lightbox-content {
-            transform: scale(1);
-        }
+        .lightbox.open .lightbox-content { transform: scale(1); }
 
         .lightbox-content img {
             max-width: 100%;
@@ -664,9 +727,7 @@
             transition: transform .15s ease;
         }
 
-        .lightbox-close:hover {
-            transform: scale(1.1);
-        }
+        .lightbox-close:hover { transform: scale(1.1); }
 
         .lightbox-info {
             position: absolute;
@@ -681,7 +742,195 @@
             text-shadow: 0 2px 10px rgba(0, 0, 0, .3);
         }
 
-        /* Responsive */
+        /* ============================================
+           AUTH MODAL STYLES
+           ============================================ */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            background: rgba(74, 55, 40, .75);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity .3s ease, visibility .3s ease;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            background: var(--card);
+            border: 2px solid var(--rose);
+            border-radius: var(--r);
+            box-shadow: 
+                0 0 60px rgba(228, 160, 160, .4),
+                0 30px 80px rgba(74, 55, 40, .3);
+            transform: scale(.9) translateY(20px);
+            transition: transform .3s ease;
+            overflow: hidden;
+        }
+
+        .modal-overlay.open .modal {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--pink-soft), var(--blush));
+            padding: 24px 24px 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--card-border);
+            position: relative;
+        }
+
+        .modal-header::before {
+            content: "🐾";
+            font-size: 36px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--cream);
+            border: 1px solid var(--rose);
+            color: var(--berry);
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .2s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--berry);
+            color: var(--cream);
+        }
+
+        .modal-title {
+            font-family: var(--font-display);
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--berry-dark);
+            margin: 0;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--ink-light);
+        }
+
+        .auth-form input {
+            flex: none;
+            width: 100%;
+            padding: 12px 14px;
+            font-size: 14px;
+        }
+
+        .auth-form input.error {
+            border-color: var(--heart);
+        }
+
+        .form-error {
+            color: var(--heart);
+            font-size: 12px;
+            font-weight: 600;
+            display: none;
+        }
+
+        .form-error.visible {
+            display: block;
+        }
+
+        .auth-actions {
+            margin-top: 8px;
+        }
+
+        .auth-actions .btn {
+            width: 100%;
+            padding: 14px;
+        }
+
+        .auth-switch {
+            text-align: center;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--pink-soft);
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .auth-switch a {
+            color: var(--berry);
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .auth-switch a:hover {
+            text-decoration: underline;
+        }
+
+        /* Empty wishlist state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--muted);
+        }
+
+        .empty-state::before {
+            content: "💕";
+            font-size: 48px;
+            display: block;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-family: var(--font-display);
+            font-size: 22px;
+            color: var(--ink-light);
+            margin: 0 0 8px;
+        }
+
+        .empty-state p {
+            margin: 0;
+            font-size: 14px;
+        }
+
         @media (max-width: 600px) {
             h1 { font-size: 24px; }
             select { flex: 1 1 180px; }
@@ -690,41 +939,78 @@
             .count { margin-left: 0; width: 100%; text-align: center; }
             .grid { grid-template-columns: 1fr; }
             .valentine-banner::before, .valentine-banner::after { display: none; }
+            .user-controls { width: 100%; justify-content: flex-end; }
+            .topRow { flex-direction: column; }
+            .modal { max-width: 100%; margin: 10px; }
         }
 
-        /* Reduced motion */
         @media (prefers-reduced-motion: reduce) {
             .stars { animation: none; opacity: 0.5; }
             .valentine-banner::before, .valentine-banner::after { animation: none; }
             #hearts { display: none; }
             .card { transition: none; }
             .card:hover { transform: none; }
+            .modal-overlay, .modal { transition: none; }
+            .save-btn.pop { animation: none; }
         }
 
-        /* Accessibility: visible focus */
         a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
             outline: 2px solid var(--berry);
             outline-offset: 2px;
         }
+
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
     </style>
 </head>
 
 <body>
     <div class="stars" aria-hidden="true"></div>
-    <!-- Valentine theme changes: Renamed canvas for floating hearts animation -->
     <canvas id="hearts" aria-hidden="true"></canvas>
 
-    <!-- Valentine theme changes: Updated banner content -->
     <div class="valentine-banner">
         💖 Spread the Love — Valentine's Season at Jojin's! 💖
     </div>
 
-    <!-- Lightbox Modal -->
+    <!-- Image Lightbox -->
     <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged product image">
         <div class="lightbox-content">
             <button class="lightbox-close" id="lightbox-close" aria-label="Close enlarged image">✕</button>
             <img id="lightbox-img" src="" alt="" />
             <div class="lightbox-info" id="lightbox-info"></div>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div class="modal-overlay" id="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+        <div class="modal">
+            <div class="modal-header">
+                <button class="modal-close" id="auth-close" aria-label="Close">✕</button>
+                <h2 class="modal-title" id="auth-title">Sign In</h2>
+            </div>
+            <div class="modal-body">
+                <form class="auth-form" id="auth-form" novalidate>
+                    <div class="form-group" id="name-group" style="display: none;">
+                        <label for="auth-name">First Name</label>
+                        <input type="text" id="auth-name" name="firstName" placeholder="Your name" autocomplete="given-name" />
+                    </div>
+                    <div class="form-group">
+                        <label for="auth-email">Email</label>
+                        <input type="email" id="auth-email" name="email" placeholder="you@example.com" required autocomplete="email" />
+                    </div>
+                    <div class="form-group">
+                        <label for="auth-password">Password</label>
+                        <input type="password" id="auth-password" name="password" placeholder="••••••••" required autocomplete="current-password" minlength="6" />
+                    </div>
+                    <div class="form-error" id="auth-error" role="alert"></div>
+                    <div class="auth-actions">
+                        <button type="submit" class="btn btn-primary" id="auth-submit">Sign In</button>
+                    </div>
+                </form>
+                <div class="auth-switch">
+                    <span id="auth-switch-text">Don't have an account?</span>
+                    <a id="auth-switch-link">Create one</a>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -735,10 +1021,27 @@
                     <div class="brand">
                         <div class="logo" aria-hidden="true">🐾</div>
                         <div>
-                            <h1>Jojin's Kitty Thrift </h1>
-                            <!-- Valentine theme changes: Updated tagline -->
+                            <h1>Jojin's Kitty Thrift Shop</h1>
                             <p class="sub">Find something <strong>special</strong> for someone you love! Call to confirm availability and reserve items. <span aria-hidden="true">💕✨</span></p>
                         </div>
+                    </div>
+                </div>
+                <div class="user-controls" id="user-controls">
+                    <!-- Logged out state -->
+                    <div id="logged-out-controls">
+                        <button class="btn btn-small" id="login-btn">Sign In</button>
+                    </div>
+                    <!-- Logged in state (hidden by default) -->
+                    <div id="logged-in-controls" style="display: none;">
+                        <button class="btn btn-small wishlist-toggle" id="wishlist-btn">
+                            ♡ My Wishlist
+                            <span class="badge" id="wishlist-badge"></span>
+                        </button>
+                        <div class="user-greeting">
+                            <span class="avatar" id="user-avatar">J</span>
+                            <span id="user-name">User</span>
+                        </div>
+                        <button class="btn btn-small" id="logout-btn">Sign Out</button>
                     </div>
                 </div>
             </div>
@@ -764,10 +1067,16 @@
 
     <main>
         <div class="wrap">
-            <!-- Valentine theme changes: Updated badge content -->
             <div class="celebration-badge">
                 <span>♡</span> With Love — Valentine's Season <span>♡</span>
             </div>
+            
+            <!-- View controls (wishlist filter) -->
+            <div class="view-controls" id="view-controls" style="display: none;">
+                <button class="view-btn active" data-view="all">All Items</button>
+                <button class="view-btn" data-view="saved">♡ My Wishlist</button>
+            </div>
+            
             <div class="grid" id="grid"></div>
         </div>
     </main>
@@ -776,12 +1085,10 @@
         <div class="wrap">
             <div class="footer-content">
                 <div class="small">
-                    <div><strong> hours:</strong> Mon–Sat 11am–4pm • Leave a message or text outside hours</div>
+                    <div><strong>Shop hours:</strong> Mon–Sat 11am–4pm • Leave a message or text outside hours</div>
                     <div><strong>Location:</strong> 4100 N. Pulaski Rd., Chicago, IL</div>
-                    <!-- Valentine theme changes: Updated footer message -->
                     <div>Inventory changes quickly — call to reserve. Spread the love! 💕</div>
                 </div>
-                <!-- Valentine theme changes: Updated footer badge -->
                 <div class="footer-badge">
                     <span>♡</span> Made with Love <span>♡</span>
                 </div>
@@ -789,42 +1096,282 @@
         </div>
     </footer>
 
-    <!-- Screen reader only class -->
-    <style>.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }</style>
-
     <script>
-        const STORE_PHONE = "+13126100321";
-        const grid = document.getElementById("grid");
-        const q = document.getElementById("q");
-        const cat = document.getElementById("cat");
-        const count = document.getElementById("count");
-        const callTop = document.getElementById("callTop");
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+       const CONFIG = {
+    apiBase: 'https://jojin-thrift-api.tvinstallchicago.workers.dev',
+    storePhone: '+13126100321'
+};
 
-        // Lightbox elements
-        const lightbox = document.getElementById("lightbox");
-        const lightboxImg = document.getElementById("lightbox-img");
-        const lightboxInfo = document.getElementById("lightbox-info");
-        const lightboxClose = document.getElementById("lightbox-close");
-
-        callTop.href = `tel:${STORE_PHONE}`;
-
+        // ============================================
+        // STATE
+        // ============================================
         let PRODUCTS = [];
+        let currentUser = null;
+        let savedItems = new Set();
+        let currentView = 'all';
 
-        const money = (n) => new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(n);
+        // ============================================
+        // DOM ELEMENTS
+        // ============================================
+        const grid = document.getElementById('grid');
+        const q = document.getElementById('q');
+        const cat = document.getElementById('cat');
+        const count = document.getElementById('count');
+        const callTop = document.getElementById('callTop');
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const lightboxInfo = document.getElementById('lightbox-info');
+        const lightboxClose = document.getElementById('lightbox-close');
+        
+        // Auth elements
+        const authModal = document.getElementById('auth-modal');
+        const authClose = document.getElementById('auth-close');
+        const authForm = document.getElementById('auth-form');
+        const authTitle = document.getElementById('auth-title');
+        const authSubmit = document.getElementById('auth-submit');
+        const authError = document.getElementById('auth-error');
+        const authSwitchText = document.getElementById('auth-switch-text');
+        const authSwitchLink = document.getElementById('auth-switch-link');
+        const nameGroup = document.getElementById('name-group');
+        const authEmail = document.getElementById('auth-email');
+        const authPassword = document.getElementById('auth-password');
+        const authName = document.getElementById('auth-name');
+        
+        // User controls
+        const loginBtn = document.getElementById('login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const loggedOutControls = document.getElementById('logged-out-controls');
+        const loggedInControls = document.getElementById('logged-in-controls');
+        const userAvatar = document.getElementById('user-avatar');
+        const userName = document.getElementById('user-name');
+        const wishlistBtn = document.getElementById('wishlist-btn');
+        const wishlistBadge = document.getElementById('wishlist-badge');
+        const viewControls = document.getElementById('view-controls');
 
-        /* Valentine theme changes: Replaced fireworks with floating hearts animation */
-        const canvas = document.getElementById("hearts");
-        const ctx = canvas.getContext("2d");
-        let hearts = [];
+        callTop.href = `tel:${CONFIG.storePhone}`;
+        
+        let isSignUp = false;
+
+        // ============================================
+        // AUTH FUNCTIONS
+        // ============================================
+        function getToken() {
+            return localStorage.getItem('jojin_token');
+        }
+
+        function setToken(token) {
+            localStorage.setItem('jojin_token', token);
+        }
+
+        function clearToken() {
+            localStorage.removeItem('jojin_token');
+        }
+
+        async function apiRequest(endpoint, options = {}) {
+            const token = getToken();
+            const headers = {
+                'Content-Type': 'application/json',
+                ...options.headers
+            };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            
+            const response = await fetch(`${CONFIG.apiBase}${endpoint}`, {
+                ...options,
+                headers
+            });
+            
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Request failed');
+            }
+            return data;
+        }
+
+        async function checkAuth() {
+            const token = getToken();
+            if (!token) return null;
+            
+            try {
+                const data = await apiRequest('/auth/me');
+                return data.user;
+            } catch {
+                clearToken();
+                return null;
+            }
+        }
+
+        async function login(email, password) {
+            const data = await apiRequest('/auth/login', {
+                method: 'POST',
+                body: JSON.stringify({ email, password })
+            });
+            setToken(data.token);
+            return data.user;
+        }
+
+        async function register(email, password, firstName) {
+            const data = await apiRequest('/auth/register', {
+                method: 'POST',
+                body: JSON.stringify({ email, password, firstName })
+            });
+            setToken(data.token);
+            return data.user;
+        }
+
+        async function logout() {
+            try {
+                await apiRequest('/auth/logout', { method: 'POST' });
+            } catch {
+                // Ignore errors
+            }
+            clearToken();
+            currentUser = null;
+            savedItems.clear();
+            updateUI();
+            render(getFilteredProducts());
+        }
+
+        async function fetchSavedItems() {
+            if (!currentUser) return;
+            try {
+                const data = await apiRequest('/saved');
+                savedItems = new Set(data.savedItems);
+                updateWishlistBadge();
+            } catch {
+                // Ignore
+            }
+        }
+
+        async function saveItem(productId) {
+            if (!currentUser) {
+                openAuthModal();
+                return;
+            }
+            
+            try {
+                await apiRequest('/saved', {
+                    method: 'POST',
+                    body: JSON.stringify({ productId })
+                });
+                savedItems.add(productId);
+                updateWishlistBadge();
+                return true;
+            } catch (err) {
+                console.error('Save error:', err);
+                return false;
+            }
+        }
+
+        async function unsaveItem(productId) {
+            if (!currentUser) return false;
+            
+            try {
+                await apiRequest(`/saved/${encodeURIComponent(productId)}`, {
+                    method: 'DELETE'
+                });
+                savedItems.delete(productId);
+                updateWishlistBadge();
+                return true;
+            } catch (err) {
+                console.error('Unsave error:', err);
+                return false;
+            }
+        }
+
+        // ============================================
+        // UI FUNCTIONS
+        // ============================================
+        function updateUI() {
+            if (currentUser) {
+                loggedOutControls.style.display = 'none';
+                loggedInControls.style.display = 'flex';
+                viewControls.style.display = 'flex';
+                
+                const initial = (currentUser.firstName || currentUser.email || 'U')[0].toUpperCase();
+                userAvatar.textContent = initial;
+                userName.textContent = currentUser.firstName || currentUser.email.split('@')[0];
+                
+                updateWishlistBadge();
+            } else {
+                loggedOutControls.style.display = 'flex';
+                loggedInControls.style.display = 'none';
+                viewControls.style.display = 'none';
+                currentView = 'all';
+                updateViewButtons();
+            }
+        }
+
+        function updateWishlistBadge() {
+            const count = savedItems.size;
+            wishlistBadge.textContent = count > 0 ? count : '';
+            wishlistBadge.dataset.count = count;
+        }
+
+        function updateViewButtons() {
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.view === currentView);
+            });
+        }
+
+        function openAuthModal(signUp = false) {
+            isSignUp = signUp;
+            updateAuthModal();
+            authModal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+            authEmail.focus();
+        }
+
+        function closeAuthModal() {
+            authModal.classList.remove('open');
+            document.body.style.overflow = '';
+            authForm.reset();
+            authError.classList.remove('visible');
+            authEmail.classList.remove('error');
+            authPassword.classList.remove('error');
+        }
+
+        function updateAuthModal() {
+            if (isSignUp) {
+                authTitle.textContent = 'Create Account';
+                authSubmit.textContent = 'Sign Up';
+                authSwitchText.textContent = 'Already have an account?';
+                authSwitchLink.textContent = 'Sign in';
+                nameGroup.style.display = 'block';
+                authPassword.autocomplete = 'new-password';
+            } else {
+                authTitle.textContent = 'Sign In';
+                authSubmit.textContent = 'Sign In';
+                authSwitchText.textContent = "Don't have an account?";
+                authSwitchLink.textContent = 'Create one';
+                nameGroup.style.display = 'none';
+                authPassword.autocomplete = 'current-password';
+            }
+        }
+
+        function showAuthError(message) {
+            authError.textContent = message;
+            authError.classList.add('visible');
+        }
+
+        // ============================================
+        // FLOATING HEARTS ANIMATION
+        // ============================================
+        const canvas = document.getElementById('hearts');
+        const ctx = canvas.getContext('2d');
+        let heartsArray = [];
 
         function resizeCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
         }
         resizeCanvas();
-        window.addEventListener("resize", resizeCanvas);
+        window.addEventListener('resize', resizeCanvas);
 
-        // Heart shape drawing function
         function drawHeart(x, y, size, color, alpha) {
             ctx.save();
             ctx.globalAlpha = alpha;
@@ -842,10 +1389,8 @@
         class FloatingHeart {
             constructor() {
                 this.reset();
-                // Start at random Y for initial population
                 this.y = Math.random() * canvas.height;
             }
-
             reset() {
                 this.x = Math.random() * canvas.width;
                 this.y = canvas.height + 20;
@@ -855,85 +1400,73 @@
                 this.wobble = Math.random() * Math.PI * 2;
                 this.wobbleSpeed = 0.02 + Math.random() * 0.02;
                 this.alpha = 0.15 + Math.random() * 0.25;
-                // Soft Valentine colors
                 const colors = ['#e8a0a0', '#d4797a', '#c45c6a', '#f5d5d5', '#e8b4b4', '#d4a574'];
                 this.color = colors[Math.floor(Math.random() * colors.length)];
             }
-
             update() {
                 this.y -= this.speedY;
                 this.wobble += this.wobbleSpeed;
                 this.x += Math.sin(this.wobble) * 0.5 + this.speedX;
-
-                // Reset when off screen
-                if (this.y < -30) {
-                    this.reset();
-                }
+                if (this.y < -30) this.reset();
             }
-
             draw() {
                 drawHeart(this.x, this.y, this.size, this.color, this.alpha);
             }
         }
 
-        // Initialize hearts
-        for (let i = 0; i < 25; i++) {
-            hearts.push(new FloatingHeart());
-        }
+        for (let i = 0; i < 25; i++) heartsArray.push(new FloatingHeart());
 
         function animateHearts() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Occasionally add a new heart
-            if (Math.random() < 0.01 && hearts.length < 35) {
-                hearts.push(new FloatingHeart());
-            }
-
-            hearts.forEach(heart => {
-                heart.update();
-                heart.draw();
-            });
-
+            if (Math.random() < 0.01 && heartsArray.length < 35) heartsArray.push(new FloatingHeart());
+            heartsArray.forEach(heart => { heart.update(); heart.draw(); });
             requestAnimationFrame(animateHearts);
         }
 
-        // Check for reduced motion preference
-        if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-            animateHearts();
-        }
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) animateHearts();
 
-        // === LIGHTBOX ===
+        // ============================================
+        // LIGHTBOX
+        // ============================================
         function openLightbox(imageSrc, productName) {
             lightboxImg.src = imageSrc;
             lightboxImg.alt = productName;
             lightboxInfo.textContent = productName;
-            lightbox.classList.add("open");
-            document.body.style.overflow = "hidden";
+            lightbox.classList.add('open');
+            document.body.style.overflow = 'hidden';
             lightboxClose.focus();
         }
 
         function closeLightbox() {
-            lightbox.classList.remove("open");
-            document.body.style.overflow = "";
+            lightbox.classList.remove('open');
+            document.body.style.overflow = '';
         }
 
-        lightboxClose.addEventListener("click", closeLightbox);
-        lightbox.addEventListener("click", (e) => {
-            if (e.target === lightbox) closeLightbox();
-        });
-        document.addEventListener("keydown", (e) => {
-            if (e.key === "Escape") closeLightbox();
-        });
+        lightboxClose.addEventListener('click', closeLightbox);
+        lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
 
-        // === PRODUCT LOGIC ===
+        // ============================================
+        // PRODUCTS
+        // ============================================
+        const money = (n) => new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(n);
+
+        function escapeHtml(str) {
+            return String(str ?? '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
         function uniqueCategories(items) {
-            return [...new Set(items.map(p => (p.category || "").trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+            return [...new Set(items.map(p => (p.category || '').trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
         }
 
         function populateCategories(items) {
             const cats = uniqueCategories(items);
             for (const c of cats) {
-                const opt = document.createElement("option");
+                const opt = document.createElement('option');
                 opt.value = c;
                 opt.textContent = c;
                 cat.appendChild(opt);
@@ -942,113 +1475,247 @@
 
         function matches(p, queryText, category) {
             const qt = queryText.trim().toLowerCase();
-            if (category && (p.category || "") !== category) return false;
+            if (category && (p.category || '') !== category) return false;
             if (!qt) return true;
             const blob = `${p.name} ${p.id} ${p.description} ${p.category}`.toLowerCase();
             return blob.includes(qt);
         }
 
-        function render(items) {
-            grid.innerHTML = "";
-            count.textContent = `${items.length} item${items.length === 1 ? "" : "s"}`;
+        function getFilteredProducts() {
+            let items = PRODUCTS.filter(p => matches(p, q.value, cat.value));
+            if (currentView === 'saved' && currentUser) {
+                items = items.filter(p => savedItems.has(p.id));
+            }
+            return items;
+        }
 
+        function render(items) {
+            grid.innerHTML = '';
+            count.textContent = `${items.length} item${items.length === 1 ? '' : 's'}`;
+            
+            if (items.length === 0 && currentView === 'saved') {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <h3>Your wishlist is empty</h3>
+                        <p>Click the ♡ on items you love to save them here!</p>
+                    </div>
+                `;
+                return;
+            }
+            
             for (const p of items) {
                 const inStock = !!p.inStock && (p.quantity ?? 1) > 0;
-
-                const card = document.createElement("article");
-                card.className = "card";
+                const isSaved = savedItems.has(p.id);
+                const card = document.createElement('article');
+                card.className = 'card';
                 card.innerHTML = `
+                    <button class="save-btn ${isSaved ? 'saved' : ''}" data-id="${escapeHtml(p.id)}" aria-label="${isSaved ? 'Remove from' : 'Add to'} wishlist">
+                        ${isSaved ? '♥' : '♡'}
+                    </button>
                     <div class="img ${p.image ? 'has-image' : ''}" ${p.image ? `data-image="${escapeHtml(p.image)}" data-name="${escapeHtml(p.name)}"` : ''}>
                         ${p.image ? `<img src="${p.image}" alt="${escapeHtml(p.name)}" loading="lazy">` : `<div class="noimg">No image yet ✨</div>`}
                     </div>
                     <div class="content">
                         <div class="meta">
-                            <span class="category-tag">${escapeHtml(p.category || "Uncategorized")}</span>
+                            <span class="category-tag">${escapeHtml(p.category || 'Uncategorized')}</span>
                             <span class="price">${money(Number(p.price || 0))}</span>
                         </div>
-
-                        <h2 class="name">${escapeHtml(p.name || "Unnamed Product")}</h2>
-
+                        <h2 class="name">${escapeHtml(p.name || 'Unnamed Product')}</h2>
                         <div class="meta">
-                            <span><strong>SKU:</strong> ${escapeHtml(p.id || "—")}</span>
-                            <span><strong>Qty:</strong> ${(p.quantity ?? "—")}</span>
+                            <span><strong>SKU:</strong> ${escapeHtml(p.id || '—')}</span>
+                            <span><strong>Qty:</strong> ${(p.quantity ?? '—')}</span>
                         </div>
-
-                        <p class="desc">${escapeHtml(p.description || "")}</p>
-
+                        <p class="desc">${escapeHtml(p.description || '')}</p>
                         <div class="tags">
-                            <span class="stock ${inStock ? "good" : "bad"}">${inStock ? "✓ In stock" : "Call to confirm"}</span>
-                            <a class="btn" href="tel:${STORE_PHONE}" aria-label="Call to order ${escapeHtml(p.name)}">
-                                📞 Call
-                            </a>
+                            <span class="stock ${inStock ? 'good' : 'bad'}">${inStock ? '✓ In stock' : 'Call to confirm'}</span>
+                            <a class="btn" href="tel:${CONFIG.storePhone}" aria-label="Call to order ${escapeHtml(p.name)}">📞 Call</a>
                         </div>
-
-                        <div class="sku-hint">
-                            When you call, mention: <strong>${escapeHtml(p.id || "")}</strong>
-                        </div>
+                        <div class="sku-hint">When you call, mention: <strong>${escapeHtml(p.id || '')}</strong></div>
                     </div>
                 `;
                 
-                // Lightbox click handler
-                const imgDiv = card.querySelector(".img.has-image");
+                // Image lightbox
+                const imgDiv = card.querySelector('.img.has-image');
                 if (imgDiv) {
-                    imgDiv.addEventListener("click", () => {
+                    imgDiv.addEventListener('click', () => {
                         openLightbox(imgDiv.dataset.image, imgDiv.dataset.name);
                     });
                 }
+                
+                // Save button
+                const saveBtn = card.querySelector('.save-btn');
+                saveBtn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    
+                    if (!currentUser) {
+                        openAuthModal();
+                        return;
+                    }
+                    
+                    const productId = saveBtn.dataset.id;
+                    const wasSaved = savedItems.has(productId);
+                    
+                    // Optimistic update
+                    saveBtn.classList.toggle('saved');
+                    saveBtn.innerHTML = wasSaved ? '♡' : '♥';
+                    saveBtn.classList.add('pop');
+                    setTimeout(() => saveBtn.classList.remove('pop'), 300);
+                    
+                    const success = wasSaved 
+                        ? await unsaveItem(productId)
+                        : await saveItem(productId);
+                    
+                    if (!success) {
+                        // Revert on failure
+                        saveBtn.classList.toggle('saved');
+                        saveBtn.innerHTML = wasSaved ? '♥' : '♡';
+                    }
+                    
+                    // Re-render if in wishlist view and item was removed
+                    if (currentView === 'saved' && wasSaved && success) {
+                        render(getFilteredProducts());
+                    }
+                });
                 
                 grid.appendChild(card);
             }
         }
 
-        function escapeHtml(str) {
-            return String(str ?? "")
-                .replaceAll("&", "&amp;")
-                .replaceAll("<", "&lt;")
-                .replaceAll(">", "&gt;")
-                .replaceAll('"', "&quot;")
-                .replaceAll("'", "&#039;");
-        }
-
-        // Debounced search
         let searchTimeout;
         function applyFilters() {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
-                const items = PRODUCTS.filter(p => matches(p, q.value, cat.value));
-                render(items);
+                render(getFilteredProducts());
             }, 150);
         }
 
-        async function init() {
-            // Try API first (Cloudflare KV), fallback to static JSON
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+        
+        // Auth modal
+        loginBtn.addEventListener('click', () => openAuthModal(false));
+        authClose.addEventListener('click', closeAuthModal);
+        authModal.addEventListener('click', (e) => { if (e.target === authModal) closeAuthModal(); });
+        
+        authSwitchLink.addEventListener('click', () => {
+            isSignUp = !isSignUp;
+            updateAuthModal();
+            authError.classList.remove('visible');
+        });
+        
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = authEmail.value.trim();
+            const password = authPassword.value;
+            const firstName = authName.value.trim();
+            
+            authError.classList.remove('visible');
+            authEmail.classList.remove('error');
+            authPassword.classList.remove('error');
+            
+            if (!email) {
+                authEmail.classList.add('error');
+                showAuthError('Please enter your email');
+                return;
+            }
+            
+            if (!password || password.length < 6) {
+                authPassword.classList.add('error');
+                showAuthError('Password must be at least 6 characters');
+                return;
+            }
+            
+            authSubmit.disabled = true;
+            authSubmit.textContent = isSignUp ? 'Creating account...' : 'Signing in...';
+            
             try {
-                const res = await fetch("/api/products", { cache: "no-store" });
+                if (isSignUp) {
+                    currentUser = await register(email, password, firstName);
+                } else {
+                    currentUser = await login(email, password);
+                }
+                
+                await fetchSavedItems();
+                updateUI();
+                closeAuthModal();
+                render(getFilteredProducts());
+            } catch (err) {
+                showAuthError(err.message);
+            } finally {
+                authSubmit.disabled = false;
+                authSubmit.textContent = isSignUp ? 'Sign Up' : 'Sign In';
+            }
+        });
+        
+        logoutBtn.addEventListener('click', logout);
+        
+        // Wishlist button
+        wishlistBtn.addEventListener('click', () => {
+            currentView = currentView === 'saved' ? 'all' : 'saved';
+            updateViewButtons();
+            render(getFilteredProducts());
+        });
+        
+        // View controls
+        viewControls.addEventListener('click', (e) => {
+            if (e.target.classList.contains('view-btn')) {
+                currentView = e.target.dataset.view;
+                updateViewButtons();
+                render(getFilteredProducts());
+            }
+        });
+        
+        // Search and filter
+        q.addEventListener('input', applyFilters);
+        cat.addEventListener('change', applyFilters);
+        
+        // Global ESC handler
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (authModal.classList.contains('open')) {
+                    closeAuthModal();
+                } else if (lightbox.classList.contains('open')) {
+                    closeLightbox();
+                }
+            }
+        });
+
+        // ============================================
+        // INIT
+        // ============================================
+        async function init() {
+            // Check if user is logged in
+            currentUser = await checkAuth();
+            if (currentUser) {
+                await fetchSavedItems();
+            }
+            updateUI();
+            
+            // Load products
+            try {
+                const res = await fetch('/api/products', { cache: 'no-store' });
                 if (res.ok) {
                     PRODUCTS = await res.json();
                 } else {
-                    throw new Error("API not available");
+                    throw new Error('API not available');
                 }
             } catch {
-                const res = await fetch("products.json", { cache: "no-store" });
+                const res = await fetch('products.json', { cache: 'no-store' });
                 PRODUCTS = await res.json();
             }
-
+            
             populateCategories(PRODUCTS);
-            render(PRODUCTS);
-
-            q.addEventListener("input", applyFilters);
-            cat.addEventListener("change", applyFilters);
+            render(getFilteredProducts());
         }
 
         init().catch(err => {
             console.error(err);
-            /* Valentine theme changes: Updated error styling */
             grid.innerHTML = `<div style="color:#a04555; background: rgba(228,160,160,.15); padding:18px; border-radius:16px; border:1px solid rgba(196,92,106,.3); text-align:center;">
                 <strong>Could not load products.</strong><br>Check your connection or try again later. 💕
             </div>`;
         });
     </script>
 </body>
-
 </html>

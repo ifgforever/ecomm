@@ -836,7 +836,7 @@
             ctx.bezierCurveTo(x, y + size * 0.8, x + size * 0.5, y + size * 0.6, x + size * 0.5, y + size * 0.3);
             ctx.bezierCurveTo(x + size * 0.5, y, x, y, x, y + size * 0.3);
             ctx.fill();
-            ctx.reStore();
+            ctx.restore();
         }
 
         class FloatingHeart {
@@ -978,7 +978,7 @@
 
                         <div class="tags">
                             <span class="stock ${inStock ? "good" : "bad"}">${inStock ? "✓ In stock" : "Call to confirm"}</span>
-                            <a class="btn" href="tel:${Store_PHONE}" aria-label="Call to order ${escapeHtml(p.name)}">
+                            <a class="btn" href="tel:${STORE_PHONE}" aria-label="Call to order ${escapeHtml(p.name)}">
                                 📞 Call
                             </a>
                         </div>
@@ -1023,14 +1023,14 @@
         async function init() {
             // Try API first (Cloudflare KV), fallback to static JSON
             try {
-                const res = await fetch("/api/products", { cache: "no-Store" });
+                const res = await fetch("/api/products", { cache: "no-store" });
                 if (res.ok) {
                     PRODUCTS = await res.json();
                 } else {
                     throw new Error("API not available");
                 }
             } catch {
-                const res = await fetch("products.json", { cache: "no-Store" });
+                const res = await fetch("products.json", { cache: "no-store" });
                 PRODUCTS = await res.json();
             }
 

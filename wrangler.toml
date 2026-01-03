@@ -1,0 +1,16 @@
+# wrangler.toml - Cloudflare Worker Configuration
+# Place this in your project root
+
+name = "jojin-thrift-api"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "jojin-thrift-db"
+database_id = "dc86b675-00df-4097-a377-b1fc5854ce2b"
+
+# Optional: If you want to serve static files too
+# [site]
+# bucket = "./public"

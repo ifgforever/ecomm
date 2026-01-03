@@ -4,7 +4,6 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <!-- Valentine theme changes: Updated title and meta for Valentine's season -->
     <title>Jojin's Kitty Thrift Shop — Valentine's Season 💕</title>
     <meta name="description"
         content="Jojin's Kitty Thrift Shop — Spread the love with unique thrift finds!" />
@@ -14,70 +13,44 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Valentine theme changes: Added Cormorant Garamond for a romantic, boutique feel -->
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* Valentine theme changes: Complete color palette overhaul */
         :root {
-            /* Base tones - warm and romantic */
             --ink: #4a3728;
             --ink-light: #6b5344;
             --muted: #9a8578;
-
-            /* Valentine backgrounds - soft creams and blush */
             --cream: #fdf8f5;
             --cream-warm: #faf3ee;
             --blush-light: #fff5f5;
             --blush: #ffe8e8;
-            
-            /* Valentine accent colors */
             --rose: #e8a0a0;
             --rose-deep: #d4797a;
             --berry: #c45c6a;
             --berry-dark: #a04555;
-            
-            /* Soft gold accents */
             --gold: #d4a574;
             --gold-soft: #e8c9a8;
             --gold-dark: #b8956a;
-            
-            /* Pink spectrum */
             --pink-soft: #f5d5d5;
             --pink-medium: #e8b4b4;
             --pink-deep: #d48a8a;
-            
-            /* Heart red */
             --heart: #e57373;
             --heart-glow: #ff8a8a;
-
-            /* Card styling */
             --card: rgba(255, 253, 250, .95);
             --card-border: rgba(212, 121, 122, .2);
             --card-glow: rgba(228, 160, 160, .15);
-
-            /* Shadows - soft and plush */
             --shadow: 0 12px 40px rgba(164, 69, 85, .08);
             --shadow-rose: 0 0 30px rgba(228, 160, 160, .2);
             --shadow-soft: 0 4px 20px rgba(164, 69, 85, .06);
-
             --r: 20px;
             --r2: 14px;
-
-            /* Valentine theme changes: New romantic font stack */
             --font-display: 'Cormorant Garamond', Georgia, serif;
             --font-body: 'Nunito', system-ui, sans-serif;
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
+        html, body { height: 100%; }
 
-        html, body {
-            height: 100%;
-        }
-
-        /* Valentine theme changes: Warm cream gradient background */
         body {
             margin: 0;
             font-family: var(--font-body);
@@ -88,7 +61,6 @@
             min-height: 100vh;
         }
 
-        /* Valentine theme changes: Replaced starfield with soft bokeh/sparkles */
         .stars {
             position: fixed;
             inset: 0;
@@ -114,7 +86,6 @@
             50% { opacity: 0.8; }
         }
 
-        /* Valentine theme changes: Renamed from #fireworks to #hearts for floating hearts */
         #hearts {
             position: fixed;
             inset: 0;
@@ -122,7 +93,6 @@
             z-index: 1;
         }
 
-        /* Valentine theme changes: Romantic banner styling */
         .valentine-banner {
             background: linear-gradient(90deg, var(--blush) 0%, var(--pink-soft) 50%, var(--blush) 100%);
             text-align: center;
@@ -163,7 +133,6 @@
             z-index: 2;
         }
 
-        /* Valentine theme changes: Soft cream header with rose border */
         header {
             position: sticky;
             top: 0;
@@ -189,7 +158,6 @@
             align-items: center;
         }
 
-        /* Valentine theme changes: Rose-tinted logo with heart gradient */
         .logo {
             width: 60px;
             height: 60px;
@@ -232,9 +200,7 @@
             max-width: 600px;
         }
 
-        .sub strong {
-            color: var(--berry);
-        }
+        .sub strong { color: var(--berry); }
 
         .bar {
             display: flex;
@@ -244,7 +210,6 @@
             margin-top: 16px;
         }
 
-        /* Valentine theme changes: Soft, romantic input styling */
         input, select {
             font-family: inherit;
             background: var(--cream);
@@ -257,25 +222,15 @@
             transition: all .2s ease;
         }
 
-        input {
-            flex: 1 1 260px;
-        }
-
-        select {
-            flex: 0 0 200px;
-            cursor: pointer;
-        }
-
-        input::placeholder {
-            color: var(--muted);
-        }
+        input { flex: 1 1 260px; }
+        select { flex: 0 0 200px; cursor: pointer; }
+        input::placeholder { color: var(--muted); }
 
         input:focus, select:focus {
             border-color: var(--rose);
             box-shadow: 0 0 0 3px rgba(228, 160, 160, .2), inset 0 2px 4px rgba(164, 69, 85, .04);
         }
 
-        /* Valentine theme changes: Gift ribbon styled pill */
         .pill {
             display: inline-flex;
             gap: 10px;
@@ -289,7 +244,6 @@
             position: relative;
         }
 
-        /* Valentine theme changes: Tiny ribbon bow effect */
         .pill::before {
             content: "🎀";
             position: absolute;
@@ -299,12 +253,8 @@
             font-size: 14px;
         }
 
-        .pill strong {
-            color: var(--berry);
-            font-weight: 700;
-        }
+        .pill strong { color: var(--berry); font-weight: 700; }
 
-        /* Valentine theme changes: Gift-wrapped button styling */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -336,11 +286,8 @@
             font-weight: 600;
         }
 
-        main {
-            padding: 24px 0 60px;
-        }
+        main { padding: 24px 0 60px; }
 
-        /* Valentine theme changes: Love-themed celebration badge */
         .celebration-badge {
             display: inline-flex;
             align-items: center;
@@ -357,9 +304,7 @@
             color: var(--berry-dark);
         }
 
-        .celebration-badge span {
-            color: var(--heart);
-        }
+        .celebration-badge span { color: var(--heart); }
 
         .grid {
             display: grid;
@@ -368,7 +313,6 @@
             margin-top: 18px;
         }
 
-        /* Valentine theme changes: Soft, plush card styling */
         .card {
             background: var(--card);
             border: 1px solid var(--card-border);
@@ -385,7 +329,6 @@
             border-color: var(--rose);
         }
 
-        /* Valentine theme changes: Subtle heart corner decoration */
         .card::before {
             content: "♡";
             position: absolute;
@@ -404,7 +347,6 @@
             transform: scale(1.1);
         }
 
-        /* Valentine theme changes: Warm, romantic image container */
         .img {
             height: 180px;
             background: 
@@ -427,9 +369,7 @@
             transition: transform .3s ease;
         }
 
-        .card:hover .img img {
-            transform: scale(1.05);
-        }
+        .card:hover .img img { transform: scale(1.05); }
 
         .noimg {
             color: var(--muted);
@@ -440,9 +380,7 @@
             border-radius: var(--r2);
         }
 
-        .img.has-image {
-            cursor: pointer;
-        }
+        .img.has-image { cursor: pointer; }
 
         .img.has-image::after {
             content: "🔍 Enlarge";
@@ -461,13 +399,9 @@
             transition: opacity .2s ease;
         }
 
-        .img.has-image:hover::after {
-            opacity: 1;
-        }
+        .img.has-image:hover::after { opacity: 1; }
 
-        .content {
-            padding: 16px;
-        }
+        .content { padding: 16px; }
 
         .meta {
             display: flex;
@@ -478,7 +412,6 @@
             font-size: 13px;
         }
 
-        /* Valentine theme changes: Soft category tag */
         .category-tag {
             background: var(--blush);
             padding: 5px 12px;
@@ -491,7 +424,6 @@
             color: var(--berry);
         }
 
-        /* Valentine theme changes: Heart-highlighted price */
         .price {
             font-weight: 800;
             font-size: 17px;
@@ -528,7 +460,6 @@
             margin-top: 14px;
         }
 
-        /* Valentine theme changes: Soft stock indicators */
         .stock {
             font-size: 12px;
             padding: 6px 14px;
@@ -556,11 +487,8 @@
             font-size: 12px;
         }
 
-        .sku-hint strong {
-            color: var(--berry);
-        }
+        .sku-hint strong { color: var(--berry); }
 
-        /* Valentine theme changes: Warm, loving footer */
         footer {
             padding: 28px 0;
             border-top: 1px solid var(--card-border);
@@ -584,11 +512,8 @@
             line-height: 1.7;
         }
 
-        .small strong {
-            color: var(--berry);
-        }
+        .small strong { color: var(--berry); }
 
-        /* Valentine theme changes: Heart-themed footer badge */
         .footer-badge {
             display: flex;
             align-items: center;
@@ -602,7 +527,6 @@
             color: var(--berry-dark);
         }
 
-        /* Valentine theme changes: Romantic lightbox styling */
         .lightbox {
             position: fixed;
             inset: 0;
@@ -631,9 +555,7 @@
             transition: transform .3s ease;
         }
 
-        .lightbox.open .lightbox-content {
-            transform: scale(1);
-        }
+        .lightbox.open .lightbox-content { transform: scale(1); }
 
         .lightbox-content img {
             max-width: 100%;
@@ -664,9 +586,7 @@
             transition: transform .15s ease;
         }
 
-        .lightbox-close:hover {
-            transform: scale(1.1);
-        }
+        .lightbox-close:hover { transform: scale(1.1); }
 
         .lightbox-info {
             position: absolute;
@@ -681,7 +601,6 @@
             text-shadow: 0 2px 10px rgba(0, 0, 0, .3);
         }
 
-        /* Responsive */
         @media (max-width: 600px) {
             h1 { font-size: 24px; }
             select { flex: 1 1 180px; }
@@ -692,7 +611,6 @@
             .valentine-banner::before, .valentine-banner::after { display: none; }
         }
 
-        /* Reduced motion */
         @media (prefers-reduced-motion: reduce) {
             .stars { animation: none; opacity: 0.5; }
             .valentine-banner::before, .valentine-banner::after { animation: none; }
@@ -701,25 +619,23 @@
             .card:hover { transform: none; }
         }
 
-        /* Accessibility: visible focus */
         a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
             outline: 2px solid var(--berry);
             outline-offset: 2px;
         }
+
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
     </style>
 </head>
 
 <body>
     <div class="stars" aria-hidden="true"></div>
-    <!-- Valentine theme changes: Renamed canvas for floating hearts animation -->
     <canvas id="hearts" aria-hidden="true"></canvas>
 
-    <!-- Valentine theme changes: Updated banner content -->
     <div class="valentine-banner">
         💖 Spread the Love — Valentine's Season at Jojin's! 💖
     </div>
 
-    <!-- Lightbox Modal -->
     <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged product image">
         <div class="lightbox-content">
             <button class="lightbox-close" id="lightbox-close" aria-label="Close enlarged image">✕</button>
@@ -735,8 +651,7 @@
                     <div class="brand">
                         <div class="logo" aria-hidden="true">🐾</div>
                         <div>
-                            <h1>Jojin's Kitty Thrift </h1>
-                            <!-- Valentine theme changes: Updated tagline -->
+                            <h1>Jojin's Kitty Thrift Shop</h1>
                             <p class="sub">Find something <strong>special</strong> for someone you love! Call to confirm availability and reserve items. <span aria-hidden="true">💕✨</span></p>
                         </div>
                     </div>
@@ -764,7 +679,6 @@
 
     <main>
         <div class="wrap">
-            <!-- Valentine theme changes: Updated badge content -->
             <div class="celebration-badge">
                 <span>♡</span> With Love — Valentine's Season <span>♡</span>
             </div>
@@ -776,21 +690,16 @@
         <div class="wrap">
             <div class="footer-content">
                 <div class="small">
-                    <div><strong> hours:</strong> Mon–Sat 11am–4pm • Leave a message or text outside hours</div>
+                    <div><strong>Shop hours:</strong> Mon–Sat 11am–4pm • Leave a message or text outside hours</div>
                     <div><strong>Location:</strong> 4100 N. Pulaski Rd., Chicago, IL</div>
-                    <!-- Valentine theme changes: Updated footer message -->
                     <div>Inventory changes quickly — call to reserve. Spread the love! 💕</div>
                 </div>
-                <!-- Valentine theme changes: Updated footer badge -->
                 <div class="footer-badge">
                     <span>♡</span> Made with Love <span>♡</span>
                 </div>
             </div>
         </div>
     </footer>
-
-    <!-- Screen reader only class -->
-    <style>.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }</style>
 
     <script>
         const STORE_PHONE = "+13126100321";
@@ -799,20 +708,15 @@
         const cat = document.getElementById("cat");
         const count = document.getElementById("count");
         const callTop = document.getElementById("callTop");
-
-        // Lightbox elements
         const lightbox = document.getElementById("lightbox");
         const lightboxImg = document.getElementById("lightbox-img");
         const lightboxInfo = document.getElementById("lightbox-info");
         const lightboxClose = document.getElementById("lightbox-close");
 
         callTop.href = `tel:${STORE_PHONE}`;
-
         let PRODUCTS = [];
-
         const money = (n) => new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(n);
 
-        /* Valentine theme changes: Replaced fireworks with floating hearts animation */
         const canvas = document.getElementById("hearts");
         const ctx = canvas.getContext("2d");
         let hearts = [];
@@ -824,7 +728,6 @@
         resizeCanvas();
         window.addEventListener("resize", resizeCanvas);
 
-        // Heart shape drawing function
         function drawHeart(x, y, size, color, alpha) {
             ctx.save();
             ctx.globalAlpha = alpha;
@@ -842,10 +745,8 @@
         class FloatingHeart {
             constructor() {
                 this.reset();
-                // Start at random Y for initial population
                 this.y = Math.random() * canvas.height;
             }
-
             reset() {
                 this.x = Math.random() * canvas.width;
                 this.y = canvas.height + 20;
@@ -855,54 +756,31 @@
                 this.wobble = Math.random() * Math.PI * 2;
                 this.wobbleSpeed = 0.02 + Math.random() * 0.02;
                 this.alpha = 0.15 + Math.random() * 0.25;
-                // Soft Valentine colors
                 const colors = ['#e8a0a0', '#d4797a', '#c45c6a', '#f5d5d5', '#e8b4b4', '#d4a574'];
                 this.color = colors[Math.floor(Math.random() * colors.length)];
             }
-
             update() {
                 this.y -= this.speedY;
                 this.wobble += this.wobbleSpeed;
                 this.x += Math.sin(this.wobble) * 0.5 + this.speedX;
-
-                // Reset when off screen
-                if (this.y < -30) {
-                    this.reset();
-                }
+                if (this.y < -30) this.reset();
             }
-
             draw() {
                 drawHeart(this.x, this.y, this.size, this.color, this.alpha);
             }
         }
 
-        // Initialize hearts
-        for (let i = 0; i < 25; i++) {
-            hearts.push(new FloatingHeart());
-        }
+        for (let i = 0; i < 25; i++) hearts.push(new FloatingHeart());
 
         function animateHearts() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Occasionally add a new heart
-            if (Math.random() < 0.01 && hearts.length < 35) {
-                hearts.push(new FloatingHeart());
-            }
-
-            hearts.forEach(heart => {
-                heart.update();
-                heart.draw();
-            });
-
+            if (Math.random() < 0.01 && hearts.length < 35) hearts.push(new FloatingHeart());
+            hearts.forEach(heart => { heart.update(); heart.draw(); });
             requestAnimationFrame(animateHearts);
         }
 
-        // Check for reduced motion preference
-        if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-            animateHearts();
-        }
+        if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) animateHearts();
 
-        // === LIGHTBOX ===
         function openLightbox(imageSrc, productName) {
             lightboxImg.src = imageSrc;
             lightboxImg.alt = productName;
@@ -918,14 +796,9 @@
         }
 
         lightboxClose.addEventListener("click", closeLightbox);
-        lightbox.addEventListener("click", (e) => {
-            if (e.target === lightbox) closeLightbox();
-        });
-        document.addEventListener("keydown", (e) => {
-            if (e.key === "Escape") closeLightbox();
-        });
+        lightbox.addEventListener("click", (e) => { if (e.target === lightbox) closeLightbox(); });
+        document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeLightbox(); });
 
-        // === PRODUCT LOGIC ===
         function uniqueCategories(items) {
             return [...new Set(items.map(p => (p.category || "").trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
         }
@@ -951,10 +824,8 @@
         function render(items) {
             grid.innerHTML = "";
             count.textContent = `${items.length} item${items.length === 1 ? "" : "s"}`;
-
             for (const p of items) {
                 const inStock = !!p.inStock && (p.quantity ?? 1) > 0;
-
                 const card = document.createElement("article");
                 card.className = "card";
                 card.innerHTML = `
@@ -966,37 +837,25 @@
                             <span class="category-tag">${escapeHtml(p.category || "Uncategorized")}</span>
                             <span class="price">${money(Number(p.price || 0))}</span>
                         </div>
-
                         <h2 class="name">${escapeHtml(p.name || "Unnamed Product")}</h2>
-
                         <div class="meta">
                             <span><strong>SKU:</strong> ${escapeHtml(p.id || "—")}</span>
                             <span><strong>Qty:</strong> ${(p.quantity ?? "—")}</span>
                         </div>
-
                         <p class="desc">${escapeHtml(p.description || "")}</p>
-
                         <div class="tags">
                             <span class="stock ${inStock ? "good" : "bad"}">${inStock ? "✓ In stock" : "Call to confirm"}</span>
-                            <a class="btn" href="tel:${STORE_PHONE}" aria-label="Call to order ${escapeHtml(p.name)}">
-                                📞 Call
-                            </a>
+                            <a class="btn" href="tel:${STORE_PHONE}" aria-label="Call to order ${escapeHtml(p.name)}">📞 Call</a>
                         </div>
-
-                        <div class="sku-hint">
-                            When you call, mention: <strong>${escapeHtml(p.id || "")}</strong>
-                        </div>
+                        <div class="sku-hint">When you call, mention: <strong>${escapeHtml(p.id || "")}</strong></div>
                     </div>
                 `;
-                
-                // Lightbox click handler
                 const imgDiv = card.querySelector(".img.has-image");
                 if (imgDiv) {
                     imgDiv.addEventListener("click", () => {
                         openLightbox(imgDiv.dataset.image, imgDiv.dataset.name);
                     });
                 }
-                
                 grid.appendChild(card);
             }
         }
@@ -1010,7 +869,6 @@
                 .replaceAll("'", "&#039;");
         }
 
-        // Debounced search
         let searchTimeout;
         function applyFilters() {
             clearTimeout(searchTimeout);
@@ -1021,7 +879,6 @@
         }
 
         async function init() {
-            // Try API first (Cloudflare KV), fallback to static JSON
             try {
                 const res = await fetch("/api/products", { cache: "no-store" });
                 if (res.ok) {
@@ -1033,22 +890,18 @@
                 const res = await fetch("products.json", { cache: "no-store" });
                 PRODUCTS = await res.json();
             }
-
             populateCategories(PRODUCTS);
             render(PRODUCTS);
-
             q.addEventListener("input", applyFilters);
             cat.addEventListener("change", applyFilters);
         }
 
         init().catch(err => {
             console.error(err);
-            /* Valentine theme changes: Updated error styling */
             grid.innerHTML = `<div style="color:#a04555; background: rgba(228,160,160,.15); padding:18px; border-radius:16px; border:1px solid rgba(196,92,106,.3); text-align:center;">
                 <strong>Could not load products.</strong><br>Check your connection or try again later. 💕
             </div>`;
         });
     </script>
 </body>
-
 </html>

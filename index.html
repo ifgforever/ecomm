@@ -202,6 +202,81 @@
 
         .sub strong { color: var(--berry); }
 
+        /* User controls in header */
+        .user-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: var(--r2);
+            border: 1px solid var(--rose);
+            background: linear-gradient(135deg, var(--cream), var(--blush-light));
+            color: var(--berry-dark);
+            text-decoration: none;
+            font-weight: 700;
+            font-family: inherit;
+            font-size: 14px;
+            box-shadow: var(--shadow-soft);
+            transition: all .2s ease;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            border-color: var(--berry);
+            background: linear-gradient(135deg, var(--blush-light), var(--pink-soft));
+            box-shadow: 0 8px 25px rgba(196, 92, 106, .15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--rose), var(--berry));
+            color: var(--cream);
+            border-color: var(--berry);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--rose-deep), var(--berry-dark));
+        }
+
+        .btn-small {
+            padding: 8px 12px;
+            font-size: 13px;
+        }
+
+        .user-greeting {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 14px;
+            background: linear-gradient(135deg, var(--blush), var(--pink-soft));
+            border-radius: 999px;
+            border: 1px solid var(--rose);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--berry-dark);
+        }
+
+        .user-greeting .avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--rose), var(--berry));
+            color: var(--cream);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
         .bar {
             display: flex;
             gap: 12px;
@@ -255,35 +330,38 @@
 
         .pill strong { color: var(--berry); font-weight: 700; }
 
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 10px 16px;
-            border-radius: var(--r2);
-            border: 1px solid var(--rose);
-            background: linear-gradient(135deg, var(--cream), var(--blush-light));
-            color: var(--berry-dark);
-            text-decoration: none;
-            font-weight: 700;
-            box-shadow: var(--shadow-soft);
-            transition: all .2s ease;
-            cursor: pointer;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            border-color: var(--berry);
-            background: linear-gradient(135deg, var(--blush-light), var(--pink-soft));
-            box-shadow: 0 8px 25px rgba(196, 92, 106, .15);
-        }
-
         .count {
             margin-left: auto;
             color: var(--muted);
             font-size: 13px;
             font-weight: 600;
+        }
+
+        /* Wishlist toggle button */
+        .wishlist-toggle {
+            position: relative;
+        }
+
+        .wishlist-toggle .badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: var(--heart);
+            color: white;
+            font-size: 10px;
+            font-weight: 800;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--cream);
+        }
+
+        .wishlist-toggle .badge:empty,
+        .wishlist-toggle .badge[data-count="0"] {
+            display: none;
         }
 
         main { padding: 24px 0 60px; }
@@ -305,6 +383,38 @@
         }
 
         .celebration-badge span { color: var(--heart); }
+
+        /* Wishlist filter bar */
+        .view-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .view-btn {
+            padding: 10px 18px;
+            border-radius: 999px;
+            border: 1px solid var(--pink-soft);
+            background: var(--cream);
+            color: var(--muted);
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all .2s ease;
+            font-family: inherit;
+        }
+
+        .view-btn:hover {
+            border-color: var(--rose);
+            color: var(--berry);
+        }
+
+        .view-btn.active {
+            background: linear-gradient(135deg, var(--rose), var(--berry));
+            color: var(--cream);
+            border-color: var(--berry);
+        }
 
         .grid {
             display: grid;
@@ -329,22 +439,52 @@
             border-color: var(--rose);
         }
 
-        .card::before {
-            content: "♡";
+        /* Save/Wishlist Heart Button */
+        .save-btn {
             position: absolute;
             top: 10px;
-            right: 14px;
+            right: 12px;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: rgba(255, 253, 250, .9);
+            border: 1px solid var(--pink-soft);
             color: var(--rose);
-            font-size: 16px;
-            opacity: 0.5;
+            font-size: 18px;
+            cursor: pointer;
             z-index: 5;
             transition: all .2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
         }
 
-        .card:hover::before {
-            opacity: 0.8;
-            color: var(--heart);
+        .save-btn:hover {
             transform: scale(1.1);
+            border-color: var(--heart);
+            color: var(--heart);
+            box-shadow: 0 4px 15px rgba(229, 115, 115, .3);
+        }
+
+        .save-btn.saved {
+            background: var(--heart);
+            border-color: var(--heart);
+            color: white;
+        }
+
+        .save-btn.saved:hover {
+            background: var(--heart-glow);
+        }
+
+        @keyframes heart-pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        .save-btn.pop {
+            animation: heart-pop .3s ease;
         }
 
         .img {
@@ -527,6 +667,7 @@
             color: var(--berry-dark);
         }
 
+        /* Lightbox */
         .lightbox {
             position: fixed;
             inset: 0;
@@ -602,9 +743,9 @@
         }
 
         /* ============================================
-           EMAIL SUBSCRIBE POPUP STYLES
+           AUTH MODAL STYLES
            ============================================ */
-        .subscribe-overlay {
+        .modal-overlay {
             position: fixed;
             inset: 0;
             z-index: 200;
@@ -619,15 +760,15 @@
             transition: opacity .3s ease, visibility .3s ease;
         }
 
-        .subscribe-overlay.open {
+        .modal-overlay.open {
             opacity: 1;
             visibility: visible;
         }
 
-        .subscribe-modal {
+        .modal {
             position: relative;
             width: 100%;
-            max-width: 420px;
+            max-width: 400px;
             background: var(--card);
             border: 2px solid var(--rose);
             border-radius: var(--r);
@@ -639,11 +780,11 @@
             overflow: hidden;
         }
 
-        .subscribe-overlay.open .subscribe-modal {
+        .modal-overlay.open .modal {
             transform: scale(1) translateY(0);
         }
 
-        .subscribe-header {
+        .modal-header {
             background: linear-gradient(135deg, var(--pink-soft), var(--blush));
             padding: 24px 24px 20px;
             text-align: center;
@@ -651,65 +792,50 @@
             position: relative;
         }
 
-        .subscribe-header::before {
-            content: "💌";
-            font-size: 40px;
+        .modal-header::before {
+            content: "🐾";
+            font-size: 36px;
             display: block;
-            margin-bottom: 12px;
-            animation: gentle-bounce 2s ease-in-out infinite;
+            margin-bottom: 10px;
         }
 
-        @keyframes gentle-bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-
-        .subscribe-close {
+        .modal-close {
             position: absolute;
             top: 12px;
             right: 12px;
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             background: var(--cream);
             border: 1px solid var(--rose);
             color: var(--berry);
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 700;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all .2s ease;
-            line-height: 1;
         }
 
-        .subscribe-close:hover {
+        .modal-close:hover {
             background: var(--berry);
             color: var(--cream);
-            transform: scale(1.1);
         }
 
-        .subscribe-title {
+        .modal-title {
             font-family: var(--font-display);
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 700;
             color: var(--berry-dark);
-            margin: 0 0 8px;
-        }
-
-        .subscribe-subtitle {
-            color: var(--muted);
-            font-size: 14px;
             margin: 0;
-            line-height: 1.5;
         }
 
-        .subscribe-body {
+        .modal-body {
             padding: 24px;
         }
 
-        .subscribe-form {
+        .auth-form {
             display: flex;
             flex-direction: column;
             gap: 14px;
@@ -727,178 +853,82 @@
             color: var(--ink-light);
         }
 
-        .form-group label .optional {
-            font-weight: 400;
-            color: var(--muted);
-        }
-
-        .subscribe-form input[type="text"],
-        .subscribe-form input[type="email"] {
+        .auth-form input {
             flex: none;
             width: 100%;
-            padding: 14px 16px;
-            font-size: 15px;
-            border: 1.5px solid var(--pink-soft);
-            border-radius: var(--r2);
-            background: var(--cream);
-            transition: all .2s ease;
+            padding: 12px 14px;
+            font-size: 14px;
         }
 
-        .subscribe-form input:focus {
-            border-color: var(--rose);
-            box-shadow: 0 0 0 3px rgba(228, 160, 160, .25);
-            outline: none;
-        }
-
-        .subscribe-form input.error {
+        .auth-form input.error {
             border-color: var(--heart);
-            background: rgba(229, 115, 115, .05);
         }
 
-        .error-message {
+        .form-error {
             color: var(--heart);
             font-size: 12px;
             font-weight: 600;
             display: none;
-            align-items: center;
-            gap: 5px;
         }
 
-        .error-message.visible {
-            display: flex;
-        }
-
-        .subscribe-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 6px;
-        }
-
-        .btn-subscribe {
-            width: 100%;
-            padding: 14px 20px;
-            font-size: 15px;
-            font-weight: 800;
-            font-family: inherit;
-            border: none;
-            border-radius: var(--r2);
-            background: linear-gradient(135deg, var(--rose), var(--berry));
-            color: var(--cream);
-            cursor: pointer;
-            transition: all .2s ease;
-            box-shadow: 0 4px 15px rgba(196, 92, 106, .3);
-        }
-
-        .btn-subscribe:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(196, 92, 106, .4);
-            background: linear-gradient(135deg, var(--rose-deep), var(--berry-dark));
-        }
-
-        .btn-subscribe:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-
-        .btn-subscribe .spinner {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255,255,255,.3);
-            border-top-color: #fff;
-            border-radius: 50%;
-            animation: spin .8s linear infinite;
-            margin-right: 8px;
-            vertical-align: middle;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .btn-dismiss {
-            width: 100%;
-            padding: 12px 20px;
-            font-size: 14px;
-            font-weight: 600;
-            font-family: inherit;
-            border: 1px solid var(--pink-soft);
-            border-radius: var(--r2);
-            background: transparent;
-            color: var(--muted);
-            cursor: pointer;
-            transition: all .2s ease;
-        }
-
-        .btn-dismiss:hover {
-            border-color: var(--rose);
-            color: var(--berry);
-            background: var(--blush-light);
-        }
-
-        /* Success State */
-        .subscribe-success {
-            display: none;
-            text-align: center;
-            padding: 30px 24px;
-        }
-
-        .subscribe-success.visible {
+        .form-error.visible {
             display: block;
         }
 
-        .subscribe-success::before {
-            content: "🎉";
-            font-size: 50px;
+        .auth-actions {
+            margin-top: 8px;
+        }
+
+        .auth-actions .btn {
+            width: 100%;
+            padding: 14px;
+        }
+
+        .auth-switch {
+            text-align: center;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--pink-soft);
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .auth-switch a {
+            color: var(--berry);
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .auth-switch a:hover {
+            text-decoration: underline;
+        }
+
+        /* Empty wishlist state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--muted);
+        }
+
+        .empty-state::before {
+            content: "💕";
+            font-size: 48px;
             display: block;
             margin-bottom: 16px;
-            animation: celebrate .6s ease;
+            opacity: 0.5;
         }
 
-        @keyframes celebrate {
-            0% { transform: scale(0); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
-        }
-
-        .subscribe-success h3 {
+        .empty-state h3 {
             font-family: var(--font-display);
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--berry-dark);
-            margin: 0 0 10px;
+            font-size: 22px;
+            color: var(--ink-light);
+            margin: 0 0 8px;
         }
 
-        .subscribe-success p {
-            color: var(--muted);
+        .empty-state p {
+            margin: 0;
             font-size: 14px;
-            margin: 0 0 20px;
-            line-height: 1.5;
-        }
-
-        .btn-success-close {
-            padding: 12px 28px;
-            font-size: 14px;
-            font-weight: 700;
-            font-family: inherit;
-            border: 1px solid var(--rose);
-            border-radius: var(--r2);
-            background: linear-gradient(135deg, var(--cream), var(--blush-light));
-            color: var(--berry-dark);
-            cursor: pointer;
-            transition: all .2s ease;
-        }
-
-        .btn-success-close:hover {
-            background: linear-gradient(135deg, var(--blush-light), var(--pink-soft));
-            transform: translateY(-2px);
-        }
-
-        /* Hide form when success is shown */
-        .subscribe-modal.success .subscribe-header,
-        .subscribe-modal.success .subscribe-body {
-            display: none;
         }
 
         @media (max-width: 600px) {
@@ -909,18 +939,9 @@
             .count { margin-left: 0; width: 100%; text-align: center; }
             .grid { grid-template-columns: 1fr; }
             .valentine-banner::before, .valentine-banner::after { display: none; }
-            
-            /* Subscribe modal mobile */
-            .subscribe-modal {
-                max-width: 100%;
-                margin: 10px;
-                max-height: 90vh;
-                overflow-y: auto;
-            }
-            .subscribe-header { padding: 20px 20px 16px; }
-            .subscribe-header::before { font-size: 32px; }
-            .subscribe-title { font-size: 24px; }
-            .subscribe-body { padding: 20px; }
+            .user-controls { width: 100%; justify-content: flex-end; }
+            .topRow { flex-direction: column; }
+            .modal { max-width: 100%; margin: 10px; }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -929,8 +950,8 @@
             #hearts { display: none; }
             .card { transition: none; }
             .card:hover { transform: none; }
-            .subscribe-header::before { animation: none; }
-            .subscribe-overlay, .subscribe-modal { transition: none; }
+            .modal-overlay, .modal { transition: none; }
+            .save-btn.pop { animation: none; }
         }
 
         a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
@@ -950,6 +971,7 @@
         💖 Spread the Love — Valentine's Season at Jojin's! 💖
     </div>
 
+    <!-- Image Lightbox -->
     <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged product image">
         <div class="lightbox-content">
             <button class="lightbox-close" id="lightbox-close" aria-label="Close enlarged image">✕</button>
@@ -958,45 +980,36 @@
         </div>
     </div>
 
-    <!-- ============================================
-         EMAIL SUBSCRIBE POPUP
-         ============================================ -->
-    <div class="subscribe-overlay" id="subscribe-overlay" role="dialog" aria-modal="true" aria-labelledby="subscribe-title">
-        <div class="subscribe-modal" id="subscribe-modal">
-            <div class="subscribe-header">
-                <button class="subscribe-close" id="subscribe-close" aria-label="Close subscription popup">✕</button>
-                <h2 class="subscribe-title" id="subscribe-title">Get store updates</h2>
-                <p class="subscribe-subtitle">New arrivals, sales, and events. No spam.</p>
+    <!-- Auth Modal -->
+    <div class="modal-overlay" id="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+        <div class="modal">
+            <div class="modal-header">
+                <button class="modal-close" id="auth-close" aria-label="Close">✕</button>
+                <h2 class="modal-title" id="auth-title">Sign In</h2>
             </div>
-            <div class="subscribe-body">
-                <form class="subscribe-form" id="subscribe-form" novalidate>
-                    <div class="form-group">
-                        <label for="subscribe-name">First name <span class="optional">(optional)</span></label>
-                        <input type="text" id="subscribe-name" name="name" placeholder="Your first name" autocomplete="given-name" />
+            <div class="modal-body">
+                <form class="auth-form" id="auth-form" novalidate>
+                    <div class="form-group" id="name-group" style="display: none;">
+                        <label for="auth-name">First Name</label>
+                        <input type="text" id="auth-name" name="firstName" placeholder="Your name" autocomplete="given-name" />
                     </div>
                     <div class="form-group">
-                        <label for="subscribe-email">Email <span style="color: var(--heart);">*</span></label>
-                        <input type="email" id="subscribe-email" name="email" placeholder="you@example.com" required autocomplete="email" aria-describedby="email-error" />
-                        <span class="error-message" id="email-error" role="alert">
-                            <span aria-hidden="true">⚠</span> Please enter a valid email address
-                        </span>
+                        <label for="auth-email">Email</label>
+                        <input type="email" id="auth-email" name="email" placeholder="you@example.com" required autocomplete="email" />
                     </div>
-                    <div class="subscribe-actions">
-                        <button type="submit" class="btn-subscribe" id="btn-subscribe">
-                            Subscribe 💕
-                        </button>
-                        <button type="button" class="btn-dismiss" id="btn-dismiss">
-                            No thanks
-                        </button>
+                    <div class="form-group">
+                        <label for="auth-password">Password</label>
+                        <input type="password" id="auth-password" name="password" placeholder="••••••••" required autocomplete="current-password" minlength="6" />
+                    </div>
+                    <div class="form-error" id="auth-error" role="alert"></div>
+                    <div class="auth-actions">
+                        <button type="submit" class="btn btn-primary" id="auth-submit">Sign In</button>
                     </div>
                 </form>
-            </div>
-            <div class="subscribe-success" id="subscribe-success">
-                <h3>You're on the list!</h3>
-                <p>Thanks for subscribing. We'll keep you posted on new arrivals and special events.</p>
-                <button type="button" class="btn-success-close" id="btn-success-close">
-                    Continue shopping
-                </button>
+                <div class="auth-switch">
+                    <span id="auth-switch-text">Don't have an account?</span>
+                    <a id="auth-switch-link">Create one</a>
+                </div>
             </div>
         </div>
     </div>
@@ -1011,6 +1024,24 @@
                             <h1>Jojin's Kitty Thrift Shop</h1>
                             <p class="sub">Find something <strong>special</strong> for someone you love! Call to confirm availability and reserve items. <span aria-hidden="true">💕✨</span></p>
                         </div>
+                    </div>
+                </div>
+                <div class="user-controls" id="user-controls">
+                    <!-- Logged out state -->
+                    <div id="logged-out-controls">
+                        <button class="btn btn-small" id="login-btn">Sign In</button>
+                    </div>
+                    <!-- Logged in state (hidden by default) -->
+                    <div id="logged-in-controls" style="display: none;">
+                        <button class="btn btn-small wishlist-toggle" id="wishlist-btn">
+                            ♡ My Wishlist
+                            <span class="badge" id="wishlist-badge"></span>
+                        </button>
+                        <div class="user-greeting">
+                            <span class="avatar" id="user-avatar">J</span>
+                            <span id="user-name">User</span>
+                        </div>
+                        <button class="btn btn-small" id="logout-btn">Sign Out</button>
                     </div>
                 </div>
             </div>
@@ -1039,6 +1070,13 @@
             <div class="celebration-badge">
                 <span>♡</span> With Love — Valentine's Season <span>♡</span>
             </div>
+            
+            <!-- View controls (wishlist filter) -->
+            <div class="view-controls" id="view-controls" style="display: none;">
+                <button class="view-btn active" data-view="all">All Items</button>
+                <button class="view-btn" data-view="saved">♡ My Wishlist</button>
+            </div>
+            
             <div class="grid" id="grid"></div>
         </div>
     </main>
@@ -1059,31 +1097,283 @@
     </footer>
 
     <script>
-        const STORE_PHONE = "+13126100321";
-        const grid = document.getElementById("grid");
-        const q = document.getElementById("q");
-        const cat = document.getElementById("cat");
-        const count = document.getElementById("count");
-        const callTop = document.getElementById("callTop");
-        const lightbox = document.getElementById("lightbox");
-        const lightboxImg = document.getElementById("lightbox-img");
-        const lightboxInfo = document.getElementById("lightbox-info");
-        const lightboxClose = document.getElementById("lightbox-close");
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        const CONFIG = {
+            // API base URL - UPDATE THIS to your Worker URL
+            // Local dev: 'http://localhost:8787'
+            // Production: 'https://your-worker.your-subdomain.workers.dev' or custom domain
+            apiBase: '/api',
+            storePhone: '+13126100321'
+        };
 
-        callTop.href = `tel:${STORE_PHONE}`;
+        // ============================================
+        // STATE
+        // ============================================
         let PRODUCTS = [];
-        const money = (n) => new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(n);
+        let currentUser = null;
+        let savedItems = new Set();
+        let currentView = 'all';
 
-        const canvas = document.getElementById("hearts");
-        const ctx = canvas.getContext("2d");
-        let hearts = [];
+        // ============================================
+        // DOM ELEMENTS
+        // ============================================
+        const grid = document.getElementById('grid');
+        const q = document.getElementById('q');
+        const cat = document.getElementById('cat');
+        const count = document.getElementById('count');
+        const callTop = document.getElementById('callTop');
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const lightboxInfo = document.getElementById('lightbox-info');
+        const lightboxClose = document.getElementById('lightbox-close');
+        
+        // Auth elements
+        const authModal = document.getElementById('auth-modal');
+        const authClose = document.getElementById('auth-close');
+        const authForm = document.getElementById('auth-form');
+        const authTitle = document.getElementById('auth-title');
+        const authSubmit = document.getElementById('auth-submit');
+        const authError = document.getElementById('auth-error');
+        const authSwitchText = document.getElementById('auth-switch-text');
+        const authSwitchLink = document.getElementById('auth-switch-link');
+        const nameGroup = document.getElementById('name-group');
+        const authEmail = document.getElementById('auth-email');
+        const authPassword = document.getElementById('auth-password');
+        const authName = document.getElementById('auth-name');
+        
+        // User controls
+        const loginBtn = document.getElementById('login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const loggedOutControls = document.getElementById('logged-out-controls');
+        const loggedInControls = document.getElementById('logged-in-controls');
+        const userAvatar = document.getElementById('user-avatar');
+        const userName = document.getElementById('user-name');
+        const wishlistBtn = document.getElementById('wishlist-btn');
+        const wishlistBadge = document.getElementById('wishlist-badge');
+        const viewControls = document.getElementById('view-controls');
+
+        callTop.href = `tel:${CONFIG.storePhone}`;
+        
+        let isSignUp = false;
+
+        // ============================================
+        // AUTH FUNCTIONS
+        // ============================================
+        function getToken() {
+            return localStorage.getItem('jojin_token');
+        }
+
+        function setToken(token) {
+            localStorage.setItem('jojin_token', token);
+        }
+
+        function clearToken() {
+            localStorage.removeItem('jojin_token');
+        }
+
+        async function apiRequest(endpoint, options = {}) {
+            const token = getToken();
+            const headers = {
+                'Content-Type': 'application/json',
+                ...options.headers
+            };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            
+            const response = await fetch(`${CONFIG.apiBase}${endpoint}`, {
+                ...options,
+                headers
+            });
+            
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Request failed');
+            }
+            return data;
+        }
+
+        async function checkAuth() {
+            const token = getToken();
+            if (!token) return null;
+            
+            try {
+                const data = await apiRequest('/auth/me');
+                return data.user;
+            } catch {
+                clearToken();
+                return null;
+            }
+        }
+
+        async function login(email, password) {
+            const data = await apiRequest('/auth/login', {
+                method: 'POST',
+                body: JSON.stringify({ email, password })
+            });
+            setToken(data.token);
+            return data.user;
+        }
+
+        async function register(email, password, firstName) {
+            const data = await apiRequest('/auth/register', {
+                method: 'POST',
+                body: JSON.stringify({ email, password, firstName })
+            });
+            setToken(data.token);
+            return data.user;
+        }
+
+        async function logout() {
+            try {
+                await apiRequest('/auth/logout', { method: 'POST' });
+            } catch {
+                // Ignore errors
+            }
+            clearToken();
+            currentUser = null;
+            savedItems.clear();
+            updateUI();
+            render(getFilteredProducts());
+        }
+
+        async function fetchSavedItems() {
+            if (!currentUser) return;
+            try {
+                const data = await apiRequest('/saved');
+                savedItems = new Set(data.savedItems);
+                updateWishlistBadge();
+            } catch {
+                // Ignore
+            }
+        }
+
+        async function saveItem(productId) {
+            if (!currentUser) {
+                openAuthModal();
+                return;
+            }
+            
+            try {
+                await apiRequest('/saved', {
+                    method: 'POST',
+                    body: JSON.stringify({ productId })
+                });
+                savedItems.add(productId);
+                updateWishlistBadge();
+                return true;
+            } catch (err) {
+                console.error('Save error:', err);
+                return false;
+            }
+        }
+
+        async function unsaveItem(productId) {
+            if (!currentUser) return false;
+            
+            try {
+                await apiRequest(`/saved/${encodeURIComponent(productId)}`, {
+                    method: 'DELETE'
+                });
+                savedItems.delete(productId);
+                updateWishlistBadge();
+                return true;
+            } catch (err) {
+                console.error('Unsave error:', err);
+                return false;
+            }
+        }
+
+        // ============================================
+        // UI FUNCTIONS
+        // ============================================
+        function updateUI() {
+            if (currentUser) {
+                loggedOutControls.style.display = 'none';
+                loggedInControls.style.display = 'flex';
+                viewControls.style.display = 'flex';
+                
+                const initial = (currentUser.firstName || currentUser.email || 'U')[0].toUpperCase();
+                userAvatar.textContent = initial;
+                userName.textContent = currentUser.firstName || currentUser.email.split('@')[0];
+                
+                updateWishlistBadge();
+            } else {
+                loggedOutControls.style.display = 'flex';
+                loggedInControls.style.display = 'none';
+                viewControls.style.display = 'none';
+                currentView = 'all';
+                updateViewButtons();
+            }
+        }
+
+        function updateWishlistBadge() {
+            const count = savedItems.size;
+            wishlistBadge.textContent = count > 0 ? count : '';
+            wishlistBadge.dataset.count = count;
+        }
+
+        function updateViewButtons() {
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.view === currentView);
+            });
+        }
+
+        function openAuthModal(signUp = false) {
+            isSignUp = signUp;
+            updateAuthModal();
+            authModal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+            authEmail.focus();
+        }
+
+        function closeAuthModal() {
+            authModal.classList.remove('open');
+            document.body.style.overflow = '';
+            authForm.reset();
+            authError.classList.remove('visible');
+            authEmail.classList.remove('error');
+            authPassword.classList.remove('error');
+        }
+
+        function updateAuthModal() {
+            if (isSignUp) {
+                authTitle.textContent = 'Create Account';
+                authSubmit.textContent = 'Sign Up';
+                authSwitchText.textContent = 'Already have an account?';
+                authSwitchLink.textContent = 'Sign in';
+                nameGroup.style.display = 'block';
+                authPassword.autocomplete = 'new-password';
+            } else {
+                authTitle.textContent = 'Sign In';
+                authSubmit.textContent = 'Sign In';
+                authSwitchText.textContent = "Don't have an account?";
+                authSwitchLink.textContent = 'Create one';
+                nameGroup.style.display = 'none';
+                authPassword.autocomplete = 'current-password';
+            }
+        }
+
+        function showAuthError(message) {
+            authError.textContent = message;
+            authError.classList.add('visible');
+        }
+
+        // ============================================
+        // FLOATING HEARTS ANIMATION
+        // ============================================
+        const canvas = document.getElementById('hearts');
+        const ctx = canvas.getContext('2d');
+        let heartsArray = [];
 
         function resizeCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
         }
         resizeCanvas();
-        window.addEventListener("resize", resizeCanvas);
+        window.addEventListener('resize', resizeCanvas);
 
         function drawHeart(x, y, size, color, alpha) {
             ctx.save();
@@ -1127,43 +1417,59 @@
             }
         }
 
-        for (let i = 0; i < 25; i++) hearts.push(new FloatingHeart());
+        for (let i = 0; i < 25; i++) heartsArray.push(new FloatingHeart());
 
         function animateHearts() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            if (Math.random() < 0.01 && hearts.length < 35) hearts.push(new FloatingHeart());
-            hearts.forEach(heart => { heart.update(); heart.draw(); });
+            if (Math.random() < 0.01 && heartsArray.length < 35) heartsArray.push(new FloatingHeart());
+            heartsArray.forEach(heart => { heart.update(); heart.draw(); });
             requestAnimationFrame(animateHearts);
         }
 
-        if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) animateHearts();
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) animateHearts();
 
+        // ============================================
+        // LIGHTBOX
+        // ============================================
         function openLightbox(imageSrc, productName) {
             lightboxImg.src = imageSrc;
             lightboxImg.alt = productName;
             lightboxInfo.textContent = productName;
-            lightbox.classList.add("open");
-            document.body.style.overflow = "hidden";
+            lightbox.classList.add('open');
+            document.body.style.overflow = 'hidden';
             lightboxClose.focus();
         }
 
         function closeLightbox() {
-            lightbox.classList.remove("open");
-            document.body.style.overflow = "";
+            lightbox.classList.remove('open');
+            document.body.style.overflow = '';
         }
 
-        lightboxClose.addEventListener("click", closeLightbox);
-        lightbox.addEventListener("click", (e) => { if (e.target === lightbox) closeLightbox(); });
-        document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeLightbox(); });
+        lightboxClose.addEventListener('click', closeLightbox);
+        lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+
+        // ============================================
+        // PRODUCTS
+        // ============================================
+        const money = (n) => new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(n);
+
+        function escapeHtml(str) {
+            return String(str ?? '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
 
         function uniqueCategories(items) {
-            return [...new Set(items.map(p => (p.category || "").trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+            return [...new Set(items.map(p => (p.category || '').trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
         }
 
         function populateCategories(items) {
             const cats = uniqueCategories(items);
             for (const c of cats) {
-                const opt = document.createElement("option");
+                const opt = document.createElement('option');
                 opt.value = c;
                 opt.textContent = c;
                 cat.appendChild(opt);
@@ -1172,85 +1478,239 @@
 
         function matches(p, queryText, category) {
             const qt = queryText.trim().toLowerCase();
-            if (category && (p.category || "") !== category) return false;
+            if (category && (p.category || '') !== category) return false;
             if (!qt) return true;
             const blob = `${p.name} ${p.id} ${p.description} ${p.category}`.toLowerCase();
             return blob.includes(qt);
         }
 
+        function getFilteredProducts() {
+            let items = PRODUCTS.filter(p => matches(p, q.value, cat.value));
+            if (currentView === 'saved' && currentUser) {
+                items = items.filter(p => savedItems.has(p.id));
+            }
+            return items;
+        }
+
         function render(items) {
-            grid.innerHTML = "";
-            count.textContent = `${items.length} item${items.length === 1 ? "" : "s"}`;
+            grid.innerHTML = '';
+            count.textContent = `${items.length} item${items.length === 1 ? '' : 's'}`;
+            
+            if (items.length === 0 && currentView === 'saved') {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <h3>Your wishlist is empty</h3>
+                        <p>Click the ♡ on items you love to save them here!</p>
+                    </div>
+                `;
+                return;
+            }
+            
             for (const p of items) {
                 const inStock = !!p.inStock && (p.quantity ?? 1) > 0;
-                const card = document.createElement("article");
-                card.className = "card";
+                const isSaved = savedItems.has(p.id);
+                const card = document.createElement('article');
+                card.className = 'card';
                 card.innerHTML = `
+                    <button class="save-btn ${isSaved ? 'saved' : ''}" data-id="${escapeHtml(p.id)}" aria-label="${isSaved ? 'Remove from' : 'Add to'} wishlist">
+                        ${isSaved ? '♥' : '♡'}
+                    </button>
                     <div class="img ${p.image ? 'has-image' : ''}" ${p.image ? `data-image="${escapeHtml(p.image)}" data-name="${escapeHtml(p.name)}"` : ''}>
                         ${p.image ? `<img src="${p.image}" alt="${escapeHtml(p.name)}" loading="lazy">` : `<div class="noimg">No image yet ✨</div>`}
                     </div>
                     <div class="content">
                         <div class="meta">
-                            <span class="category-tag">${escapeHtml(p.category || "Uncategorized")}</span>
+                            <span class="category-tag">${escapeHtml(p.category || 'Uncategorized')}</span>
                             <span class="price">${money(Number(p.price || 0))}</span>
                         </div>
-                        <h2 class="name">${escapeHtml(p.name || "Unnamed Product")}</h2>
+                        <h2 class="name">${escapeHtml(p.name || 'Unnamed Product')}</h2>
                         <div class="meta">
-                            <span><strong>SKU:</strong> ${escapeHtml(p.id || "—")}</span>
-                            <span><strong>Qty:</strong> ${(p.quantity ?? "—")}</span>
+                            <span><strong>SKU:</strong> ${escapeHtml(p.id || '—')}</span>
+                            <span><strong>Qty:</strong> ${(p.quantity ?? '—')}</span>
                         </div>
-                        <p class="desc">${escapeHtml(p.description || "")}</p>
+                        <p class="desc">${escapeHtml(p.description || '')}</p>
                         <div class="tags">
-                            <span class="stock ${inStock ? "good" : "bad"}">${inStock ? "✓ In stock" : "Call to confirm"}</span>
-                            <a class="btn" href="tel:${STORE_PHONE}" aria-label="Call to order ${escapeHtml(p.name)}">📞 Call</a>
+                            <span class="stock ${inStock ? 'good' : 'bad'}">${inStock ? '✓ In stock' : 'Call to confirm'}</span>
+                            <a class="btn" href="tel:${CONFIG.storePhone}" aria-label="Call to order ${escapeHtml(p.name)}">📞 Call</a>
                         </div>
-                        <div class="sku-hint">When you call, mention: <strong>${escapeHtml(p.id || "")}</strong></div>
+                        <div class="sku-hint">When you call, mention: <strong>${escapeHtml(p.id || '')}</strong></div>
                     </div>
                 `;
-                const imgDiv = card.querySelector(".img.has-image");
+                
+                // Image lightbox
+                const imgDiv = card.querySelector('.img.has-image');
                 if (imgDiv) {
-                    imgDiv.addEventListener("click", () => {
+                    imgDiv.addEventListener('click', () => {
                         openLightbox(imgDiv.dataset.image, imgDiv.dataset.name);
                     });
                 }
+                
+                // Save button
+                const saveBtn = card.querySelector('.save-btn');
+                saveBtn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    
+                    if (!currentUser) {
+                        openAuthModal();
+                        return;
+                    }
+                    
+                    const productId = saveBtn.dataset.id;
+                    const wasSaved = savedItems.has(productId);
+                    
+                    // Optimistic update
+                    saveBtn.classList.toggle('saved');
+                    saveBtn.innerHTML = wasSaved ? '♡' : '♥';
+                    saveBtn.classList.add('pop');
+                    setTimeout(() => saveBtn.classList.remove('pop'), 300);
+                    
+                    const success = wasSaved 
+                        ? await unsaveItem(productId)
+                        : await saveItem(productId);
+                    
+                    if (!success) {
+                        // Revert on failure
+                        saveBtn.classList.toggle('saved');
+                        saveBtn.innerHTML = wasSaved ? '♥' : '♡';
+                    }
+                    
+                    // Re-render if in wishlist view and item was removed
+                    if (currentView === 'saved' && wasSaved && success) {
+                        render(getFilteredProducts());
+                    }
+                });
+                
                 grid.appendChild(card);
             }
-        }
-
-        function escapeHtml(str) {
-            return String(str ?? "")
-                .replaceAll("&", "&amp;")
-                .replaceAll("<", "&lt;")
-                .replaceAll(">", "&gt;")
-                .replaceAll('"', "&quot;")
-                .replaceAll("'", "&#039;");
         }
 
         let searchTimeout;
         function applyFilters() {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
-                const items = PRODUCTS.filter(p => matches(p, q.value, cat.value));
-                render(items);
+                render(getFilteredProducts());
             }, 150);
         }
 
-        async function init() {
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+        
+        // Auth modal
+        loginBtn.addEventListener('click', () => openAuthModal(false));
+        authClose.addEventListener('click', closeAuthModal);
+        authModal.addEventListener('click', (e) => { if (e.target === authModal) closeAuthModal(); });
+        
+        authSwitchLink.addEventListener('click', () => {
+            isSignUp = !isSignUp;
+            updateAuthModal();
+            authError.classList.remove('visible');
+        });
+        
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = authEmail.value.trim();
+            const password = authPassword.value;
+            const firstName = authName.value.trim();
+            
+            authError.classList.remove('visible');
+            authEmail.classList.remove('error');
+            authPassword.classList.remove('error');
+            
+            if (!email) {
+                authEmail.classList.add('error');
+                showAuthError('Please enter your email');
+                return;
+            }
+            
+            if (!password || password.length < 6) {
+                authPassword.classList.add('error');
+                showAuthError('Password must be at least 6 characters');
+                return;
+            }
+            
+            authSubmit.disabled = true;
+            authSubmit.textContent = isSignUp ? 'Creating account...' : 'Signing in...';
+            
             try {
-                const res = await fetch("/api/products", { cache: "no-store" });
+                if (isSignUp) {
+                    currentUser = await register(email, password, firstName);
+                } else {
+                    currentUser = await login(email, password);
+                }
+                
+                await fetchSavedItems();
+                updateUI();
+                closeAuthModal();
+                render(getFilteredProducts());
+            } catch (err) {
+                showAuthError(err.message);
+            } finally {
+                authSubmit.disabled = false;
+                authSubmit.textContent = isSignUp ? 'Sign Up' : 'Sign In';
+            }
+        });
+        
+        logoutBtn.addEventListener('click', logout);
+        
+        // Wishlist button
+        wishlistBtn.addEventListener('click', () => {
+            currentView = currentView === 'saved' ? 'all' : 'saved';
+            updateViewButtons();
+            render(getFilteredProducts());
+        });
+        
+        // View controls
+        viewControls.addEventListener('click', (e) => {
+            if (e.target.classList.contains('view-btn')) {
+                currentView = e.target.dataset.view;
+                updateViewButtons();
+                render(getFilteredProducts());
+            }
+        });
+        
+        // Search and filter
+        q.addEventListener('input', applyFilters);
+        cat.addEventListener('change', applyFilters);
+        
+        // Global ESC handler
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (authModal.classList.contains('open')) {
+                    closeAuthModal();
+                } else if (lightbox.classList.contains('open')) {
+                    closeLightbox();
+                }
+            }
+        });
+
+        // ============================================
+        // INIT
+        // ============================================
+        async function init() {
+            // Check if user is logged in
+            currentUser = await checkAuth();
+            if (currentUser) {
+                await fetchSavedItems();
+            }
+            updateUI();
+            
+            // Load products
+            try {
+                const res = await fetch('/api/products', { cache: 'no-store' });
                 if (res.ok) {
                     PRODUCTS = await res.json();
                 } else {
-                    throw new Error("API not available");
+                    throw new Error('API not available');
                 }
             } catch {
-                const res = await fetch("products.json", { cache: "no-store" });
+                const res = await fetch('products.json', { cache: 'no-store' });
                 PRODUCTS = await res.json();
             }
+            
             populateCategories(PRODUCTS);
-            render(PRODUCTS);
-            q.addEventListener("input", applyFilters);
-            cat.addEventListener("change", applyFilters);
+            render(getFilteredProducts());
         }
 
         init().catch(err => {
@@ -1259,404 +1719,6 @@
                 <strong>Could not load products.</strong><br>Check your connection or try again later. 💕
             </div>`;
         });
-
-        /* ============================================
-           EMAIL SUBSCRIBE POPUP SCRIPT
-           ============================================ */
-        (function() {
-            'use strict';
-
-            // ======================
-            // CONFIGURATION
-            // ======================
-            const CONFIG = {
-                // Form endpoint - REPLACE with your actual endpoint
-                // Formspree: https://formspree.io/f/YOUR_FORM_ID
-                // Mailchimp: Use their embedded form action URL
-                // Klaviyo: Use their subscribe endpoint
-                // Custom: Your own API endpoint
-                endpoint: 'https://formspree.io/f/xjgkawoj',
-                
-                // Timing
-                showAfterSeconds: 8,
-                showAtScrollPercent: 35,
-                suppressDays: 14,
-                
-                // localStorage keys
-                storageKey: 'jojin_subscribe',
-                
-                // Provider type: 'formspree', 'mailchimp', 'klaviyo', 'custom'
-                provider: 'formspree'
-            };
-
-            // ======================
-            // STATE
-            // ======================
-            let popupShown = false;
-            let previouslyFocusedElement = null;
-            const focusableSelectors = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
-
-            // ======================
-            // DOM ELEMENTS
-            // ======================
-            const overlay = document.getElementById('subscribe-overlay');
-            const modal = document.getElementById('subscribe-modal');
-            const closeBtn = document.getElementById('subscribe-close');
-            const dismissBtn = document.getElementById('btn-dismiss');
-            const form = document.getElementById('subscribe-form');
-            const emailInput = document.getElementById('subscribe-email');
-            const nameInput = document.getElementById('subscribe-name');
-            const submitBtn = document.getElementById('btn-subscribe');
-            const emailError = document.getElementById('email-error');
-            const successDiv = document.getElementById('subscribe-success');
-            const successCloseBtn = document.getElementById('btn-success-close');
-
-            // ======================
-            // STORAGE HELPERS
-            // ======================
-            function getStorageData() {
-                try {
-                    const data = localStorage.getItem(CONFIG.storageKey);
-                    return data ? JSON.parse(data) : null;
-                } catch {
-                    return null;
-                }
-            }
-
-            function setStorageData(data) {
-                try {
-                    localStorage.setItem(CONFIG.storageKey, JSON.stringify(data));
-                } catch {
-                    // localStorage not available
-                }
-            }
-
-            function shouldShowPopup() {
-                // Already shown this session
-                if (popupShown) return false;
-
-                const data = getStorageData();
-                if (!data) return true;
-
-                // Already subscribed (permanent)
-                if (data.subscribed) return false;
-
-                // Dismissed - check if 14 days have passed
-                if (data.dismissed) {
-                    const dismissedAt = new Date(data.dismissedAt);
-                    const now = new Date();
-                    const daysSinceDismissed = (now - dismissedAt) / (1000 * 60 * 60 * 24);
-                    return daysSinceDismissed >= CONFIG.suppressDays;
-                }
-
-                return true;
-            }
-
-            function markDismissed() {
-                setStorageData({
-                    dismissed: true,
-                    dismissedAt: new Date().toISOString()
-                });
-            }
-
-            function markSubscribed() {
-                setStorageData({
-                    subscribed: true,
-                    subscribedAt: new Date().toISOString()
-                });
-            }
-
-            // ======================
-            // MODAL CONTROLS
-            // ======================
-            function openPopup() {
-                if (!shouldShowPopup()) return;
-                
-                popupShown = true;
-                previouslyFocusedElement = document.activeElement;
-                
-                overlay.classList.add('open');
-                document.body.style.overflow = 'hidden';
-                
-                // Focus email input after animation
-                setTimeout(() => {
-                    emailInput.focus();
-                }, 100);
-
-                // Add ESC listener (popup-specific, doesn't conflict with lightbox)
-                document.addEventListener('keydown', handlePopupKeydown);
-            }
-
-            function closePopup() {
-                overlay.classList.remove('open');
-                document.body.style.overflow = '';
-                
-                document.removeEventListener('keydown', handlePopupKeydown);
-                
-                // Return focus
-                if (previouslyFocusedElement && previouslyFocusedElement.focus) {
-                    previouslyFocusedElement.focus();
-                }
-            }
-
-            function handlePopupKeydown(e) {
-                if (e.key === 'Escape') {
-                    e.preventDefault();
-                    markDismissed();
-                    closePopup();
-                    return;
-                }
-
-                // Focus trap
-                if (e.key === 'Tab') {
-                    const focusableElements = modal.querySelectorAll(focusableSelectors);
-                    const focusable = Array.from(focusableElements).filter(el => {
-                        return el.offsetParent !== null; // visible
-                    });
-                    
-                    if (focusable.length === 0) return;
-
-                    const firstFocusable = focusable[0];
-                    const lastFocusable = focusable[focusable.length - 1];
-
-                    if (e.shiftKey && document.activeElement === firstFocusable) {
-                        e.preventDefault();
-                        lastFocusable.focus();
-                    } else if (!e.shiftKey && document.activeElement === lastFocusable) {
-                        e.preventDefault();
-                        firstFocusable.focus();
-                    }
-                }
-            }
-
-            // ======================
-            // FORM VALIDATION
-            // ======================
-            function isValidEmail(email) {
-                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                return re.test(email.trim());
-            }
-
-            function showEmailError() {
-                emailInput.classList.add('error');
-                emailError.classList.add('visible');
-                emailInput.setAttribute('aria-invalid', 'true');
-            }
-
-            function hideEmailError() {
-                emailInput.classList.remove('error');
-                emailError.classList.remove('visible');
-                emailInput.removeAttribute('aria-invalid');
-            }
-
-            // ======================
-            // FORM SUBMISSION
-            // ======================
-            async function handleSubmit(e) {
-                e.preventDefault();
-
-                const email = emailInput.value.trim();
-                const name = nameInput.value.trim();
-
-                // Validate
-                if (!isValidEmail(email)) {
-                    showEmailError();
-                    emailInput.focus();
-                    return;
-                }
-
-                hideEmailError();
-
-                // Show loading state
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span class="spinner"></span>Subscribing...';
-
-                try {
-                    let success = false;
-
-                    if (CONFIG.provider === 'formspree') {
-                        success = await submitToFormspree(email, name);
-                    } else if (CONFIG.provider === 'mailchimp') {
-                        success = await submitToMailchimp(email, name);
-                    } else if (CONFIG.provider === 'klaviyo') {
-                        success = await submitToKlaviyo(email, name);
-                    } else {
-                        success = await submitToCustomEndpoint(email, name);
-                    }
-
-                    if (success) {
-                        markSubscribed();
-                        showSuccess();
-                    } else {
-                        throw new Error('Submission failed');
-                    }
-                } catch (err) {
-                    console.error('Subscribe error:', err);
-                    // Fallback: still mark as subscribed locally to not annoy user
-                    // In production, you might want to show an error message
-                    markSubscribed();
-                    showSuccess();
-                } finally {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = 'Subscribe 💕';
-                }
-            }
-
-            // Provider-specific submission functions
-            async function submitToFormspree(email, name) {
-                const response = await fetch(CONFIG.endpoint, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({ email, name })
-                });
-                return response.ok;
-            }
-
-            async function submitToMailchimp(email, name) {
-                // Mailchimp requires server-side proxy due to CORS
-                // This is a placeholder - you'd need a serverless function
-                // For now, fallback to form POST
-                const formData = new FormData();
-                formData.append('EMAIL', email);
-                if (name) formData.append('FNAME', name);
-                
-                try {
-                    const response = await fetch(CONFIG.endpoint, {
-                        method: 'POST',
-                        body: formData,
-                        mode: 'no-cors' // Mailchimp doesn't support CORS
-                    });
-                    return true; // Can't verify with no-cors
-                } catch {
-                    return false;
-                }
-            }
-
-            async function submitToKlaviyo(email, name) {
-                // Klaviyo client-side API
-                // Replace LIST_ID with your Klaviyo list ID
-                const response = await fetch('https://a.klaviyo.com/api/v2/list/LIST_ID/subscribe', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        api_key: 'YOUR_PUBLIC_API_KEY',
-                        profiles: [{ email, first_name: name }]
-                    })
-                });
-                return response.ok;
-            }
-
-            async function submitToCustomEndpoint(email, name) {
-                const response = await fetch(CONFIG.endpoint, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ email, name })
-                });
-                return response.ok;
-            }
-
-            function showSuccess() {
-                modal.classList.add('success');
-                successDiv.classList.add('visible');
-                successCloseBtn.focus();
-            }
-
-            // ======================
-            // TRIGGER LOGIC
-            // ======================
-            function initTriggers() {
-                if (!shouldShowPopup()) return;
-
-                let timeoutTriggered = false;
-                let scrollTriggered = false;
-
-                // Time-based trigger (8 seconds)
-                const timeoutId = setTimeout(() => {
-                    if (!scrollTriggered && shouldShowPopup()) {
-                        timeoutTriggered = true;
-                        openPopup();
-                    }
-                }, CONFIG.showAfterSeconds * 1000);
-
-                // Scroll-based trigger (35%)
-                function handleScroll() {
-                    if (timeoutTriggered || scrollTriggered || !shouldShowPopup()) return;
-
-                    const scrollTop = window.scrollY || document.documentElement.scrollTop;
-                    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-                    const scrollPercent = (scrollTop / docHeight) * 100;
-
-                    if (scrollPercent >= CONFIG.showAtScrollPercent) {
-                        scrollTriggered = true;
-                        clearTimeout(timeoutId);
-                        openPopup();
-                        window.removeEventListener('scroll', handleScroll);
-                    }
-                }
-
-                window.addEventListener('scroll', handleScroll, { passive: true });
-            }
-
-            // ======================
-            // EVENT LISTENERS
-            // ======================
-            function initEventListeners() {
-                // Close button
-                closeBtn.addEventListener('click', () => {
-                    markDismissed();
-                    closePopup();
-                });
-
-                // Dismiss button
-                dismissBtn.addEventListener('click', () => {
-                    markDismissed();
-                    closePopup();
-                });
-
-                // Click outside modal
-                overlay.addEventListener('click', (e) => {
-                    if (e.target === overlay) {
-                        markDismissed();
-                        closePopup();
-                    }
-                });
-
-                // Form submission
-                form.addEventListener('submit', handleSubmit);
-
-                // Clear error on input
-                emailInput.addEventListener('input', () => {
-                    if (emailInput.classList.contains('error')) {
-                        hideEmailError();
-                    }
-                });
-
-                // Success close button
-                successCloseBtn.addEventListener('click', closePopup);
-            }
-
-            // ======================
-            // INIT
-            // ======================
-            function init() {
-                initEventListeners();
-                initTriggers();
-            }
-
-            // Start when DOM is ready
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', init);
-            } else {
-                init();
-            }
-        })();
     </script>
 </body>
 </html>

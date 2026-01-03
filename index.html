@@ -7,8 +7,8 @@
     <!-- Valentine theme changes: Updated title and meta for Valentine's season -->
     <title>Jojin's Kitty Thrift Shop — Valentine's Season 💕</title>
     <meta name="description"
-        content="Jojin's Kitty Thrift Store — Spread the love with unique thrift finds!" />
-    <meta property="og:title" content="Jojin's Kitty Thrift Store" />
+        content="Jojin's Kitty Thrift Shop — Spread the love with unique thrift finds!" />
+    <meta property="og:title" content="Jojin's Kitty Thrift Shop" />
     <meta property="og:description" content="Find something special for your sweetheart!" />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32'>🐾</text></svg>">
 
@@ -735,7 +735,7 @@
                     <div class="brand">
                         <div class="logo" aria-hidden="true">🐾</div>
                         <div>
-                            <h1>Jojin's Kitty Thrift Store</h1>
+                            <h1>Jojin's Kitty Thrift Shop</h1>
                             <!-- Valentine theme changes: Updated tagline -->
                             <p class="sub">Find something <strong>special</strong> for someone you love! Call to confirm availability and reserve items. <span aria-hidden="true">💕✨</span></p>
                         </div>
@@ -776,7 +776,7 @@
         <div class="wrap">
             <div class="footer-content">
                 <div class="small">
-                    <div><strong>Store hours:</strong> Mon–Sat 11am–4pm • Leave a message or text outside hours</div>
+                    <div><strong>Shop hours:</strong> Mon–Sat 11am–4pm • Leave a message or text outside hours</div>
                     <div><strong>Location:</strong> 4100 N. Pulaski Rd., Chicago, IL</div>
                     <!-- Valentine theme changes: Updated footer message -->
                     <div>Inventory changes quickly — call to reserve. Spread the love! 💕</div>
@@ -793,7 +793,7 @@
     <style>.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }</style>
 
     <script>
-        const STORE_PHONE = "+13126100321";
+        const Shop_PHONE = "+13126100321";
         const grid = document.getElementById("grid");
         const q = document.getElementById("q");
         const cat = document.getElementById("cat");
@@ -806,7 +806,7 @@
         const lightboxInfo = document.getElementById("lightbox-info");
         const lightboxClose = document.getElementById("lightbox-close");
 
-        callTop.href = `tel:${STORE_PHONE}`;
+        callTop.href = `tel:${Shop_PHONE}`;
 
         let PRODUCTS = [];
 
@@ -836,7 +836,7 @@
             ctx.bezierCurveTo(x, y + size * 0.8, x + size * 0.5, y + size * 0.6, x + size * 0.5, y + size * 0.3);
             ctx.bezierCurveTo(x + size * 0.5, y, x, y, x, y + size * 0.3);
             ctx.fill();
-            ctx.restore();
+            ctx.reShop();
         }
 
         class FloatingHeart {
@@ -978,7 +978,7 @@
 
                         <div class="tags">
                             <span class="stock ${inStock ? "good" : "bad"}">${inStock ? "✓ In stock" : "Call to confirm"}</span>
-                            <a class="btn" href="tel:${STORE_PHONE}" aria-label="Call to order ${escapeHtml(p.name)}">
+                            <a class="btn" href="tel:${Shop_PHONE}" aria-label="Call to order ${escapeHtml(p.name)}">
                                 📞 Call
                             </a>
                         </div>
@@ -1023,14 +1023,14 @@
         async function init() {
             // Try API first (Cloudflare KV), fallback to static JSON
             try {
-                const res = await fetch("/api/products", { cache: "no-store" });
+                const res = await fetch("/api/products", { cache: "no-Shop" });
                 if (res.ok) {
                     PRODUCTS = await res.json();
                 } else {
                     throw new Error("API not available");
                 }
             } catch {
-                const res = await fetch("products.json", { cache: "no-store" });
+                const res = await fetch("products.json", { cache: "no-Shop" });
                 PRODUCTS = await res.json();
             }
 

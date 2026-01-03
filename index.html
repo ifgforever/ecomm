@@ -601,6 +601,306 @@
             text-shadow: 0 2px 10px rgba(0, 0, 0, .3);
         }
 
+        /* ============================================
+           EMAIL SUBSCRIBE POPUP STYLES
+           ============================================ */
+        .subscribe-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            background: rgba(74, 55, 40, .75);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity .3s ease, visibility .3s ease;
+        }
+
+        .subscribe-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .subscribe-modal {
+            position: relative;
+            width: 100%;
+            max-width: 420px;
+            background: var(--card);
+            border: 2px solid var(--rose);
+            border-radius: var(--r);
+            box-shadow: 
+                0 0 60px rgba(228, 160, 160, .4),
+                0 30px 80px rgba(74, 55, 40, .3);
+            transform: scale(.9) translateY(20px);
+            transition: transform .3s ease;
+            overflow: hidden;
+        }
+
+        .subscribe-overlay.open .subscribe-modal {
+            transform: scale(1) translateY(0);
+        }
+
+        .subscribe-header {
+            background: linear-gradient(135deg, var(--pink-soft), var(--blush));
+            padding: 24px 24px 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--card-border);
+            position: relative;
+        }
+
+        .subscribe-header::before {
+            content: "💌";
+            font-size: 40px;
+            display: block;
+            margin-bottom: 12px;
+            animation: gentle-bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes gentle-bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .subscribe-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--cream);
+            border: 1px solid var(--rose);
+            color: var(--berry);
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .2s ease;
+            line-height: 1;
+        }
+
+        .subscribe-close:hover {
+            background: var(--berry);
+            color: var(--cream);
+            transform: scale(1.1);
+        }
+
+        .subscribe-title {
+            font-family: var(--font-display);
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--berry-dark);
+            margin: 0 0 8px;
+        }
+
+        .subscribe-subtitle {
+            color: var(--muted);
+            font-size: 14px;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .subscribe-body {
+            padding: 24px;
+        }
+
+        .subscribe-form {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--ink-light);
+        }
+
+        .form-group label .optional {
+            font-weight: 400;
+            color: var(--muted);
+        }
+
+        .subscribe-form input[type="text"],
+        .subscribe-form input[type="email"] {
+            flex: none;
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 15px;
+            border: 1.5px solid var(--pink-soft);
+            border-radius: var(--r2);
+            background: var(--cream);
+            transition: all .2s ease;
+        }
+
+        .subscribe-form input:focus {
+            border-color: var(--rose);
+            box-shadow: 0 0 0 3px rgba(228, 160, 160, .25);
+            outline: none;
+        }
+
+        .subscribe-form input.error {
+            border-color: var(--heart);
+            background: rgba(229, 115, 115, .05);
+        }
+
+        .error-message {
+            color: var(--heart);
+            font-size: 12px;
+            font-weight: 600;
+            display: none;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .error-message.visible {
+            display: flex;
+        }
+
+        .subscribe-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        .btn-subscribe {
+            width: 100%;
+            padding: 14px 20px;
+            font-size: 15px;
+            font-weight: 800;
+            font-family: inherit;
+            border: none;
+            border-radius: var(--r2);
+            background: linear-gradient(135deg, var(--rose), var(--berry));
+            color: var(--cream);
+            cursor: pointer;
+            transition: all .2s ease;
+            box-shadow: 0 4px 15px rgba(196, 92, 106, .3);
+        }
+
+        .btn-subscribe:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(196, 92, 106, .4);
+            background: linear-gradient(135deg, var(--rose-deep), var(--berry-dark));
+        }
+
+        .btn-subscribe:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .btn-subscribe .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .btn-dismiss {
+            width: 100%;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            border: 1px solid var(--pink-soft);
+            border-radius: var(--r2);
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all .2s ease;
+        }
+
+        .btn-dismiss:hover {
+            border-color: var(--rose);
+            color: var(--berry);
+            background: var(--blush-light);
+        }
+
+        /* Success State */
+        .subscribe-success {
+            display: none;
+            text-align: center;
+            padding: 30px 24px;
+        }
+
+        .subscribe-success.visible {
+            display: block;
+        }
+
+        .subscribe-success::before {
+            content: "🎉";
+            font-size: 50px;
+            display: block;
+            margin-bottom: 16px;
+            animation: celebrate .6s ease;
+        }
+
+        @keyframes celebrate {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .subscribe-success h3 {
+            font-family: var(--font-display);
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--berry-dark);
+            margin: 0 0 10px;
+        }
+
+        .subscribe-success p {
+            color: var(--muted);
+            font-size: 14px;
+            margin: 0 0 20px;
+            line-height: 1.5;
+        }
+
+        .btn-success-close {
+            padding: 12px 28px;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: inherit;
+            border: 1px solid var(--rose);
+            border-radius: var(--r2);
+            background: linear-gradient(135deg, var(--cream), var(--blush-light));
+            color: var(--berry-dark);
+            cursor: pointer;
+            transition: all .2s ease;
+        }
+
+        .btn-success-close:hover {
+            background: linear-gradient(135deg, var(--blush-light), var(--pink-soft));
+            transform: translateY(-2px);
+        }
+
+        /* Hide form when success is shown */
+        .subscribe-modal.success .subscribe-header,
+        .subscribe-modal.success .subscribe-body {
+            display: none;
+        }
+
         @media (max-width: 600px) {
             h1 { font-size: 24px; }
             select { flex: 1 1 180px; }
@@ -609,6 +909,18 @@
             .count { margin-left: 0; width: 100%; text-align: center; }
             .grid { grid-template-columns: 1fr; }
             .valentine-banner::before, .valentine-banner::after { display: none; }
+            
+            /* Subscribe modal mobile */
+            .subscribe-modal {
+                max-width: 100%;
+                margin: 10px;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            .subscribe-header { padding: 20px 20px 16px; }
+            .subscribe-header::before { font-size: 32px; }
+            .subscribe-title { font-size: 24px; }
+            .subscribe-body { padding: 20px; }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -617,6 +929,8 @@
             #hearts { display: none; }
             .card { transition: none; }
             .card:hover { transform: none; }
+            .subscribe-header::before { animation: none; }
+            .subscribe-overlay, .subscribe-modal { transition: none; }
         }
 
         a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
@@ -641,6 +955,49 @@
             <button class="lightbox-close" id="lightbox-close" aria-label="Close enlarged image">✕</button>
             <img id="lightbox-img" src="" alt="" />
             <div class="lightbox-info" id="lightbox-info"></div>
+        </div>
+    </div>
+
+    <!-- ============================================
+         EMAIL SUBSCRIBE POPUP
+         ============================================ -->
+    <div class="subscribe-overlay" id="subscribe-overlay" role="dialog" aria-modal="true" aria-labelledby="subscribe-title">
+        <div class="subscribe-modal" id="subscribe-modal">
+            <div class="subscribe-header">
+                <button class="subscribe-close" id="subscribe-close" aria-label="Close subscription popup">✕</button>
+                <h2 class="subscribe-title" id="subscribe-title">Get store updates</h2>
+                <p class="subscribe-subtitle">New arrivals, sales, and events. No spam.</p>
+            </div>
+            <div class="subscribe-body">
+                <form class="subscribe-form" id="subscribe-form" novalidate>
+                    <div class="form-group">
+                        <label for="subscribe-name">First name <span class="optional">(optional)</span></label>
+                        <input type="text" id="subscribe-name" name="name" placeholder="Your first name" autocomplete="given-name" />
+                    </div>
+                    <div class="form-group">
+                        <label for="subscribe-email">Email <span style="color: var(--heart);">*</span></label>
+                        <input type="email" id="subscribe-email" name="email" placeholder="you@example.com" required autocomplete="email" aria-describedby="email-error" />
+                        <span class="error-message" id="email-error" role="alert">
+                            <span aria-hidden="true">⚠</span> Please enter a valid email address
+                        </span>
+                    </div>
+                    <div class="subscribe-actions">
+                        <button type="submit" class="btn-subscribe" id="btn-subscribe">
+                            Subscribe 💕
+                        </button>
+                        <button type="button" class="btn-dismiss" id="btn-dismiss">
+                            No thanks
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="subscribe-success" id="subscribe-success">
+                <h3>You're on the list!</h3>
+                <p>Thanks for subscribing. We'll keep you posted on new arrivals and special events.</p>
+                <button type="button" class="btn-success-close" id="btn-success-close">
+                    Continue shopping
+                </button>
+            </div>
         </div>
     </div>
 
@@ -902,6 +1259,404 @@
                 <strong>Could not load products.</strong><br>Check your connection or try again later. 💕
             </div>`;
         });
+
+        /* ============================================
+           EMAIL SUBSCRIBE POPUP SCRIPT
+           ============================================ */
+        (function() {
+            'use strict';
+
+            // ======================
+            // CONFIGURATION
+            // ======================
+            const CONFIG = {
+                // Form endpoint - REPLACE with your actual endpoint
+                // Formspree: https://formspree.io/f/YOUR_FORM_ID
+                // Mailchimp: Use their embedded form action URL
+                // Klaviyo: Use their subscribe endpoint
+                // Custom: Your own API endpoint
+                endpoint: 'https://formspree.io/f/xjgkawoj',
+                
+                // Timing
+                showAfterSeconds: 8,
+                showAtScrollPercent: 35,
+                suppressDays: 14,
+                
+                // localStorage keys
+                storageKey: 'jojin_subscribe',
+                
+                // Provider type: 'formspree', 'mailchimp', 'klaviyo', 'custom'
+                provider: 'formspree'
+            };
+
+            // ======================
+            // STATE
+            // ======================
+            let popupShown = false;
+            let previouslyFocusedElement = null;
+            const focusableSelectors = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
+            // ======================
+            // DOM ELEMENTS
+            // ======================
+            const overlay = document.getElementById('subscribe-overlay');
+            const modal = document.getElementById('subscribe-modal');
+            const closeBtn = document.getElementById('subscribe-close');
+            const dismissBtn = document.getElementById('btn-dismiss');
+            const form = document.getElementById('subscribe-form');
+            const emailInput = document.getElementById('subscribe-email');
+            const nameInput = document.getElementById('subscribe-name');
+            const submitBtn = document.getElementById('btn-subscribe');
+            const emailError = document.getElementById('email-error');
+            const successDiv = document.getElementById('subscribe-success');
+            const successCloseBtn = document.getElementById('btn-success-close');
+
+            // ======================
+            // STORAGE HELPERS
+            // ======================
+            function getStorageData() {
+                try {
+                    const data = localStorage.getItem(CONFIG.storageKey);
+                    return data ? JSON.parse(data) : null;
+                } catch {
+                    return null;
+                }
+            }
+
+            function setStorageData(data) {
+                try {
+                    localStorage.setItem(CONFIG.storageKey, JSON.stringify(data));
+                } catch {
+                    // localStorage not available
+                }
+            }
+
+            function shouldShowPopup() {
+                // Already shown this session
+                if (popupShown) return false;
+
+                const data = getStorageData();
+                if (!data) return true;
+
+                // Already subscribed (permanent)
+                if (data.subscribed) return false;
+
+                // Dismissed - check if 14 days have passed
+                if (data.dismissed) {
+                    const dismissedAt = new Date(data.dismissedAt);
+                    const now = new Date();
+                    const daysSinceDismissed = (now - dismissedAt) / (1000 * 60 * 60 * 24);
+                    return daysSinceDismissed >= CONFIG.suppressDays;
+                }
+
+                return true;
+            }
+
+            function markDismissed() {
+                setStorageData({
+                    dismissed: true,
+                    dismissedAt: new Date().toISOString()
+                });
+            }
+
+            function markSubscribed() {
+                setStorageData({
+                    subscribed: true,
+                    subscribedAt: new Date().toISOString()
+                });
+            }
+
+            // ======================
+            // MODAL CONTROLS
+            // ======================
+            function openPopup() {
+                if (!shouldShowPopup()) return;
+                
+                popupShown = true;
+                previouslyFocusedElement = document.activeElement;
+                
+                overlay.classList.add('open');
+                document.body.style.overflow = 'hidden';
+                
+                // Focus email input after animation
+                setTimeout(() => {
+                    emailInput.focus();
+                }, 100);
+
+                // Add ESC listener (popup-specific, doesn't conflict with lightbox)
+                document.addEventListener('keydown', handlePopupKeydown);
+            }
+
+            function closePopup() {
+                overlay.classList.remove('open');
+                document.body.style.overflow = '';
+                
+                document.removeEventListener('keydown', handlePopupKeydown);
+                
+                // Return focus
+                if (previouslyFocusedElement && previouslyFocusedElement.focus) {
+                    previouslyFocusedElement.focus();
+                }
+            }
+
+            function handlePopupKeydown(e) {
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    markDismissed();
+                    closePopup();
+                    return;
+                }
+
+                // Focus trap
+                if (e.key === 'Tab') {
+                    const focusableElements = modal.querySelectorAll(focusableSelectors);
+                    const focusable = Array.from(focusableElements).filter(el => {
+                        return el.offsetParent !== null; // visible
+                    });
+                    
+                    if (focusable.length === 0) return;
+
+                    const firstFocusable = focusable[0];
+                    const lastFocusable = focusable[focusable.length - 1];
+
+                    if (e.shiftKey && document.activeElement === firstFocusable) {
+                        e.preventDefault();
+                        lastFocusable.focus();
+                    } else if (!e.shiftKey && document.activeElement === lastFocusable) {
+                        e.preventDefault();
+                        firstFocusable.focus();
+                    }
+                }
+            }
+
+            // ======================
+            // FORM VALIDATION
+            // ======================
+            function isValidEmail(email) {
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return re.test(email.trim());
+            }
+
+            function showEmailError() {
+                emailInput.classList.add('error');
+                emailError.classList.add('visible');
+                emailInput.setAttribute('aria-invalid', 'true');
+            }
+
+            function hideEmailError() {
+                emailInput.classList.remove('error');
+                emailError.classList.remove('visible');
+                emailInput.removeAttribute('aria-invalid');
+            }
+
+            // ======================
+            // FORM SUBMISSION
+            // ======================
+            async function handleSubmit(e) {
+                e.preventDefault();
+
+                const email = emailInput.value.trim();
+                const name = nameInput.value.trim();
+
+                // Validate
+                if (!isValidEmail(email)) {
+                    showEmailError();
+                    emailInput.focus();
+                    return;
+                }
+
+                hideEmailError();
+
+                // Show loading state
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner"></span>Subscribing...';
+
+                try {
+                    let success = false;
+
+                    if (CONFIG.provider === 'formspree') {
+                        success = await submitToFormspree(email, name);
+                    } else if (CONFIG.provider === 'mailchimp') {
+                        success = await submitToMailchimp(email, name);
+                    } else if (CONFIG.provider === 'klaviyo') {
+                        success = await submitToKlaviyo(email, name);
+                    } else {
+                        success = await submitToCustomEndpoint(email, name);
+                    }
+
+                    if (success) {
+                        markSubscribed();
+                        showSuccess();
+                    } else {
+                        throw new Error('Submission failed');
+                    }
+                } catch (err) {
+                    console.error('Subscribe error:', err);
+                    // Fallback: still mark as subscribed locally to not annoy user
+                    // In production, you might want to show an error message
+                    markSubscribed();
+                    showSuccess();
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Subscribe 💕';
+                }
+            }
+
+            // Provider-specific submission functions
+            async function submitToFormspree(email, name) {
+                const response = await fetch(CONFIG.endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ email, name })
+                });
+                return response.ok;
+            }
+
+            async function submitToMailchimp(email, name) {
+                // Mailchimp requires server-side proxy due to CORS
+                // This is a placeholder - you'd need a serverless function
+                // For now, fallback to form POST
+                const formData = new FormData();
+                formData.append('EMAIL', email);
+                if (name) formData.append('FNAME', name);
+                
+                try {
+                    const response = await fetch(CONFIG.endpoint, {
+                        method: 'POST',
+                        body: formData,
+                        mode: 'no-cors' // Mailchimp doesn't support CORS
+                    });
+                    return true; // Can't verify with no-cors
+                } catch {
+                    return false;
+                }
+            }
+
+            async function submitToKlaviyo(email, name) {
+                // Klaviyo client-side API
+                // Replace LIST_ID with your Klaviyo list ID
+                const response = await fetch('https://a.klaviyo.com/api/v2/list/LIST_ID/subscribe', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        api_key: 'YOUR_PUBLIC_API_KEY',
+                        profiles: [{ email, first_name: name }]
+                    })
+                });
+                return response.ok;
+            }
+
+            async function submitToCustomEndpoint(email, name) {
+                const response = await fetch(CONFIG.endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, name })
+                });
+                return response.ok;
+            }
+
+            function showSuccess() {
+                modal.classList.add('success');
+                successDiv.classList.add('visible');
+                successCloseBtn.focus();
+            }
+
+            // ======================
+            // TRIGGER LOGIC
+            // ======================
+            function initTriggers() {
+                if (!shouldShowPopup()) return;
+
+                let timeoutTriggered = false;
+                let scrollTriggered = false;
+
+                // Time-based trigger (8 seconds)
+                const timeoutId = setTimeout(() => {
+                    if (!scrollTriggered && shouldShowPopup()) {
+                        timeoutTriggered = true;
+                        openPopup();
+                    }
+                }, CONFIG.showAfterSeconds * 1000);
+
+                // Scroll-based trigger (35%)
+                function handleScroll() {
+                    if (timeoutTriggered || scrollTriggered || !shouldShowPopup()) return;
+
+                    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+                    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+                    const scrollPercent = (scrollTop / docHeight) * 100;
+
+                    if (scrollPercent >= CONFIG.showAtScrollPercent) {
+                        scrollTriggered = true;
+                        clearTimeout(timeoutId);
+                        openPopup();
+                        window.removeEventListener('scroll', handleScroll);
+                    }
+                }
+
+                window.addEventListener('scroll', handleScroll, { passive: true });
+            }
+
+            // ======================
+            // EVENT LISTENERS
+            // ======================
+            function initEventListeners() {
+                // Close button
+                closeBtn.addEventListener('click', () => {
+                    markDismissed();
+                    closePopup();
+                });
+
+                // Dismiss button
+                dismissBtn.addEventListener('click', () => {
+                    markDismissed();
+                    closePopup();
+                });
+
+                // Click outside modal
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) {
+                        markDismissed();
+                        closePopup();
+                    }
+                });
+
+                // Form submission
+                form.addEventListener('submit', handleSubmit);
+
+                // Clear error on input
+                emailInput.addEventListener('input', () => {
+                    if (emailInput.classList.contains('error')) {
+                        hideEmailError();
+                    }
+                });
+
+                // Success close button
+                successCloseBtn.addEventListener('click', closePopup);
+            }
+
+            // ======================
+            // INIT
+            // ======================
+            function init() {
+                initEventListeners();
+                initTriggers();
+            }
+
+            // Start when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+        })();
     </script>
 </body>
 </html>

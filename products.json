@@ -7,6 +7,7 @@
         "inStock": true,
         "quantity": 22,
         "image": "images/gloves.png",
+        "rotation": 0,
         "description": "Durable grip, breathable back."
     },
     {
@@ -17,6 +18,7 @@
         "inStock": false,
         "quantity": 0,
         "image": "images/hammer.jpg",
+        "rotation": 0,
         "description": "Balanced steel head, comfortable handle."
     }
 ]

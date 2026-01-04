@@ -83,6 +83,11 @@
             background: rgba(34, 197, 94, .3);
         }
 
+        .btn.small {
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse
@@ -144,6 +149,109 @@
             border-radius: 12px;
             padding: 10px 12px;
         }
+
+        /* Image preview and rotation controls */
+        .image-preview-section {
+            margin-top: 10px;
+            padding: 12px;
+            background: #0f172a;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, .08);
+        }
+
+        .image-preview-container {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .image-preview-wrapper {
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1f2937;
+            border-radius: 8px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .image-preview-wrapper img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+
+        /* Handle rotated images - when 90/270, we need to fit differently */
+        .image-preview-wrapper img.rotated-90,
+        .image-preview-wrapper img.rotated-270 {
+            max-width: 120px;
+            max-height: 120px;
+        }
+
+        .rotation-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .rotation-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .rotation-info {
+            font-size: 12px;
+            color: #9ca3af;
+        }
+
+        .no-image-preview {
+            color: #6b7280;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        /* Table image thumbnails */
+        .table-img-wrapper {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1f2937;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .table-img-wrapper img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .table-rotation-controls {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            margin-top: 4px;
+        }
+
+        .btn.rotate-btn {
+            padding: 4px 8px;
+            font-size: 11px;
+            min-width: 28px;
+        }
+
+        .rotation-badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            background: rgba(96, 165, 250, .2);
+            border-radius: 4px;
+            color: #93c5fd;
+        }
     </style>
 </head>
 
@@ -186,6 +294,27 @@
 
                 <label class="muted">Image path</label>
                 <input id="image" placeholder="images/product.jpg" />
+
+                <!-- Image Preview with Rotation Controls -->
+                <div class="image-preview-section" id="imagePreviewSection">
+                    <div class="image-preview-container">
+                        <div class="image-preview-wrapper" id="imagePreviewWrapper">
+                            <div class="no-image-preview" id="noImageText">No image</div>
+                            <img id="imagePreview" src="" alt="Preview" style="display: none;" />
+                        </div>
+                        <div class="rotation-controls" id="rotationControls" style="display: none;">
+                            <div class="rotation-buttons">
+                                <button type="button" class="btn small" id="rotateLeftBtn" title="Rotate Left 90°">↺ Left</button>
+                                <button type="button" class="btn small" id="rotateRightBtn" title="Rotate Right 90°">↻ Right</button>
+                            </div>
+                            <div class="rotation-info">
+                                Current: <strong id="rotationDegrees">0°</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" id="rotation" value="0" />
+
                 <div style="height:10px"></div>
 
                 <label class="muted">Description</label>
@@ -205,6 +334,7 @@
                     <table>
                         <thead>
                             <tr>
+                                <th>Image</th>
                                 <th>SKU</th>
                                 <th>Name</th>
                                 <th>Price</th>
@@ -232,11 +362,94 @@
             quantity: document.getElementById("quantity"),
             inStock: document.getElementById("inStock"),
             image: document.getElementById("image"),
+            rotation: document.getElementById("rotation"),
             description: document.getElementById("description"),
             list: document.getElementById("list"),
             stats: document.getElementById("stats"),
             statusMsg: document.getElementById("statusMsg"),
+            imagePreview: document.getElementById("imagePreview"),
+            imagePreviewWrapper: document.getElementById("imagePreviewWrapper"),
+            noImageText: document.getElementById("noImageText"),
+            rotationControls: document.getElementById("rotationControls"),
+            rotationDegrees: document.getElementById("rotationDegrees"),
+            rotateLeftBtn: document.getElementById("rotateLeftBtn"),
+            rotateRightBtn: document.getElementById("rotateRightBtn"),
         };
+
+        // Normalize rotation to 0, 90, 180, or 270
+        function normalizeRotation(deg) {
+            deg = ((deg % 360) + 360) % 360; // Handle negatives
+            // Snap to nearest 90
+            const snapped = Math.round(deg / 90) * 90;
+            return snapped % 360;
+        }
+
+        // Get CSS class for rotation
+        function getRotationClass(deg) {
+            const normalized = normalizeRotation(deg);
+            if (normalized === 90) return 'rotated-90';
+            if (normalized === 180) return 'rotated-180';
+            if (normalized === 270) return 'rotated-270';
+            return '';
+        }
+
+        // Apply rotation transform to an element
+        function applyRotation(imgEl, deg) {
+            const normalized = normalizeRotation(deg);
+            imgEl.style.transform = `rotate(${normalized}deg)`;
+            // Remove old rotation classes
+            imgEl.classList.remove('rotated-90', 'rotated-180', 'rotated-270');
+            const cls = getRotationClass(normalized);
+            if (cls) imgEl.classList.add(cls);
+        }
+
+        // Update image preview
+        function updateImagePreview() {
+            const imagePath = els.image.value.trim();
+            const rotation = parseInt(els.rotation.value) || 0;
+
+            if (imagePath) {
+                els.imagePreview.src = imagePath;
+                els.imagePreview.style.display = 'block';
+                els.noImageText.style.display = 'none';
+                els.rotationControls.style.display = 'block';
+                applyRotation(els.imagePreview, rotation);
+                els.rotationDegrees.textContent = normalizeRotation(rotation) + '°';
+            } else {
+                els.imagePreview.style.display = 'none';
+                els.noImageText.style.display = 'block';
+                els.rotationControls.style.display = 'none';
+            }
+        }
+
+        // Rotate handlers for form
+        function rotateLeft() {
+            const current = parseInt(els.rotation.value) || 0;
+            els.rotation.value = normalizeRotation(current - 90);
+            updateImagePreview();
+        }
+
+        function rotateRight() {
+            const current = parseInt(els.rotation.value) || 0;
+            els.rotation.value = normalizeRotation(current + 90);
+            updateImagePreview();
+        }
+
+        els.rotateLeftBtn.addEventListener('click', rotateLeft);
+        els.rotateRightBtn.addEventListener('click', rotateRight);
+        els.image.addEventListener('input', updateImagePreview);
+        els.image.addEventListener('change', updateImagePreview);
+
+        // Handle image load errors
+        els.imagePreview.addEventListener('error', () => {
+            els.imagePreview.style.display = 'none';
+            els.noImageText.textContent = 'Image not found';
+            els.noImageText.style.display = 'block';
+        });
+
+        els.imagePreview.addEventListener('load', () => {
+            els.noImageText.style.display = 'none';
+        });
 
         function showStatus(message, type = "info") {
             els.statusMsg.textContent = message;
@@ -288,23 +501,65 @@
             els.stats.textContent = `${PRODUCTS.length} product(s)`;
 
             for (const p of PRODUCTS) {
+                const rotation = normalizeRotation(p.rotation || 0);
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
+                    <td>
+                        <div class="table-img-wrapper">
+                            ${p.image 
+                                ? `<img src="${esc(p.image)}" alt="${esc(p.name)}" style="transform: rotate(${rotation}deg);" />` 
+                                : '<span style="color:#6b7280;font-size:10px;">No img</span>'}
+                        </div>
+                        ${p.image ? `
+                        <div class="table-rotation-controls">
+                            <button class="btn rotate-btn" data-rotate-left="${esc(p.id)}" title="Rotate Left">↺</button>
+                            <span class="rotation-badge">${rotation}°</span>
+                            <button class="btn rotate-btn" data-rotate-right="${esc(p.id)}" title="Rotate Right">↻</button>
+                        </div>
+                        ` : ''}
+                    </td>
                     <td>${esc(p.id)}</td>
                     <td>${esc(p.name)}</td>
                     <td>$${Number(p.price || 0).toFixed(2)}</td>
                     <td>${esc(p.category || "")}</td>
                     <td>${p.quantity ?? ""}</td>
                     <td style="white-space:nowrap;">
-                        <button class="btn" data-edit="${esc(p.id)}" style="padding:6px 10px;">Edit</button>
-                        <button class="btn" data-del="${esc(p.id)}" style="padding:6px 10px;">Del</button>
+                        <button class="btn small" data-edit="${esc(p.id)}">Edit</button>
+                        <button class="btn small" data-del="${esc(p.id)}">Del</button>
                     </td>
                 `;
                 els.list.appendChild(tr);
             }
 
+            // Attach event listeners
             els.list.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", () => edit(b.dataset.edit)));
             els.list.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => del(b.dataset.del)));
+            
+            // Rotation buttons in table
+            els.list.querySelectorAll("[data-rotate-left]").forEach(b => {
+                b.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    rotateProduct(b.dataset.rotateLeft, -90);
+                });
+            });
+            els.list.querySelectorAll("[data-rotate-right]").forEach(b => {
+                b.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    rotateProduct(b.dataset.rotateRight, 90);
+                });
+            });
+        }
+
+        // Rotate a product's image directly from the table
+        async function rotateProduct(id, delta) {
+            const p = PRODUCTS.find(x => x.id === id);
+            if (!p) return;
+            
+            const current = normalizeRotation(p.rotation || 0);
+            p.rotation = normalizeRotation(current + delta);
+            
+            render();
+            await saveToCloud();
         }
 
         function esc(s) {
@@ -321,7 +576,9 @@
             els.quantity.value = "";
             els.inStock.value = "true";
             els.image.value = "";
+            els.rotation.value = "0";
             els.description.value = "";
+            updateImagePreview();
         }
 
         function edit(id) {
@@ -334,7 +591,9 @@
             els.quantity.value = p.quantity ?? "";
             els.inStock.value = String(!!p.inStock);
             els.image.value = p.image || "";
+            els.rotation.value = normalizeRotation(p.rotation || 0);
             els.description.value = p.description || "";
+            updateImagePreview();
             window.scrollTo({ top: 0, behavior: "smooth" });
         }
 
@@ -357,6 +616,7 @@
                 quantity: Number(els.quantity.value || 0),
                 inStock: els.inStock.value === "true",
                 image: els.image.value.trim(),
+                rotation: normalizeRotation(parseInt(els.rotation.value) || 0),
                 description: els.description.value.trim()
             };
 

@@ -503,12 +503,26 @@
         }
 
         .img img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-            transition: transform .3s ease;
-        }
+    width: 100%;
+    height: 100%;
+    display: block;
+    transition: transform .3s ease;
+    transform-origin: center center;
+
+
+    image-orientation: none;
+
+  
+    object-fit: cover;
+}
+
+/* 90° / 270° rotations must not crop */
+.img img.rotated-90,
+.img img.rotated-270 {
+    object-fit: contain;
+    padding: 8px;
+}
+
 
         /* Rotation classes - use object-fit: contain for rotated images to prevent clipping */
         .img img.rotated-90,
@@ -712,15 +726,20 @@
 
         .lightbox.open .lightbox-content { transform: scale(1); }
 
-        .lightbox-content img {
-            max-width: 100%;
-            max-height: 85vh;
-            border-radius: var(--r);
-            border: 3px solid var(--cream);
-            box-shadow: 0 0 60px rgba(228, 160, 160, .3), 0 30px 80px rgba(0, 0, 0, .3);
-            object-fit: contain;
-            transition: transform 0.3s ease;
-        }
+      .lightbox-content img {
+    max-width: 100%;
+    max-height: 85vh;
+    border-radius: var(--r);
+    border: 3px solid var(--cream);
+    box-shadow: 0 0 60px rgba(228, 160, 160, .3), 0 30px 80px rgba(0, 0, 0, .3);
+    object-fit: contain;
+    transition: transform 0.3s ease;
+
+    /* 🔥 Prevent mobile EXIF rotation */
+    image-orientation: none;
+    transform-origin: center center;
+}
+
 
         /* Lightbox rotation handling */
         .lightbox-content img.rotated-90,
@@ -965,6 +984,17 @@
             .topRow { flex-direction: column; }
             .modal { max-width: 100%; margin: 10px; }
         }
+@media (max-width: 600px) {
+    .img {
+        height: 220px; /* give rotated images room */
+    }
+
+    .img img.rotated-90,
+    .img img.rotated-270 {
+        max-width: 100%;
+        max-height: 100%;
+    }
+}
 
         @media (prefers-reduced-motion: reduce) {
             .stars { animation: none; opacity: 0.5; }

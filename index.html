@@ -1,0 +1,1120 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Jojin's Kitty Thrift Shop</title>
+    <meta name="description" content="Jojin's Kitty Thrift Shop — Unique thrift finds in Chicago." />
+    <meta property="og:title" content="Jojin's Kitty Thrift Shop" />
+    <meta property="og:description" content="Unique thrift finds in Chicago." />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32'>🐾</text></svg>">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --ink: #1c1610;
+            --ink-mid: #3d3228;
+            --ink-soft: #6b5d4f;
+            --muted: #9a8878;
+            --paper: #f7f2eb;
+            --paper-warm: #f0e9de;
+            --paper-dark: #e8dfd3;
+            --tan: #d4c4a8;
+            --tan-dark: #b8a888;
+            --amber: #c8863a;
+            --amber-light: #e0a050;
+            --amber-dark: #a06820;
+            --teal: #3d7a6e;
+            --teal-light: #5a9e90;
+            --teal-dark: #2a5a50;
+            --rust: #b8522a;
+            --rust-light: #d4703a;
+            --card: rgba(247, 242, 235, 0.97);
+            --card-border: rgba(180, 155, 120, 0.3);
+            --shadow: 0 8px 32px rgba(28, 22, 16, 0.1);
+            --shadow-soft: 0 3px 14px rgba(28, 22, 16, 0.07);
+            --r: 4px;
+            --r2: 3px;
+            --font-display: 'Playfair Display', Georgia, serif;
+            --font-body: 'Karla', system-ui, sans-serif;
+        }
+
+        * { box-sizing: border-box; }
+        html, body { height: 100%; }
+
+        body {
+            margin: 0;
+            font-family: var(--font-body);
+            color: var(--ink);
+            background-color: var(--paper);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* ── Grain texture overlay ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+        }
+
+        /* ── Top accent bar ── */
+        .accent-bar {
+            height: 5px;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--amber) 0px,
+                var(--amber) 40px,
+                var(--teal) 40px,
+                var(--teal) 80px,
+                var(--rust) 80px,
+                var(--rust) 120px,
+                var(--amber-dark) 120px,
+                var(--amber-dark) 160px
+            );
+        }
+
+        /* ── Announcement bar ── */
+        .announce-bar {
+            background: var(--ink);
+            color: var(--paper-warm);
+            text-align: center;
+            padding: 9px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .announce-bar span {
+            color: var(--amber-light);
+        }
+
+        /* ── Header ── */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: var(--paper);
+            border-bottom: 2px solid var(--ink);
+            box-shadow: 0 4px 0 var(--tan);
+        }
+
+        .wrap {
+            max-width: 1140px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header-inner {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 20px 0 16px;
+            flex-wrap: wrap;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            width: 58px;
+            height: 58px;
+            border-radius: 2px;
+            background: var(--ink);
+            border: 2px solid var(--ink);
+            display: grid;
+            place-items: center;
+            font-size: 28px;
+            flex-shrink: 0;
+            box-shadow: 4px 4px 0 var(--amber);
+        }
+
+        .brand-text h1 {
+            margin: 0;
+            font-family: var(--font-display);
+            font-size: 28px;
+            font-weight: 900;
+            line-height: 1.05;
+            color: var(--ink);
+            letter-spacing: -0.02em;
+        }
+
+        .brand-text h1 em {
+            font-style: italic;
+            color: var(--amber-dark);
+        }
+
+        .brand-sub {
+            margin: 5px 0 0;
+            color: var(--ink-soft);
+            font-size: 13px;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .brand-sub strong {
+            color: var(--teal-dark);
+            font-weight: 700;
+        }
+
+        /* ── User controls ── */
+        .user-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            padding: 10px 16px;
+            border-radius: var(--r2);
+            border: 1.5px solid var(--ink);
+            background: var(--paper);
+            color: var(--ink);
+            text-decoration: none;
+            font-weight: 700;
+            font-family: inherit;
+            font-size: 13px;
+            box-shadow: 3px 3px 0 var(--tan-dark);
+            transition: transform 0.15s, box-shadow 0.15s;
+            cursor: pointer;
+            letter-spacing: 0.02em;
+        }
+
+        .btn:hover {
+            transform: translate(-1px, -1px);
+            box-shadow: 4px 4px 0 var(--amber);
+        }
+
+        .btn:active {
+            transform: translate(1px, 1px);
+            box-shadow: 1px 1px 0 var(--tan-dark);
+        }
+
+        .btn-accent {
+            background: var(--amber);
+            color: var(--ink);
+            border-color: var(--amber-dark);
+            box-shadow: 3px 3px 0 var(--amber-dark);
+        }
+
+        .btn-accent:hover {
+            background: var(--amber-light);
+            box-shadow: 4px 4px 0 var(--amber-dark);
+        }
+
+        .btn-teal {
+            background: var(--teal);
+            color: var(--paper);
+            border-color: var(--teal-dark);
+            box-shadow: 3px 3px 0 var(--teal-dark);
+        }
+
+        .btn-teal:hover {
+            background: var(--teal-light);
+            box-shadow: 4px 4px 0 var(--teal-dark);
+        }
+
+        /* ── Search bar ── */
+        .bar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            padding: 12px 0 14px;
+            border-top: 1px solid var(--paper-dark);
+        }
+
+        input, select {
+            font-family: inherit;
+            background: var(--paper-warm);
+            color: var(--ink);
+            border: 1.5px solid var(--ink-soft);
+            padding: 10px 14px;
+            border-radius: var(--r2);
+            outline: none;
+            font-size: 14px;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        input {
+            flex: 1 1 260px;
+        }
+
+        select {
+            flex: 0 0 190px;
+            cursor: pointer;
+        }
+
+        input::placeholder { color: var(--muted); }
+
+        input:focus, select:focus {
+            border-color: var(--teal);
+            box-shadow: 0 0 0 3px rgba(61, 122, 110, 0.15);
+        }
+
+        .call-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 14px;
+            border-radius: var(--r2);
+            background: var(--ink);
+            color: var(--paper-warm);
+            font-size: 13px;
+            font-weight: 700;
+            border: 1.5px solid var(--ink);
+            white-space: nowrap;
+            text-decoration: none;
+            letter-spacing: 0.03em;
+            box-shadow: 3px 3px 0 var(--amber-dark);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        .call-badge:hover {
+            transform: translate(-1px, -1px);
+            box-shadow: 4px 4px 0 var(--amber-dark);
+        }
+
+        .call-badge .call-num {
+            color: var(--amber-light);
+        }
+
+        .count {
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 600;
+            margin-left: auto;
+            white-space: nowrap;
+        }
+
+        .wishlist-toggle {
+            position: relative;
+        }
+
+        .wishlist-toggle .badge {
+            position: absolute;
+            top: -7px;
+            right: -7px;
+            background: var(--rust);
+            color: white;
+            font-size: 10px;
+            font-weight: 800;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--paper);
+        }
+
+        .wishlist-toggle .badge:empty,
+        .wishlist-toggle .badge[data-count="0"] { display: none; }
+
+        /* ── Main ── */
+        main { padding: 28px 0 72px; }
+
+        /* ── Section header ── */
+        .section-header {
+            display: flex;
+            align-items: baseline;
+            gap: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: 32px;
+            font-weight: 900;
+            color: var(--ink);
+            margin: 0;
+            letter-spacing: -0.02em;
+            line-height: 1;
+        }
+
+        .section-title em {
+            font-style: italic;
+            color: var(--amber-dark);
+        }
+
+        .section-divider {
+            flex: 1;
+            height: 2px;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--tan-dark) 0,
+                var(--tan-dark) 6px,
+                transparent 6px,
+                transparent 10px
+            );
+            min-width: 40px;
+        }
+
+        /* ── View controls ── */
+        .view-controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .view-btn {
+            padding: 8px 16px;
+            border-radius: var(--r2);
+            border: 1.5px solid var(--ink-soft);
+            background: var(--paper);
+            color: var(--ink-soft);
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: inherit;
+            letter-spacing: 0.02em;
+        }
+
+        .view-btn:hover {
+            border-color: var(--teal);
+            color: var(--teal-dark);
+        }
+
+        .view-btn.active {
+            background: var(--ink);
+            color: var(--paper-warm);
+            border-color: var(--ink);
+            box-shadow: 2px 2px 0 var(--amber-dark);
+        }
+
+        /* ── Product Grid ── */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        /* ── Product Card ── */
+        .card {
+            background: var(--card);
+            border: 1.5px solid var(--ink);
+            border-radius: var(--r);
+            overflow: hidden;
+            box-shadow: 5px 5px 0 var(--tan-dark);
+            position: relative;
+            transition: transform 0.18s, box-shadow 0.18s;
+        }
+
+        .card:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 7px 7px 0 var(--amber-dark);
+        }
+
+        /* ── Save button ── */
+        .save-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 36px;
+            height: 36px;
+            border-radius: var(--r2);
+            background: var(--paper);
+            border: 1.5px solid var(--ink);
+            color: var(--ink-soft);
+            font-size: 17px;
+            cursor: pointer;
+            z-index: 5;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 2px 2px 0 var(--tan-dark);
+        }
+
+        .save-btn:hover {
+            background: var(--amber-light);
+            color: var(--ink);
+            box-shadow: 3px 3px 0 var(--amber-dark);
+        }
+
+        .save-btn.saved {
+            background: var(--teal);
+            border-color: var(--teal-dark);
+            color: white;
+            box-shadow: 2px 2px 0 var(--teal-dark);
+        }
+
+        .save-btn.saved:hover {
+            background: var(--rust);
+            border-color: var(--rust);
+            box-shadow: 2px 2px 0 var(--rust);
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.25); }
+            100% { transform: scale(1); }
+        }
+
+        .save-btn.pop { animation: pop 0.25s ease; }
+
+        /* ── Card image ── */
+        .img {
+            height: 200px;
+            background: var(--paper-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border-bottom: 1.5px solid var(--ink);
+            position: relative;
+        }
+
+        .img img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            transition: transform 0.3s ease;
+            object-fit: cover;
+            image-orientation: none;
+        }
+
+        .img img.rotated-90,
+        .img img.rotated-270 {
+            object-fit: contain;
+            padding: 8px;
+        }
+
+        .card:hover .img img { transform: scale(1.03); }
+
+        .noimg {
+            color: var(--muted);
+            font-weight: 700;
+            font-size: 13px;
+            text-align: center;
+            padding: 12px;
+        }
+
+        .img.has-image { cursor: zoom-in; }
+
+        .img-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(28,22,16,0.55));
+            padding: 24px 12px 10px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+
+        .img.has-image:hover .img-overlay { opacity: 1; }
+
+        .img-overlay span {
+            color: var(--paper);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        /* ── Card content ── */
+        .content { padding: 14px 16px 16px; }
+
+        .meta-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .category-tag {
+            background: var(--ink);
+            color: var(--paper-warm);
+            padding: 4px 10px;
+            border-radius: 2px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .price {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 22px;
+            color: var(--amber-dark);
+            letter-spacing: -0.01em;
+        }
+
+        .name {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 19px;
+            margin: 10px 0 6px;
+            line-height: 1.2;
+            color: var(--ink);
+        }
+
+        .meta-row {
+            display: flex;
+            gap: 14px;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .meta-row strong { color: var(--ink-soft); }
+
+        .desc {
+            color: var(--ink-soft);
+            font-size: 13px;
+            line-height: 1.55;
+            margin: 8px 0 0;
+            min-height: 38px;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px dashed var(--tan-dark);
+        }
+
+        .stock {
+            font-size: 12px;
+            padding: 5px 12px;
+            border-radius: 2px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .stock.good {
+            background: rgba(61, 122, 110, 0.12);
+            border: 1px solid var(--teal);
+            color: var(--teal-dark);
+        }
+
+        .stock.bad {
+            background: rgba(184, 82, 42, 0.1);
+            border: 1px solid var(--rust-light);
+            color: var(--rust);
+        }
+
+        .sku-hint {
+            margin-top: 10px;
+            font-size: 11px;
+            color: var(--muted);
+            letter-spacing: 0.03em;
+        }
+
+        .sku-hint strong { color: var(--teal-dark); }
+
+        /* ── Lightbox ── */
+        .lightbox {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(28, 22, 16, 0.88);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.25s, visibility 0.25s;
+        }
+
+        .lightbox.open { opacity: 1; visibility: visible; }
+
+        .lightbox-content {
+            position: relative;
+            max-width: 88vw;
+            max-height: 85vh;
+            transform: scale(0.92);
+            transition: transform 0.25s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lightbox.open .lightbox-content { transform: scale(1); }
+
+        .lightbox-content img {
+            max-width: 100%;
+            max-height: 85vh;
+            border-radius: var(--r);
+            border: 3px solid var(--paper);
+            box-shadow: 8px 8px 0 var(--amber-dark), 0 30px 80px rgba(0,0,0,0.4);
+            object-fit: contain;
+            image-orientation: none;
+        }
+
+        .lightbox-content img.rotated-90,
+        .lightbox-content img.rotated-270 {
+            max-width: 85vh;
+            max-height: 90vw;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: -16px;
+            right: -16px;
+            width: 44px;
+            height: 44px;
+            border-radius: var(--r2);
+            background: var(--ink);
+            border: 2px solid var(--paper);
+            color: var(--paper);
+            font-size: 20px;
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 3px 3px 0 var(--amber-dark);
+            transition: transform 0.15s;
+        }
+
+        .lightbox-close:hover { transform: scale(1.1); background: var(--rust); }
+
+        .lightbox-info {
+            position: absolute;
+            bottom: -40px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: var(--paper-warm);
+            font-family: var(--font-display);
+            font-style: italic;
+            font-size: 17px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.4);
+        }
+
+        /* ── Footer ── */
+        footer {
+            border-top: 2px solid var(--ink);
+            background: var(--ink);
+            color: var(--paper-warm);
+            padding: 28px 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .footer-inner {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-text { font-size: 13px; line-height: 1.8; }
+        .footer-text strong { color: var(--amber-light); }
+
+        .footer-stamp {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--amber);
+            color: var(--ink);
+            padding: 10px 18px;
+            border-radius: var(--r2);
+            font-weight: 800;
+            font-size: 14px;
+            border: 2px solid var(--amber-dark);
+            box-shadow: 3px 3px 0 var(--amber-dark);
+            letter-spacing: 0.03em;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 600px) {
+            .brand-text h1 { font-size: 22px; }
+            .section-title { font-size: 24px; }
+            .grid { grid-template-columns: 1fr; }
+            .count { margin-left: 0; }
+            .user-controls { width: 100%; justify-content: flex-end; }
+            .header-inner { flex-direction: column; }
+        }
+
+        /* ── Accessibility ── */
+        a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+            outline: 2px solid var(--teal);
+            outline-offset: 2px;
+        }
+
+        .sr-only {
+            position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+            overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .card { transition: none; }
+            .card:hover { transform: none; }
+            .save-btn.pop { animation: none; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Accent bar -->
+    <div class="accent-bar"></div>
+
+    <!-- Announce bar -->
+    <div class="announce-bar">
+        🐾 Jojin's Kitty Thrift Shop &nbsp;·&nbsp; <span>Call to reserve items</span> &nbsp;·&nbsp; Chicago, IL &nbsp;·&nbsp; Mon–Sat 11am–4pm
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged product image">
+        <div class="lightbox-content">
+            <button class="lightbox-close" id="lightbox-close" aria-label="Close enlarged image">✕</button>
+            <img id="lightbox-img" src="" alt="" />
+            <div class="lightbox-info" id="lightbox-info"></div>
+        </div>
+    </div>
+
+    <header>
+        <div class="wrap">
+            <div class="header-inner">
+                <div class="brand">
+                    <div class="logo" aria-hidden="true">🐾</div>
+                    <div class="brand-text">
+                        <h1>Jojin's <em>Kitty</em> Thrift</h1>
+                        <p class="brand-sub">Unique finds, fair prices. <strong>Call to confirm availability</strong> before visiting.</p>
+                    </div>
+                </div>
+                <div class="user-controls" id="user-controls">
+                    <button class="btn wishlist-toggle" id="wishlist-btn">
+                        ♡ Saved
+                        <span class="badge" id="wishlist-badge"></span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="bar">
+                <label for="q" class="sr-only">Search products</label>
+                <input id="q" type="search" placeholder="Search by name, SKU, or description…" />
+
+                <label for="cat" class="sr-only">Filter by category</label>
+                <select id="cat">
+                    <option value="">All categories</option>
+                </select>
+
+                <a class="call-badge" id="callTop" href="tel:+13126100321">
+                    📞 <span class="call-num">+1 (312) 610-0321</span>
+                </a>
+
+                <span class="count" id="count"></span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="wrap">
+
+            <div class="section-header">
+                <h2 class="section-title">Browse the <em>Shop</em></h2>
+                <div class="section-divider"></div>
+            </div>
+
+            <div class="view-controls" id="view-controls">
+                <button class="view-btn active" data-view="all">All Items</button>
+                <button class="view-btn" data-view="saved">♡ My Saved Items</button>
+            </div>
+
+            <div class="grid" id="grid"></div>
+
+        </div>
+    </main>
+
+    <footer>
+        <div class="wrap">
+            <div class="footer-inner">
+                <div class="footer-text">
+                    <div><strong>Hours:</strong> Mon–Sat 11am–4pm &nbsp;·&nbsp; Leave a message or text outside hours</div>
+                    <div><strong>Location:</strong> 4100 N. Pulaski Rd., Chicago, IL</div>
+                    <div>Inventory changes quickly — call ahead to reserve. <strong>+1 (312) 610-0321</strong></div>
+                </div>
+                <div class="footer-stamp">🐾 Jojin's Kitty Thrift</div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const CONFIG = {
+            apiBase: 'https://jojin-thrift-api.tvinstallchicago.workers.dev',
+            storePhone: '+13126100321'
+        };
+
+        let PRODUCTS = [];
+        let savedItems = new Set();
+        let currentView = 'all';
+
+        const grid       = document.getElementById('grid');
+        const q          = document.getElementById('q');
+        const cat        = document.getElementById('cat');
+        const count      = document.getElementById('count');
+        const callTop    = document.getElementById('callTop');
+
+        const lightbox      = document.getElementById('lightbox');
+        const lightboxImg   = document.getElementById('lightbox-img');
+        const lightboxInfo  = document.getElementById('lightbox-info');
+        const lightboxClose = document.getElementById('lightbox-close');
+
+        const wishlistBtn   = document.getElementById('wishlist-btn');
+        const wishlistBadge = document.getElementById('wishlist-badge');
+        const viewControls  = document.getElementById('view-controls');
+
+        callTop.href = `tel:${CONFIG.storePhone}`;
+
+        // ── Wishlist ──────────────────────────────────────
+        const WISHLIST_KEY = 'jojin_wishlist_v1';
+
+        function loadWishlist() {
+            try {
+                const raw = localStorage.getItem(WISHLIST_KEY);
+                const arr = raw ? JSON.parse(raw) : [];
+                savedItems = new Set(Array.isArray(arr) ? arr : []);
+            } catch { savedItems = new Set(); }
+        }
+
+        function persistWishlist() {
+            localStorage.setItem(WISHLIST_KEY, JSON.stringify([...savedItems]));
+        }
+
+        function updateWishlistBadge() {
+            const c = savedItems.size;
+            wishlistBadge.textContent = c > 0 ? String(c) : '';
+            wishlistBadge.dataset.count = String(c);
+        }
+
+        function updateViewButtons() {
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.view === currentView);
+            });
+        }
+
+        function updateUI() { updateWishlistBadge(); updateViewButtons(); }
+
+        // ── Rotation helpers ──────────────────────────────
+        function normalizeRotation(deg) {
+            deg = ((deg % 360) + 360) % 360;
+            return Math.round(deg / 90) * 90 % 360;
+        }
+
+        function getRotationClass(deg) {
+            const n = normalizeRotation(deg);
+            if (n === 90)  return 'rotated-90';
+            if (n === 180) return 'rotated-180';
+            if (n === 270) return 'rotated-270';
+            return '';
+        }
+
+        function getRotationStyle(deg) {
+            const n = normalizeRotation(deg);
+            return n > 0 ? `transform: rotate(${n}deg);` : '';
+        }
+
+        // ── Lightbox ──────────────────────────────────────
+        function openLightbox(src, name, rotation = 0) {
+            lightboxImg.src = src;
+            lightboxImg.alt = name;
+            lightboxInfo.textContent = name;
+            const n = normalizeRotation(rotation);
+            lightboxImg.style.transform = n > 0 ? `rotate(${n}deg)` : '';
+            lightboxImg.className = '';
+            const cls = getRotationClass(rotation);
+            if (cls) lightboxImg.classList.add(cls);
+            lightbox.classList.add('open');
+            document.body.style.overflow = 'hidden';
+            lightboxClose.focus();
+        }
+
+        function closeLightbox() {
+            lightbox.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        lightboxClose.addEventListener('click', closeLightbox);
+        lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+
+        // ── Products ──────────────────────────────────────
+        const money = n => new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(n);
+
+        function escapeHtml(str) {
+            return String(str ?? '')
+                .replaceAll('&', '&amp;').replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;').replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
+        function populateCategories(items) {
+            const cats = [...new Set(items.map(p => (p.category || '').trim()).filter(Boolean))].sort();
+            for (const c of cats) {
+                const opt = document.createElement('option');
+                opt.value = c; opt.textContent = c;
+                cat.appendChild(opt);
+            }
+        }
+
+        function matches(p, queryText, category) {
+            const qt = queryText.trim().toLowerCase();
+            if (category && (p.category || '') !== category) return false;
+            if (!qt) return true;
+            return `${p.name} ${p.id} ${p.description} ${p.category}`.toLowerCase().includes(qt);
+        }
+
+        function getFilteredProducts() {
+            let items = PRODUCTS.filter(p => matches(p, q.value, cat.value));
+            if (currentView === 'saved') items = items.filter(p => savedItems.has(p.id));
+            return items;
+        }
+
+        function render(items) {
+            grid.innerHTML = '';
+            count.textContent = `${items.length} item${items.length === 1 ? '' : 's'}`;
+            if (items.length === 0) return;
+
+            for (const p of items) {
+                const inStock  = !!p.inStock && (p.quantity ?? 1) > 0;
+                const isSaved  = savedItems.has(p.id);
+                const rotation = normalizeRotation(p.rotation || 0);
+                const rotStyle = getRotationStyle(rotation);
+                const rotClass = getRotationClass(rotation);
+
+                const card = document.createElement('article');
+                card.className = 'card';
+                card.innerHTML = `
+                    <button class="save-btn ${isSaved ? 'saved' : ''}" data-id="${escapeHtml(p.id)}" aria-label="${isSaved ? 'Remove from' : 'Add to'} saved items">
+                        ${isSaved ? '♥' : '♡'}
+                    </button>
+                    <div class="img ${p.image ? 'has-image' : ''}" ${p.image ? `data-image="${escapeHtml(p.image)}" data-name="${escapeHtml(p.name)}" data-rotation="${rotation}"` : ''}>
+                        ${p.image
+                            ? `<img src="${p.image}" alt="${escapeHtml(p.name)}" loading="lazy" class="${rotClass}" style="${rotStyle}">
+                               <div class="img-overlay"><span>Enlarge ↗</span></div>`
+                            : `<div class="noimg">No photo yet</div>`
+                        }
+                    </div>
+                    <div class="content">
+                        <div class="meta-top">
+                            <span class="category-tag">${escapeHtml(p.category || 'Misc')}</span>
+                            <span class="price">${money(Number(p.price || 0))}</span>
+                        </div>
+                        <h2 class="name">${escapeHtml(p.name || 'Unnamed Item')}</h2>
+                        <div class="meta-row">
+                            <span><strong>SKU:</strong> ${escapeHtml(p.id || '—')}</span>
+                            <span><strong>Qty:</strong> ${p.quantity ?? '—'}</span>
+                        </div>
+                        <p class="desc">${escapeHtml(p.description || '')}</p>
+                        <div class="card-footer">
+                            <span class="stock ${inStock ? 'good' : 'bad'}">${inStock ? '✓ In stock' : 'Call to confirm'}</span>
+                            <a class="btn btn-teal" href="tel:${CONFIG.storePhone}" aria-label="Call about ${escapeHtml(p.name)}">📞 Call</a>
+                        </div>
+                        <div class="sku-hint">Mention SKU: <strong>${escapeHtml(p.id || '')}</strong></div>
+                    </div>
+                `;
+
+                const imgDiv = card.querySelector('.img.has-image');
+                if (imgDiv) {
+                    imgDiv.addEventListener('click', () => {
+                        openLightbox(imgDiv.dataset.image, imgDiv.dataset.name, parseInt(imgDiv.dataset.rotation) || 0);
+                    });
+                }
+
+                const saveBtn = card.querySelector('.save-btn');
+                saveBtn.addEventListener('click', e => {
+                    e.stopPropagation();
+                    const id = saveBtn.dataset.id;
+                    const was = savedItems.has(id);
+                    if (was) savedItems.delete(id); else savedItems.add(id);
+                    persistWishlist();
+                    updateWishlistBadge();
+                    saveBtn.classList.toggle('saved');
+                    saveBtn.innerHTML = was ? '♡' : '♥';
+                    saveBtn.classList.add('pop');
+                    setTimeout(() => saveBtn.classList.remove('pop'), 250);
+                    if (currentView === 'saved' && was) render(getFilteredProducts());
+                });
+
+                grid.appendChild(card);
+            }
+        }
+
+        let searchTimeout;
+        function applyFilters() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => render(getFilteredProducts()), 150);
+        }
+
+        // ── Events ───────────────────────────────────────
+        wishlistBtn.addEventListener('click', () => {
+            currentView = currentView === 'saved' ? 'all' : 'saved';
+            updateViewButtons();
+            render(getFilteredProducts());
+        });
+
+        viewControls.addEventListener('click', e => {
+            if (e.target.classList.contains('view-btn')) {
+                currentView = e.target.dataset.view;
+                updateViewButtons();
+                render(getFilteredProducts());
+            }
+        });
+
+        q.addEventListener('input', applyFilters);
+        cat.addEventListener('change', applyFilters);
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && lightbox.classList.contains('open')) closeLightbox();
+        });
+
+        // ── Init ─────────────────────────────────────────
+        async function init() {
+            loadWishlist();
+            updateUI();
+            try {
+                const res = await fetch('/api/products', { cache: 'no-store' });
+                if (res.ok) { PRODUCTS = await res.json(); }
+                else throw new Error();
+            } catch {
+                const res = await fetch('products.json', { cache: 'no-store' });
+                PRODUCTS = await res.json();
+            }
+            populateCategories(PRODUCTS);
+            render(getFilteredProducts());
+        }
+
+        init().catch(err => {
+            console.error(err);
+            grid.innerHTML = `<div style="border:1.5px solid var(--rust-light); background:rgba(184,82,42,.07); padding:20px; border-radius:4px; color:var(--rust); font-weight:700;">
+                Could not load products. Check your connection or try again later.
+            </div>`;
+        });
+    </script>
+</body>
+</html>

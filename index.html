@@ -405,6 +405,122 @@
             box-shadow: 2px 2px 0 var(--amber-dark);
         }
 
+        /* ── About Jojin ── */
+        .about-jojin {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            background: var(--card);
+            border: 1.5px solid var(--ink);
+            border-radius: var(--r);
+            padding: 20px 24px;
+            margin-bottom: 32px;
+            box-shadow: 5px 5px 0 var(--tan-dark);
+        }
+
+        .about-jojin .paw {
+            font-size: 30px;
+            flex-shrink: 0;
+            line-height: 1;
+            margin-top: 2px;
+        }
+
+        .about-jojin p {
+            margin: 0;
+            font-size: 14.5px;
+            line-height: 1.65;
+            color: var(--ink-mid);
+            max-width: 68ch;
+        }
+
+        .about-jojin .signoff {
+            display: block;
+            margin-top: 8px;
+            font-family: var(--font-display);
+            font-style: italic;
+            color: var(--amber-dark);
+            font-size: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .about-jojin { flex-direction: column; }
+        }
+
+        /* ── Handpicked by Jojin ── */
+        .picks-section { margin-bottom: 36px; }
+
+        .picks-title {
+            font-family: var(--font-display);
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--ink);
+            margin: 0 0 4px;
+            letter-spacing: -0.02em;
+        }
+
+        .picks-title em { font-style: italic; color: var(--amber-dark); }
+
+        .picks-sub {
+            margin: 0 0 16px;
+            color: var(--ink-soft);
+            font-size: 13px;
+        }
+
+        .picks-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .pick-card {
+            position: relative;
+            background: var(--card);
+            border: 1.5px solid var(--amber-dark);
+            border-radius: var(--r);
+            overflow: hidden;
+            box-shadow: 5px 5px 0 var(--amber);
+            transition: transform 0.18s, box-shadow 0.18s;
+        }
+
+        .pick-card:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 7px 7px 0 var(--amber-dark);
+        }
+
+        .pick-ribbon {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 3;
+            background: var(--rust);
+            color: var(--paper);
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 5px 10px;
+            border-radius: 2px;
+            box-shadow: 2px 2px 0 var(--rust-light);
+        }
+
+        .pick-card .img { height: 180px; }
+
+        .pick-card .content { padding: 12px 14px 14px; }
+
+        .pick-card .name {
+            font-size: 17px;
+            margin: 8px 0 4px;
+        }
+
+        .pick-note {
+            font-family: var(--font-display);
+            font-style: italic;
+            font-size: 13px;
+            color: var(--teal-dark);
+            margin: 6px 0 0;
+            line-height: 1.4;
+        }
+
         /* ── Product Grid ── */
         .grid {
             display: grid;
@@ -786,7 +902,7 @@
 
     <!-- Announce bar -->
     <div class="announce-bar">
-        🐾 Jojin's Kitty Thrift Shop &nbsp;·&nbsp; <span>Call to reserve items</span> &nbsp;·&nbsp; Chicago, IL &nbsp;·&nbsp; Mon–Sat 11am–4pm
+        🐾 Jojin's Kitty Thrift Shop &nbsp;·&nbsp; <span>Every item hand-picked by Jojin</span> &nbsp;·&nbsp; Chicago, IL &nbsp;·&nbsp; Mon–Sat 11am–4pm
     </div>
 
     <!-- Lightbox -->
@@ -805,7 +921,7 @@
                     <div class="logo" aria-hidden="true">🐾</div>
                     <div class="brand-text">
                         <h1>Jojin's <em>Kitty</em> Thrift</h1>
-                        <p class="brand-sub">Unique finds, fair prices. <strong>Call to confirm availability</strong> before visiting.</p>
+                        <p class="brand-sub">One woman's treasure hunt, open to everyone. Stop by, dig around, find something good.</p>
                     </div>
                 </div>
                 <div class="user-controls" id="user-controls">
@@ -837,6 +953,20 @@
     <main>
         <div class="wrap">
 
+            <div class="about-jojin">
+                <div class="paw" aria-hidden="true">🐾</div>
+                <p>
+                    Jojin's been a bargain hunter her whole life — always hunting for a good find, always ready to pass one along. After a multi-day yard sale turned into something bigger than she expected, she decided to make it permanent. She's Filipina, born and raised with deep roots here in Chicago, and a mom of four. If you bring the kids, don't be surprised if she lights up — nothing makes her happier than seeing a kid smile over something they found here.
+                    <span class="signoff">— Welcome to the shop. Come dig around.</span>
+                </p>
+            </div>
+
+            <div class="picks-section" id="picks-section" hidden>
+                <h2 class="picks-title">Handpicked by <em>Jojin</em></h2>
+                <p class="picks-sub">A few she's especially excited about right now — good finds, good prices.</p>
+                <div class="picks-row" id="picks-row"></div>
+            </div>
+
             <div class="section-header">
                 <h2 class="section-title">Browse the <em>Shop</em></h2>
                 <div class="section-divider"></div>
@@ -856,9 +986,9 @@
         <div class="wrap">
             <div class="footer-inner">
                 <div class="footer-text">
-                    <div><strong>Hours:</strong> Mon–Sat 11am–4pm &nbsp;·&nbsp; Leave a message or text outside hours</div>
-                    <div><strong>Location:</strong> 4100 N. Pulaski Rd., Chicago, IL</div>
-                    <div>Inventory changes quickly — call ahead to reserve. <strong>+1 (312) 610-0321</strong></div>
+                    <div>Come say hi — <strong>Mon–Sat 11am–4pm</strong> at 4100 N. Pulaski Rd., Chicago</div>
+                    <div>Outside those hours? Leave a message or text and Jojin will get back to you.</div>
+                    <div>Things move fast — give us a call at <strong>+1 (312) 610-0321</strong> to reserve something before you visit.</div>
                 </div>
                 <div class="footer-stamp">🐾 Jojin's Kitty Thrift</div>
             </div>
@@ -995,6 +1125,56 @@
             return items;
         }
 
+        function renderPicks(items) {
+            const section = document.getElementById('picks-section');
+            const row = document.getElementById('picks-row');
+            const picks = items.filter(p => p.featured);
+
+            if (picks.length === 0) {
+                section.hidden = true;
+                row.innerHTML = '';
+                return;
+            }
+
+            section.hidden = false;
+            row.innerHTML = '';
+
+            for (const p of picks) {
+                const card = document.createElement('article');
+                card.className = 'pick-card';
+                card.innerHTML = `
+                    <span class="pick-ribbon">🐾 Jojin's Pick</span>
+                    <div class="img ${p.image ? 'has-image' : ''}" ${p.image ? `data-image="${escapeHtml(p.image)}" data-name="${escapeHtml(p.name)}" data-rotation="${p.rotation || 0}"` : ''}>
+                        ${p.image
+                            ? `<img src="${p.image}" alt="${escapeHtml(p.name)}" loading="lazy">`
+                            : `<div class="noimg">No photo yet</div>`
+                        }
+                    </div>
+                    <div class="content">
+                        <div class="meta-top">
+                            <span class="category-tag">${escapeHtml(p.category || 'Misc')}</span>
+                            <span class="price">${money(Number(p.price || 0))}</span>
+                        </div>
+                        <h3 class="name">${escapeHtml(p.name || 'Unnamed Item')}</h3>
+                        <p class="pick-note">${escapeHtml(p.pickNote || 'A good deal worth grabbing.')}</p>
+                        <div class="card-footer">
+                            <span class="stock ${(!!p.inStock && (p.quantity ?? 1) > 0) ? 'good' : 'bad'}">${(!!p.inStock && (p.quantity ?? 1) > 0) ? '✓ In stock' : 'Ask about it'}</span>
+                            <a class="btn btn-teal" href="tel:${CONFIG.storePhone}" aria-label="Call about ${escapeHtml(p.name)}">📞 Call</a>
+                        </div>
+                    </div>
+                `;
+
+                const imgDiv = card.querySelector('.img.has-image');
+                if (imgDiv) {
+                    imgDiv.addEventListener('click', () => {
+                        openLightbox(imgDiv.dataset.image, imgDiv.dataset.name, parseInt(imgDiv.dataset.rotation) || 0);
+                    });
+                }
+
+                row.appendChild(card);
+            }
+        }
+
         function render(items) {
             grid.innerHTML = '';
             count.textContent = `${items.length} item${items.length === 1 ? '' : 's'}`;
@@ -1032,7 +1212,7 @@
                         </div>
                         <p class="desc">${escapeHtml(p.description || '')}</p>
                         <div class="card-footer">
-                            <span class="stock ${inStock ? 'good' : 'bad'}">${inStock ? '✓ In stock' : 'Call to confirm'}</span>
+                            <span class="stock ${inStock ? 'good' : 'bad'}">${inStock ? '✓ In stock' : 'Ask about it'}</span>
                             <a class="btn btn-teal" href="tel:${CONFIG.storePhone}" aria-label="Call about ${escapeHtml(p.name)}">📞 Call</a>
                         </div>
                         <div class="sku-hint">Mention SKU: <strong>${escapeHtml(p.id || '')}</strong></div>
@@ -1106,6 +1286,7 @@
                 PRODUCTS = await res.json();
             }
             populateCategories(PRODUCTS);
+            renderPicks(PRODUCTS);
             render(getFilteredProducts());
         }
 

@@ -375,7 +375,7 @@
                     </div>
                 </div>
 
-                <label class="muted">SKU / ID</label>
+                <label class="muted">SKU / ID <span style="opacity:.6;">(auto-suggested — edit if you want)</span></label>
                 <input id="id" placeholder="SKU-1234" />
                 <div style="height:10px"></div>
 
@@ -829,6 +829,7 @@ Respond with ONLY a raw JSON array — your entire reply must be the array itsel
                 PRODUCTS = [];
             }
             render();
+            if (!els.id.value.trim()) els.id.value = nextSku();
         }
 
         async function saveToCloud() {
@@ -991,8 +992,23 @@ Respond with ONLY a raw JSON array — your entire reply must be the array itsel
 
         els.name.addEventListener("blur", suggestImagePath);
 
+        // Auto-generates the next SKU (SKU-1001, SKU-1002, ...) so there's
+        // never a "what do I even call this used item" moment. Scans every
+        // existing id matching that pattern and picks one past the highest.
+        function nextSku() {
+            let maxNum = 1000;
+            for (const p of PRODUCTS) {
+                const match = /^SKU-(\d+)$/.exec(p.id || "");
+                if (match) {
+                    const num = parseInt(match[1], 10);
+                    if (num > maxNum) maxNum = num;
+                }
+            }
+            return `SKU-${maxNum + 1}`;
+        }
+
         function clearForm() {
-            els.id.value = "";
+            els.id.value = nextSku();
             els.name.value = "";
             els.price.value = "";
             els.category.value = "";

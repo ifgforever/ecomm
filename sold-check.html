@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Sold Check — Jojin's Kitty Thrift</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32'>🐾</text></svg>">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #1c1610;
+    --ink-soft: #6b5d4f;
+    --paper: #f7f2eb;
+    --paper-warm: #f0e9de;
+    --tan: #d4c4a8;
+    --amber: #c8863a;
+    --amber-dark: #a06820;
+    --teal: #3d7a6e;
+    --rust: #b8522a;
+    --card: #ffffff;
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'Karla', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    color: var(--ink);
+    background: var(--paper);
+    padding-bottom: 96px;
+  }
+  header {
+    background: var(--ink);
+    color: var(--paper-warm);
+    padding: 22px 18px 18px;
+    border-bottom: 4px solid var(--amber);
+  }
+  header .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--amber);
+    font-weight: 700;
+    margin: 0 0 6px;
+  }
+  header h1 {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 900;
+    margin: 0 0 6px;
+  }
+  header p {
+    margin: 0;
+    font-size: 13.5px;
+    color: var(--tan);
+    line-height: 1.5;
+  }
+
+  .wrap { max-width: 560px; margin: 0 auto; padding: 16px; }
+
+  .state-msg {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 14px;
+    padding: 40px 20px;
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--card);
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.08s ease, background 0.15s ease;
+  }
+  .row:active { transform: scale(0.99); }
+  .row.is-sold {
+    background: #f2ece2;
+    border-color: var(--tan);
+  }
+
+  .row .thumb {
+    width: 56px; height: 56px;
+    border-radius: 6px;
+    background: var(--paper-warm);
+    border: 1px solid var(--tan);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .row .thumb img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .row .thumb .noimg { font-size: 10px; color: var(--ink-soft); }
+
+  .row .info { flex: 1; min-width: 0; }
+  .row .name {
+    font-weight: 700;
+    font-size: 15px;
+    margin: 0 0 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .row.is-sold .name { text-decoration: line-through; color: var(--ink-soft); }
+  .row .meta {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
+  .row .price {
+    font-weight: 700;
+    color: var(--amber-dark);
+    margin-left: 6px;
+  }
+
+  .check {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--ink);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    background: var(--paper);
+  }
+  .row.is-sold .check {
+    background: var(--rust);
+    border-color: var(--rust);
+    color: #fff;
+  }
+
+  .bottombar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--ink);
+    color: var(--paper-warm);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    box-shadow: 0 -4px 16px rgba(0,0,0,0.2);
+  }
+  .bottombar .count { font-size: 13.5px; color: var(--tan); }
+  .bottombar button {
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    cursor: pointer;
+    background: var(--amber);
+    color: var(--ink);
+  }
+  .bottombar button:disabled { background: var(--ink-soft); color: var(--tan); cursor: default; }
+
+  .toast {
+    position: fixed;
+    top: 14px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--teal);
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+    display: none;
+    z-index: 20;
+  }
+  .toast.error { background: var(--rust); }
+</style>
+</head>
+<body>
+
+  <div class="toast" id="toast"></div>
+
+  <header>
+    <p class="eyebrow">Weekly sold check</p>
+    <h1>What's still here?</h1>
+    <p>Tap anything that's sold, then hit save at the bottom. Everything else stays listed as-is.</p>
+  </header>
+
+  <div class="wrap">
+    <div id="list"></div>
+  </div>
+
+  <div class="bottombar">
+    <span class="count" id="count">Loading…</span>
+    <button id="saveBtn" disabled>Save</button>
+  </div>
+
+<script>
+(function () {
+  const listEl = document.getElementById('list');
+  const countEl = document.getElementById('count');
+  const saveBtn = document.getElementById('saveBtn');
+  const toastEl = document.getElementById('toast');
+
+  let PRODUCTS = [];
+  let liveItems = [];
+  const soldIds = new Set();
+
+  function showToast(msg, isError) {
+    toastEl.textContent = msg;
+    toastEl.className = 'toast' + (isError ? ' error' : '');
+    toastEl.style.display = 'block';
+    setTimeout(() => { toastEl.style.display = 'none'; }, 3200);
+  }
+
+  function esc(s) {
+    return String(s ?? '')
+      .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;');
+  }
+
+  function money(n) {
+    return '$' + Number(n || 0).toFixed(2);
+  }
+
+  function updateBar() {
+    const n = soldIds.size;
+    countEl.textContent = n === 0
+      ? `${liveItems.length} listed`
+      : `${n} marked sold`;
+    saveBtn.disabled = n === 0;
+  }
+
+  function render() {
+    listEl.innerHTML = '';
+
+    if (liveItems.length === 0) {
+      listEl.innerHTML = '<p class="state-msg">Nothing currently listed as in stock. All caught up 🐾</p>';
+      countEl.textContent = 'All caught up';
+      return;
+    }
+
+    for (const p of liveItems) {
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.dataset.id = p.id;
+      const rotation = Number(p.rotation || 0);
+      row.innerHTML = `
+        <div class="thumb">
+          ${p.image
+            ? `<img src="${esc(p.image)}" alt="" style="transform: rotate(${rotation}deg);">`
+            : `<span class="noimg">No photo</span>`}
+        </div>
+        <div class="info">
+          <p class="name">${esc(p.name || 'Unnamed item')}</p>
+          <p class="meta">${esc(p.category || '')} <span class="price">${money(p.price)}</span></p>
+        </div>
+        <div class="check">✓</div>
+      `;
+      row.addEventListener('click', () => toggle(p.id, row));
+      listEl.appendChild(row);
+    }
+  }
+
+  function toggle(id, row) {
+    if (soldIds.has(id)) {
+      soldIds.delete(id);
+      row.classList.remove('is-sold');
+    } else {
+      soldIds.add(id);
+      row.classList.add('is-sold');
+    }
+    updateBar();
+  }
+
+  async function load() {
+    try {
+      const res = await fetch('/api/products', { cache: 'no-store' });
+      if (!res.ok) throw new Error('Could not reach the product list');
+      PRODUCTS = await res.json();
+      liveItems = PRODUCTS.filter(p => p.inStock !== false);
+      render();
+      updateBar();
+    } catch (err) {
+      listEl.innerHTML = `<p class="state-msg">Couldn't load the list (${esc(err.message)}). Try reloading the page.</p>`;
+      countEl.textContent = 'Error';
+    }
+  }
+
+  async function save() {
+    if (soldIds.size === 0) return;
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving…';
+
+    const updated = PRODUCTS.map(p => {
+      if (soldIds.has(p.id)) {
+        return { ...p, inStock: false, quantity: 0, featured: false };
+      }
+      return p;
+    });
+
+    try {
+      const res = await fetch('/api/products', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated)
+      });
+      if (!res.ok) throw new Error('Save failed');
+
+      showToast(`Marked ${soldIds.size} item${soldIds.size === 1 ? '' : 's'} as sold`);
+      PRODUCTS = updated;
+      liveItems = liveItems.filter(p => !soldIds.has(p.id));
+      soldIds.clear();
+      render();
+      updateBar();
+    } catch (err) {
+      showToast(`Couldn't save (${err.message}). Try again.`, true);
+    } finally {
+      saveBtn.textContent = 'Save';
+      updateBar();
+    }
+  }
+
+  saveBtn.addEventListener('click', save);
+  load();
+})();
+</script>
+</body>
+</html>

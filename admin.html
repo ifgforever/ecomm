@@ -513,6 +513,7 @@
 
         let aiImageBase64 = null;
         let aiImageMediaType = null;
+        let aiImageUploadedUrl = null;
 
         // Normalize rotation to 0, 90, 180, or 270
         function normalizeRotation(deg) {
@@ -597,6 +598,7 @@
             const file = els.aiPhoto.files && els.aiPhoto.files[0];
             if (!file) return;
             aiImageMediaType = file.type || "image/jpeg";
+            aiImageUploadedUrl = null; // new photo picked, needs (re)uploading
             const reader = new FileReader();
             reader.onload = () => {
                 aiImageBase64 = reader.result.split(",")[1];
@@ -606,6 +608,27 @@
             reader.onerror = () => showAiError("Couldn't read that image.");
             reader.readAsDataURL(file);
         });
+
+        // Pulls the JSON object/array out of a response even if the model
+        // added stray commentary before or after it.
+        function extractJson(text) {
+            const cleaned = text.replace(/```json|```/g, "").trim();
+            const firstBrace = cleaned.indexOf("{");
+            const firstBracket = cleaned.indexOf("[");
+
+            let start = -1, endChar = "";
+            if (firstBrace !== -1 && (firstBracket === -1 || firstBrace < firstBracket)) {
+                start = firstBrace;
+                endChar = "}";
+            } else if (firstBracket !== -1) {
+                start = firstBracket;
+                endChar = "]";
+            }
+            if (start === -1) return cleaned;
+
+            const end = cleaned.lastIndexOf(endChar);
+            return (end === -1 || end < start) ? cleaned : cleaned.slice(start, end + 1);
+        }
 
         function showAiError(msg) {
             els.aiErr.textContent = msg;
@@ -646,7 +669,7 @@
 - a suggested resale price in USD appropriate for a small thrift shop (a single number, not a range)
 - a short one-sentence "pick note" in Jojin's own voice, the kind of personal blurb she'd write if featuring this item on the homepage
 
-Respond with ONLY a raw JSON object, no markdown fences, no commentary, in this exact shape:
+Respond with ONLY a raw JSON object — your entire reply must be the JSON object itself, starting with { and ending with }. No markdown fences, no preamble, no caveats, no commentary before or after it. Shape:
 {"name": "...", "category": "...", "description": "...", "price": 0, "pickNote": "..."}`;
 
             try {
@@ -665,7 +688,7 @@ Respond with ONLY a raw JSON object, no markdown fences, no commentary, in this 
                 const textBlock = (data.content || []).find(b => b.type === "text");
                 if (!textBlock) throw new Error("No text in response");
 
-                const cleaned = textBlock.text.replace(/```json|```/g, "").trim();
+                const cleaned = extractJson(textBlock.text);
                 const parsed = JSON.parse(cleaned);
 
                 els.name.value = parsed.name || "";
@@ -726,7 +749,7 @@ Respond with ONLY a raw JSON object, no markdown fences, no commentary, in this 
 Inventory:
 ${JSON.stringify(slim)}
 
-Respond with ONLY a raw JSON array, no markdown fences, no commentary, of exactly 5 objects in this shape:
+Respond with ONLY a raw JSON array — your entire reply must be the array itself, starting with [ and ending with ]. No markdown fences, no preamble, no caveats, no commentary before or after it. Exactly 5 objects, shape:
 [{"id": "...", "pickNote": "..."}]`;
 
             try {
@@ -745,7 +768,7 @@ Respond with ONLY a raw JSON array, no markdown fences, no commentary, of exactl
                 const textBlock = (data.content || []).find(b => b.type === "text");
                 if (!textBlock) throw new Error("No text in response");
 
-                const cleaned = textBlock.text.replace(/```json|```/g, "").trim();
+                const cleaned = extractJson(textBlock.text);
                 const picks = JSON.parse(cleaned);
 
                 const validPicks = picks.filter(pk => PRODUCTS.some(p => p.id === pk.id));
@@ -983,6 +1006,7 @@ Respond with ONLY a raw JSON array, no markdown fences, no commentary, of exactl
             els.aiNote.value = "";
             aiImageBase64 = null;
             aiImageMediaType = null;
+            aiImageUploadedUrl = null;
             els.aiThumbLabel.style.backgroundImage = "";
             els.aiThumbContent.textContent = "📷";
             els.aiPhoto.value = "";
@@ -1014,9 +1038,47 @@ Respond with ONLY a raw JSON array, no markdown fences, no commentary, of exactl
             await saveToCloud();
         }
 
+        // Uploads whatever photo is staged in the AI box to R2, so Save
+        // never needs a separate manual file push. Returns the public URL,
+        // or null (with an alert) if there's nothing to upload / it fails.
+        async function uploadStagedPhoto() {
+            if (aiImageUploadedUrl) return aiImageUploadedUrl; // already uploaded this photo
+
+            const suggested = els.image.value.trim() || `images/${slugify(els.name.value) || "item"}.jpg`;
+
+            try {
+                const res = await fetch("/api/upload-image", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        filename: suggested,
+                        mediaType: aiImageMediaType,
+                        base64: aiImageBase64,
+                    }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || `Upload failed (${res.status})`);
+
+                aiImageUploadedUrl = data.url;
+                return data.url;
+            } catch (err) {
+                alert(`Couldn't upload the photo (${err.message}). The product wasn't saved — try again.`);
+                return null;
+            }
+        }
+
         async function save() {
             const id = els.id.value.trim();
             if (!id) return alert("SKU/ID is required.");
+
+            if (aiImageBase64 && !aiImageUploadedUrl) {
+                els.aiGoBtn.disabled = true;
+                showStatus("Uploading photo…", "info");
+                const url = await uploadStagedPhoto();
+                els.aiGoBtn.disabled = false;
+                if (!url) return; // upload failed, bail out before saving
+                els.image.value = url;
+            }
 
             const p = {
                 id,

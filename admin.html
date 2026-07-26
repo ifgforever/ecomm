@@ -252,6 +252,97 @@
             border-radius: 4px;
             color: #93c5fd;
         }
+
+        /* AI assist box */
+        .ai-box {
+            margin-bottom: 16px;
+            padding: 14px;
+            background: rgba(168, 85, 247, .08);
+            border: 1px solid rgba(168, 85, 247, .35);
+            border-radius: 12px;
+        }
+
+        .ai-box h4 {
+            margin: 0 0 4px;
+            font-size: 13px;
+            color: #d8b4fe;
+        }
+
+        .ai-box .muted {
+            margin-bottom: 8px;
+        }
+
+        .ai-row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .ai-thumb {
+            width: 54px;
+            height: 54px;
+            border-radius: 8px;
+            background: #0f172a;
+            border: 1px solid rgba(255, 255, 255, .1);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-size: cover;
+            background-position: center;
+            font-size: 10px;
+            color: #6b7280;
+            text-align: center;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .ai-fields {
+            flex: 1;
+        }
+
+        .btn.ai {
+            background: rgba(168, 85, 247, .2);
+            border-color: rgba(168, 85, 247, .4);
+        }
+
+        .btn.ai:hover {
+            background: rgba(168, 85, 247, .3);
+        }
+
+        .btn.ai:disabled {
+            opacity: .55;
+            cursor: default;
+        }
+
+        .ai-err {
+            display: none;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #fca5a5;
+        }
+
+        .featured-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .featured-row input[type="checkbox"] {
+            width: auto;
+        }
+
+        .star-btn {
+            background: none;
+            border: none;
+            font-size: 15px;
+            cursor: pointer;
+            padding: 2px 4px;
+        }
+
+        .star-btn:not(.is-featured) {
+            opacity: .3;
+        }
     </style>
 </head>
 
@@ -265,6 +356,25 @@
         <div class="row">
             <div class="card">
                 <h3 style="margin-top:0;">Add / Update product</h3>
+
+                <div class="ai-box">
+                    <h4>✨ Draft this listing with AI</h4>
+                    <p class="muted">Snap a photo (just for the AI — still upload the real file to /images yourself) and jot a one-line note. It'll fill in Name, Category, Description, Price, and a pick note below.</p>
+                    <div class="ai-row">
+                        <label class="ai-thumb" id="aiThumbLabel">
+                            <span id="aiThumbContent">📷</span>
+                            <input type="file" accept="image/*" id="aiPhoto" style="display:none" />
+                        </label>
+                        <div class="ai-fields">
+                            <textarea id="aiNote" placeholder="e.g. green corduroy overshirt, missing one button, smells a little like cedar" style="min-height:56px;"></textarea>
+                            <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
+                                <button type="button" class="btn ai small" id="aiGoBtn">✨ Generate</button>
+                                <span class="ai-err" id="aiErr"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <label class="muted">SKU / ID</label>
                 <input id="id" placeholder="SKU-1234" />
                 <div style="height:10px"></div>
@@ -292,7 +402,7 @@
                 </select>
                 <div style="height:10px"></div>
 
-                <label class="muted">Image path</label>
+                <label class="muted">Image path <span style="opacity:.6;">(auto-suggested from the name — edit if you want)</span></label>
                 <input id="image" placeholder="images/product.jpg" />
 
                 <!-- Image Preview with Rotation Controls -->
@@ -319,6 +429,16 @@
 
                 <label class="muted">Description</label>
                 <textarea id="description" placeholder="Short description"></textarea>
+                <div style="height:10px"></div>
+
+                <div class="featured-row">
+                    <input type="checkbox" id="featured" />
+                    <label for="featured" class="muted" style="margin:0;">Feature on homepage ("Handpicked by Jojin")</label>
+                </div>
+                <div style="height:10px"></div>
+
+                <label class="muted">Pick note (Jojin's personal blurb, shown when featured)</label>
+                <textarea id="pickNote" placeholder="A good deal worth grabbing." style="min-height:56px;"></textarea>
 
                 <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
                     <button class="btn primary" id="save">💾 Save product</button>
@@ -330,11 +450,16 @@
             <div class="card">
                 <h3 style="margin-top:0;">Current inventory</h3>
                 <div class="muted" id="stats"></div>
+                <div style="margin-top:8px;">
+                    <button type="button" class="btn ai small" id="refreshPicksBtn">🔄 Refresh Handpicked Picks (AI)</button>
+                    <span class="ai-err" id="refreshErr"></span>
+                </div>
                 <div style="overflow:auto; margin-top:10px;">
                     <table>
                         <thead>
                             <tr>
                                 <th>Image</th>
+                                <th>★</th>
                                 <th>SKU</th>
                                 <th>Name</th>
                                 <th>Price</th>
@@ -364,6 +489,8 @@
             image: document.getElementById("image"),
             rotation: document.getElementById("rotation"),
             description: document.getElementById("description"),
+            featured: document.getElementById("featured"),
+            pickNote: document.getElementById("pickNote"),
             list: document.getElementById("list"),
             stats: document.getElementById("stats"),
             statusMsg: document.getElementById("statusMsg"),
@@ -374,7 +501,18 @@
             rotationDegrees: document.getElementById("rotationDegrees"),
             rotateLeftBtn: document.getElementById("rotateLeftBtn"),
             rotateRightBtn: document.getElementById("rotateRightBtn"),
+            aiPhoto: document.getElementById("aiPhoto"),
+            aiThumbLabel: document.getElementById("aiThumbLabel"),
+            aiThumbContent: document.getElementById("aiThumbContent"),
+            aiNote: document.getElementById("aiNote"),
+            aiGoBtn: document.getElementById("aiGoBtn"),
+            aiErr: document.getElementById("aiErr"),
+            refreshPicksBtn: document.getElementById("refreshPicksBtn"),
+            refreshErr: document.getElementById("refreshErr"),
         };
+
+        let aiImageBase64 = null;
+        let aiImageMediaType = null;
 
         // Normalize rotation to 0, 90, 180, or 270
         function normalizeRotation(deg) {
@@ -451,6 +589,204 @@
             els.noImageText.style.display = 'none';
         });
 
+        // ==================
+        // AI LISTING ASSIST
+        // ==================
+
+        els.aiPhoto.addEventListener("change", () => {
+            const file = els.aiPhoto.files && els.aiPhoto.files[0];
+            if (!file) return;
+            aiImageMediaType = file.type || "image/jpeg";
+            const reader = new FileReader();
+            reader.onload = () => {
+                aiImageBase64 = reader.result.split(",")[1];
+                els.aiThumbLabel.style.backgroundImage = `url(${reader.result})`;
+                els.aiThumbContent.textContent = "";
+            };
+            reader.onerror = () => showAiError("Couldn't read that image.");
+            reader.readAsDataURL(file);
+        });
+
+        function showAiError(msg) {
+            els.aiErr.textContent = msg;
+            els.aiErr.style.display = "inline";
+        }
+        function clearAiError() {
+            els.aiErr.style.display = "none";
+            els.aiErr.textContent = "";
+        }
+
+        async function generateWithAI() {
+            clearAiError();
+            const note = els.aiNote.value.trim();
+            if (!note) {
+                showAiError("Add a quick note first — that's what the agent works from.");
+                return;
+            }
+
+            els.aiGoBtn.disabled = true;
+            els.aiGoBtn.textContent = "Generating…";
+
+            const contentBlocks = [];
+            if (aiImageBase64) {
+                contentBlocks.push({
+                    type: "image",
+                    source: { type: "base64", media_type: aiImageMediaType, data: aiImageBase64 }
+                });
+            }
+            contentBlocks.push({
+                type: "text",
+                text: `Shop owner's note: "${note}"${aiImageBase64 ? "" : " (no photo provided — work from the note alone)"}`
+            });
+
+            const systemPrompt = `You help draft listings for Jojin's Kitty Thrift, a small curated secondhand clothing shop in Chicago. Given a photo (if provided) and a short note from the shop owner, write:
+- a short, honest, appealing product name (title case, no gimmicks)
+- a one or two word category (e.g. "Outerwear", "Denim", "Accessories", "Knitwear")
+- a 2-3 sentence description in a warm, slightly wry voice. Mention real flaws honestly, don't oversell.
+- a suggested resale price in USD appropriate for a small thrift shop (a single number, not a range)
+- a short one-sentence "pick note" in Jojin's own voice, the kind of personal blurb she'd write if featuring this item on the homepage
+
+Respond with ONLY a raw JSON object, no markdown fences, no commentary, in this exact shape:
+{"name": "...", "category": "...", "description": "...", "price": 0, "pickNote": "..."}`;
+
+            try {
+                const response = await fetch("https://api.anthropic.com/v1/messages", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        model: "claude-sonnet-4-6",
+                        max_tokens: 1000,
+                        system: systemPrompt,
+                        messages: [{ role: "user", content: contentBlocks }]
+                    })
+                });
+
+                if (!response.ok) throw new Error(`API returned ${response.status}`);
+
+                const data = await response.json();
+                const textBlock = (data.content || []).find(b => b.type === "text");
+                if (!textBlock) throw new Error("No text in response");
+
+                const cleaned = textBlock.text.replace(/```json|```/g, "").trim();
+                const parsed = JSON.parse(cleaned);
+
+                els.name.value = parsed.name || "";
+                els.category.value = parsed.category || "";
+                els.description.value = parsed.description || "";
+                if (parsed.price != null) els.price.value = parsed.price;
+                els.pickNote.value = parsed.pickNote || "";
+                suggestImagePath();
+
+                showStatus("✓ Draft filled in — review before saving", "success");
+            } catch (err) {
+                showAiError(`Couldn't generate a draft (${err.message}). Try again.`);
+            } finally {
+                els.aiGoBtn.disabled = false;
+                els.aiGoBtn.textContent = "✨ Generate";
+            }
+        }
+
+        els.aiGoBtn.addEventListener("click", generateWithAI);
+
+        // ==========================
+        // AI: REFRESH HANDPICKED PICKS
+        // ==========================
+
+        function showRefreshError(msg) {
+            els.refreshErr.textContent = msg;
+            els.refreshErr.style.display = "inline";
+        }
+        function clearRefreshError() {
+            els.refreshErr.style.display = "none";
+            els.refreshErr.textContent = "";
+        }
+
+        async function refreshPicks() {
+            clearRefreshError();
+            const available = PRODUCTS.filter(p => p.inStock !== false);
+
+            if (available.length < 5) {
+                showRefreshError("Need at least 5 in-stock items before picks can be refreshed.");
+                return;
+            }
+
+            els.refreshPicksBtn.disabled = true;
+            els.refreshPicksBtn.textContent = "Thinking…";
+
+            const slim = available.map(p => ({
+                id: p.id,
+                name: p.name,
+                category: p.category,
+                price: p.price,
+                quantity: p.quantity,
+                description: p.description,
+                featured: !!p.featured
+            }));
+
+            const systemPrompt = `You're refreshing the "Handpicked by Jojin" section on the homepage of a small curated thrift shop. Given the current in-stock inventory (JSON below), choose exactly 5 items to feature that would make the site feel fresh and worth checking back on. Prefer variety across categories, and lean toward items that aren't already featured — but it's fine to keep a current pick if nothing else fits as well. For each chosen item, write one short pick note in Jojin's warm, casual, honest voice — the kind of line she'd jot herself.
+
+Inventory:
+${JSON.stringify(slim)}
+
+Respond with ONLY a raw JSON array, no markdown fences, no commentary, of exactly 5 objects in this shape:
+[{"id": "...", "pickNote": "..."}]`;
+
+            try {
+                const response = await fetch("https://api.anthropic.com/v1/messages", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        model: "claude-sonnet-4-6",
+                        max_tokens: 1000,
+                        system: systemPrompt,
+                        messages: [{ role: "user", content: "Choose the 5 picks now." }]
+                    })
+                });
+
+                if (!response.ok) throw new Error(`API returned ${response.status}`);
+
+                const data = await response.json();
+                const textBlock = (data.content || []).find(b => b.type === "text");
+                if (!textBlock) throw new Error("No text in response");
+
+                const cleaned = textBlock.text.replace(/```json|```/g, "").trim();
+                const picks = JSON.parse(cleaned);
+
+                const validPicks = picks.filter(pk => PRODUCTS.some(p => p.id === pk.id));
+                if (validPicks.length === 0) throw new Error("No valid picks returned");
+
+                const pickIds = new Set(validPicks.map(pk => pk.id));
+                const summary = validPicks
+                    .map(pk => `• ${PRODUCTS.find(p => p.id === pk.id).name} — "${pk.pickNote}"`)
+                    .join("\n");
+
+                const confirmed = confirm(`New Handpicked picks:\n\n${summary}\n\nApply these to the homepage?`);
+                if (!confirmed) {
+                    showStatus("Refresh cancelled — nothing changed", "info");
+                    return;
+                }
+
+                for (const p of PRODUCTS) {
+                    if (pickIds.has(p.id)) {
+                        p.featured = true;
+                        p.pickNote = validPicks.find(pk => pk.id === p.id).pickNote;
+                    } else if (p.featured) {
+                        p.featured = false;
+                    }
+                }
+
+                render();
+                await saveToCloud();
+            } catch (err) {
+                showRefreshError(`Couldn't refresh picks (${err.message}). Try again.`);
+            } finally {
+                els.refreshPicksBtn.disabled = false;
+                els.refreshPicksBtn.textContent = "🔄 Refresh Handpicked Picks (AI)";
+            }
+        }
+
+        els.refreshPicksBtn.addEventListener("click", refreshPicks);
+
         function showStatus(message, type = "info") {
             els.statusMsg.textContent = message;
             els.statusMsg.className = `status ${type}`;
@@ -518,6 +854,9 @@
                         </div>
                         ` : ''}
                     </td>
+                    <td>
+                        <button class="star-btn ${p.featured ? 'is-featured' : ''}" data-star="${esc(p.id)}" title="${p.featured ? 'Remove from Handpicked' : 'Add to Handpicked'}">⭐</button>
+                    </td>
                     <td>${esc(p.id)}</td>
                     <td>${esc(p.name)}</td>
                     <td>$${Number(p.price || 0).toFixed(2)}</td>
@@ -534,6 +873,10 @@
             // Attach event listeners
             els.list.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", () => edit(b.dataset.edit)));
             els.list.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => del(b.dataset.del)));
+            els.list.querySelectorAll("[data-star]").forEach(b => b.addEventListener("click", (e) => {
+                e.stopPropagation();
+                toggleFeatured(b.dataset.star);
+            }));
             
             // Rotation buttons in table
             els.list.querySelectorAll("[data-rotate-left]").forEach(b => {
@@ -562,11 +905,72 @@
             await saveToCloud();
         }
 
+        // Toggle a product's featured (Handpicked by Jojin) status directly from the table
+        async function toggleFeatured(id) {
+            const p = PRODUCTS.find(x => x.id === id);
+            if (!p) return;
+
+            p.featured = !p.featured;
+            if (p.featured && !p.pickNote) {
+                p.pickNote = "A good deal worth grabbing.";
+            }
+
+            render();
+            await saveToCloud();
+        }
+
         function esc(s) {
             return String(s ?? "")
                 .replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
                 .replaceAll('"', "&quot;").replaceAll("'", "&#039;");
         }
+
+        // ==========================
+        // AUTO IMAGE PATH SUGGESTION
+        // ==========================
+
+        function slugify(text) {
+            return String(text || "")
+                .toLowerCase()
+                .trim()
+                .replace(/['"]/g, "")
+                .replace(/[^a-z0-9]+/g, "-")
+                .replace(/^-+|-+$/g, "");
+        }
+
+        function extFromMediaType(mediaType) {
+            const map = {
+                "image/jpeg": "jpg",
+                "image/jpg": "jpg",
+                "image/png": "png",
+                "image/webp": "webp",
+                "image/heic": "heic",
+                "image/heif": "heif",
+                "image/gif": "gif"
+            };
+            return map[mediaType] || "jpg";
+        }
+
+        // Builds a clean, collision-free filename from the product name,
+        // checked against every image path already used across PRODUCTS.
+        function suggestImagePath() {
+            if (els.image.value.trim()) return; // don't clobber an existing/manual path
+            const base = slugify(els.name.value);
+            if (!base) return;
+
+            const ext = extFromMediaType(aiImageMediaType);
+            const existing = new Set(PRODUCTS.map(p => (p.image || "").toLowerCase()));
+
+            let candidate = `images/${base}.${ext}`;
+            let n = 2;
+            while (existing.has(candidate.toLowerCase())) {
+                candidate = `images/${base}-${n}.${ext}`;
+                n++;
+            }
+            els.image.value = candidate;
+        }
+
+        els.name.addEventListener("blur", suggestImagePath);
 
         function clearForm() {
             els.id.value = "";
@@ -578,6 +982,14 @@
             els.image.value = "";
             els.rotation.value = "0";
             els.description.value = "";
+            els.featured.checked = false;
+            els.pickNote.value = "";
+            els.aiNote.value = "";
+            aiImageBase64 = null;
+            aiImageMediaType = null;
+            els.aiThumbLabel.style.backgroundImage = "";
+            els.aiThumbContent.textContent = "📷";
+            els.aiPhoto.value = "";
             updateImagePreview();
         }
 
@@ -593,6 +1005,8 @@
             els.image.value = p.image || "";
             els.rotation.value = normalizeRotation(p.rotation || 0);
             els.description.value = p.description || "";
+            els.featured.checked = !!p.featured;
+            els.pickNote.value = p.pickNote || "";
             updateImagePreview();
             window.scrollTo({ top: 0, behavior: "smooth" });
         }
@@ -617,7 +1031,9 @@
                 inStock: els.inStock.value === "true",
                 image: els.image.value.trim(),
                 rotation: normalizeRotation(parseInt(els.rotation.value) || 0),
-                description: els.description.value.trim()
+                description: els.description.value.trim(),
+                featured: els.featured.checked,
+                pickNote: els.pickNote.value.trim()
             };
 
             const idx = PRODUCTS.findIndex(x => x.id === id);

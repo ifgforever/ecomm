@@ -650,20 +650,18 @@ Respond with ONLY a raw JSON object, no markdown fences, no commentary, in this 
 {"name": "...", "category": "...", "description": "...", "price": 0, "pickNote": "..."}`;
 
             try {
-                const response = await fetch("https://api.anthropic.com/v1/messages", {
+                const response = await fetch("/api/ai-assist", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        model: "claude-sonnet-4-6",
-                        max_tokens: 1000,
                         system: systemPrompt,
                         messages: [{ role: "user", content: contentBlocks }]
                     })
                 });
 
-                if (!response.ok) throw new Error(`API returned ${response.status}`);
-
                 const data = await response.json();
+                if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
+
                 const textBlock = (data.content || []).find(b => b.type === "text");
                 if (!textBlock) throw new Error("No text in response");
 
@@ -732,20 +730,18 @@ Respond with ONLY a raw JSON array, no markdown fences, no commentary, of exactl
 [{"id": "...", "pickNote": "..."}]`;
 
             try {
-                const response = await fetch("https://api.anthropic.com/v1/messages", {
+                const response = await fetch("/api/ai-assist", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        model: "claude-sonnet-4-6",
-                        max_tokens: 1000,
                         system: systemPrompt,
                         messages: [{ role: "user", content: "Choose the 5 picks now." }]
                     })
                 });
 
-                if (!response.ok) throw new Error(`API returned ${response.status}`);
-
                 const data = await response.json();
+                if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
+
                 const textBlock = (data.content || []).find(b => b.type === "text");
                 if (!textBlock) throw new Error("No text in response");
 

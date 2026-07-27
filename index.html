@@ -625,6 +625,21 @@
             font-size: 13px;
         }
 
+        .invite-link {
+            color: var(--teal);
+            font-weight: 700;
+            text-decoration: none;
+            margin-left: 4px;
+        }
+        .invite-link:hover { text-decoration: underline; }
+
+        .empty-state {
+            color: var(--ink-soft);
+            font-style: italic;
+            font-size: 13px;
+            padding: 6px 0 2px;
+        }
+
         .gallery-row {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -1323,16 +1338,18 @@
 
             <div class="grid" id="grid" hidden></div>
 
-            <div class="gallery-section" id="gallery-section" hidden>
+            <div class="gallery-section" id="gallery-section">
                 <h2 class="gallery-title">You're Part of the <em>Story</em></h2>
-                <p class="gallery-sub">Snapped by folks who stopped by the shop.</p>
+                <p class="gallery-sub">Snapped by folks who stopped by the shop. <a href="gallery-submit.html" class="invite-link">📷 Share your own photo →</a></p>
                 <div class="gallery-row" id="gallery-row"></div>
+                <p class="empty-state" id="gallery-empty" hidden>Nothing shared yet — be the first!</p>
             </div>
 
-            <div class="community-section" id="community-section" hidden>
+            <div class="community-section" id="community-section">
                 <h2 class="community-title">From the <em>Community</em></h2>
-                <p class="community-sub">Posted by other folks, not the shop — reach out to them directly if you're interested.</p>
+                <p class="community-sub">Posted by other folks, not the shop — reach out to them directly if you're interested. <a href="community-sell.html" class="invite-link">👋 Post your own item →</a></p>
                 <div class="community-row" id="community-row"></div>
+                <p class="empty-state" id="community-empty" hidden>Nothing posted yet — be the first!</p>
             </div>
 
             <div class="promo-banner">
@@ -1537,9 +1554,9 @@
         let galleryApprovedCount = 0;
 
         function updateGalleryVisibility() {
-            const visible = galleryApprovedCount > 0;
-            document.getElementById('gallery-section').hidden = !visible;
-            document.getElementById('gallery-jump-link').hidden = !visible;
+            // Section and jump-button both always show now — even with nothing approved yet,
+            // there's still the invite to be the first to share a photo.
+            document.getElementById('gallery-jump-link').hidden = false;
         }
 
         function showCategoryMode() {
@@ -1647,10 +1664,13 @@
 
         function renderGallery(items) {
             const row = document.getElementById('gallery-row');
+            const emptyState = document.getElementById('gallery-empty');
             const approved = items.filter(g => g.approved);
             galleryApprovedCount = approved.length;
 
             row.innerHTML = '';
+            emptyState.hidden = approved.length > 0;
+
             for (const g of approved) {
                 const card = document.createElement('figure');
                 card.className = 'polaroid';
@@ -1690,18 +1710,12 @@
         }
 
         function renderCommunityListings(items) {
-            const section = document.getElementById('community-section');
             const row = document.getElementById('community-row');
+            const emptyState = document.getElementById('community-empty');
             const approved = items.filter(l => l.approved);
 
-            if (approved.length === 0) {
-                section.hidden = true;
-                row.innerHTML = '';
-                return;
-            }
-
-            section.hidden = false;
             row.innerHTML = '';
+            emptyState.hidden = approved.length > 0;
 
             for (const l of approved) {
                 const card = document.createElement('article');

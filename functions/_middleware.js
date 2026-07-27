@@ -13,10 +13,10 @@
 // Setup: Pages > Settings > Variables and Secrets > add ADMIN_KEY (Secret).
 
 const PROTECTED_PAGES = new Set([
-  "/admin.html",
-  "/sold-check.html",
-  "/gallery-review.html",
-  "/community-listings-review.html",
+  "/admin.html", "/admin",
+  "/sold-check.html", "/sold-check",
+  "/gallery-review.html", "/gallery-review",
+  "/community-listings-review.html", "/community-listings-review",
 ]);
 
 const PROTECTED_WRITE_PATHS = new Set([

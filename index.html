@@ -704,6 +704,8 @@
         }
 
         /* ── Product Grid ── */
+        [hidden] { display: none !important; }
+
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -1388,7 +1390,7 @@
             updateViewButtons();
             showGridMode();
             render(getFilteredProducts());
-            document.querySelector('.section-header').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            backToCategoriesBtn.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function matches(p, queryText, category) {

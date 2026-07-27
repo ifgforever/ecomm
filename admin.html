@@ -487,6 +487,11 @@
                     <button type="button" class="btn ai small" id="refreshPicksBtn">🔄 Refresh Handpicked Picks (AI)</button>
                     <span class="ai-err" id="refreshErr"></span>
                 </div>
+                <div style="margin-top:8px;">
+                    <button type="button" class="btn small" id="refreshNearbyBtn">🏘️ Refresh Nearby Stores (Google)</button>
+                    <span class="muted" id="nearbyStatus" style="margin-left:8px;"></span>
+                    <span class="ai-err" id="nearbyErr"></span>
+                </div>
                 <div style="overflow:auto; margin-top:10px;">
                     <table>
                         <thead>
@@ -854,6 +859,49 @@ Respond with ONLY a raw JSON array — your entire reply must be the array itsel
         }
 
         els.refreshPicksBtn.addEventListener("click", refreshPicks);
+
+        // ── Nearby Stores (Google Places) ──────────────────
+        const refreshNearbyBtn = document.getElementById("refreshNearbyBtn");
+        const nearbyStatus = document.getElementById("nearbyStatus");
+        const nearbyErr = document.getElementById("nearbyErr");
+
+        async function loadNearbyStatus() {
+            try {
+                const res = await fetch("/api/nearby-stores", { cache: "no-store" });
+                const data = await res.json();
+                if (data.refreshedAt) {
+                    const when = new Date(data.refreshedAt).toLocaleString();
+                    nearbyStatus.textContent = `${data.stores.length} stores — last refreshed ${when}`;
+                } else {
+                    nearbyStatus.textContent = "Never refreshed yet";
+                }
+            } catch {
+                nearbyStatus.textContent = "";
+            }
+        }
+
+        async function refreshNearbyStores() {
+            nearbyErr.style.display = "none";
+            refreshNearbyBtn.disabled = true;
+            refreshNearbyBtn.textContent = "Asking Google…";
+
+            try {
+                const res = await fetch("/api/refresh-nearby-stores", { method: "POST" });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+                showStatus(`✓ Found ${data.count} nearby stores`, "success");
+                await loadNearbyStatus();
+            } catch (err) {
+                nearbyErr.textContent = `Couldn't refresh (${err.message}).`;
+                nearbyErr.style.display = "inline";
+            } finally {
+                refreshNearbyBtn.disabled = false;
+                refreshNearbyBtn.textContent = "🏘️ Refresh Nearby Stores (Google)";
+            }
+        }
+
+        refreshNearbyBtn.addEventListener("click", refreshNearbyStores);
+        loadNearbyStatus();
 
         function showStatus(message, type = "info") {
             els.statusMsg.textContent = message;

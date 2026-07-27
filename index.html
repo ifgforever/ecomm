@@ -107,6 +107,92 @@
         }
 
         /* ── Top accent bar ── */
+        /* ── Enter overlay ── */
+        .enter-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(28, 22, 16, 0.92);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .enter-overlay[hidden] { display: none; }
+
+        .enter-card {
+            max-width: 380px;
+            text-align: center;
+            background: var(--card, #fff);
+            border-radius: var(--r);
+            padding: 40px 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+        .enter-paw { font-size: 42px; margin-bottom: 8px; }
+        .enter-eyebrow {
+            font-size: 11px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--rust);
+            font-weight: 700;
+            margin: 0 0 8px;
+        }
+        .enter-title {
+            font-family: var(--font-display);
+            font-size: 30px;
+            font-weight: 900;
+            margin: 0 0 10px;
+            letter-spacing: -0.02em;
+            color: var(--ink);
+        }
+        .enter-title em { font-style: italic; color: var(--teal); }
+        .enter-sub {
+            color: var(--ink-soft);
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 0 0 24px;
+        }
+        .enter-btn {
+            display: block;
+            width: 100%;
+            font-family: var(--font-body);
+            font-weight: 700;
+            font-size: 15px;
+            color: #fff;
+            background: var(--teal);
+            border: none;
+            border-radius: var(--r);
+            padding: 14px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .enter-btn:hover { opacity: 0.9; }
+        .enter-skip {
+            background: none;
+            border: none;
+            color: var(--ink-soft);
+            font-size: 12.5px;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .music-toggle {
+            position: fixed;
+            bottom: 18px;
+            right: 18px;
+            z-index: 500;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            border: none;
+            background: var(--ink);
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+        }
+        .music-toggle[hidden] { display: none; }
+
         .accent-bar {
             height: 5px;
             background: repeating-linear-gradient(
@@ -1383,6 +1469,21 @@
 
 <body>
 
+    <div class="enter-overlay" id="enterOverlay">
+        <div class="enter-card">
+            <div class="enter-paw">🐾</div>
+            <p class="enter-eyebrow">Welcome</p>
+            <h1 class="enter-title">Come On <em>In</em></h1>
+            <p class="enter-sub">A little music while you browse — like stepping into the shop.</p>
+            <button class="enter-btn" id="enterWithMusic">🎵 Enter the Shop</button>
+            <button class="enter-skip" id="enterSkip">No thanks, just browsing</button>
+        </div>
+    </div>
+
+    <audio id="bgMusic" preload="none"></audio>
+
+    <button class="music-toggle" id="musicToggle" hidden aria-label="Toggle music">🔊</button>
+
     <!-- Accent bar -->
     <div class="accent-bar"></div>
 
@@ -2152,6 +2253,68 @@
                 Could not load products. Check your connection or try again later.
             </div>`;
         });
+
+        // ── Entrance overlay + background music (3-song playlist, repeats) ──
+        (function () {
+            const overlay = document.getElementById('enterOverlay');
+            const enterBtn = document.getElementById('enterWithMusic');
+            const skipBtn = document.getElementById('enterSkip');
+            const music = document.getElementById('bgMusic');
+            const toggle = document.getElementById('musicToggle');
+            const MUTE_KEY = 'jkt_music_muted';
+
+            const PLAYLIST = [
+                '/audio/track-1.mp3',
+                '/audio/track-2.mp3',
+                '/audio/track-3.mp3',
+            ];
+            let trackIndex = 0;
+
+            music.addEventListener('ended', () => {
+                trackIndex = (trackIndex + 1) % PLAYLIST.length; // wraps back to track 1 after the 3rd
+                music.src = PLAYLIST[trackIndex];
+                music.play().catch(() => {});
+            });
+
+            function closeOverlay() {
+                overlay.hidden = true;
+            }
+
+            function startMusic() {
+                music.volume = 0.5;
+                music.src = PLAYLIST[trackIndex];
+                music.play().catch(() => {
+                    // Autoplay can still fail in rare cases even after a click; fail quietly.
+                });
+                toggle.hidden = false;
+                toggle.textContent = '🔊';
+                localStorage.setItem(MUTE_KEY, 'false');
+            }
+
+            enterBtn.addEventListener('click', () => {
+                closeOverlay();
+                startMusic();
+            });
+
+            skipBtn.addEventListener('click', () => {
+                closeOverlay();
+                toggle.hidden = false;
+                toggle.textContent = '🔇';
+                localStorage.setItem(MUTE_KEY, 'true');
+            });
+
+            toggle.addEventListener('click', () => {
+                if (music.paused) {
+                    music.play().catch(() => {});
+                    toggle.textContent = '🔊';
+                    localStorage.setItem(MUTE_KEY, 'false');
+                } else {
+                    music.pause();
+                    toggle.textContent = '🔇';
+                    localStorage.setItem(MUTE_KEY, 'true');
+                }
+            });
+        })();
     </script>
 </body>
 </html>

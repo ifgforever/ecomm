@@ -10,6 +10,45 @@
     <meta property="og:description" content="Unique thrift finds in Chicago." />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32'>🐾</text></svg>">
 
+    <!--
+      Structured data for search engines (schema.org LocalBusiness).
+      NOTE: openingHours below must stay in strict "Mo-Sa 11:00-16:00" format —
+      it can't safely auto-sync with the freeform Store Hours field in admin.html.
+      If real hours change meaningfully, update the openingHours line here too.
+    -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Store",
+      "name": "Jojin's Kitty Thrift Shop",
+      "description": "Unique secondhand thrift finds in Chicago — curated, always-changing inventory.",
+      "url": "https://jinkittys.com/",
+      "telephone": "+13126100321",
+      "priceRange": "$",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "4100 N Pulaski Rd",
+        "addressLocality": "Chicago",
+        "addressRegion": "IL",
+        "postalCode": "60641",
+        "addressCountry": "US"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 41.9556017,
+        "longitude": -87.7278817
+      },
+      "openingHours": ["Mo-Sa 11:00-16:00"],
+      "sameAs": [
+        "https://www.yelp.com/biz/jojins-kitty-chicago-2",
+        "https://www.facebook.com/p/Jojins-Kitty-Thrift-Shop-61585291957385/",
+        "https://www.tiktok.com/@jojinteston",
+        "https://www.instagram.com/jinlovegodfirst",
+        "https://share.google/Ulhsi8pst9S7QpiaL"
+      ]
+    }
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">

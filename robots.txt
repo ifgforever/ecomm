@@ -1,4 +1,9 @@
 User-agent: *
 Allow: /
+Disallow: /admin.html
+Disallow: /admin-price.html
+Disallow: /sold-check.html
+Disallow: /gallery-review.html
+Disallow: /community-listings-review.html
 
 Sitemap: https://jinkittys.com/sitemap.xml

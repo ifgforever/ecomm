@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Page Not Found — Jojin's Kitty Thrift</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32'>🐾</text></svg>">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #1c1610;
+    --ink-soft: #6b5d4f;
+    --paper: #f7f2eb;
+    --paper-warm: #f0e9de;
+    --tan: #d4c4a8;
+    --amber: #c8863a;
+    --amber-dark: #a06820;
+    --teal: #3d7a6e;
+    --rust: #b8522a;
+    --card: #ffffff;
+    --r: 4px;
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'Karla', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    color: var(--ink);
+    background: var(--paper);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .card {
+    max-width: 440px;
+    text-align: center;
+    background: var(--card);
+    border: 1.5px solid var(--tan);
+    border-radius: var(--r);
+    padding: 44px 32px;
+    box-shadow: 6px 6px 0 var(--amber);
+  }
+  .paw { font-size: 44px; margin-bottom: 6px; }
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--rust);
+    font-weight: 700;
+    margin: 0 0 10px;
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 900;
+    margin: 0 0 12px;
+    letter-spacing: -0.02em;
+  }
+  h1 em { font-style: italic; color: var(--teal); }
+  p {
+    color: var(--ink-soft);
+    font-size: 14.5px;
+    line-height: 1.6;
+    margin: 0 0 26px;
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+  }
+  .links a {
+    display: inline-block;
+    font-weight: 700;
+    font-size: 13.5px;
+    text-decoration: none;
+    padding: 10px 16px;
+    border-radius: var(--r);
+  }
+  .links a.primary {
+    background: var(--teal);
+    color: #fff;
+  }
+  .links a.secondary {
+    background: var(--paper-warm);
+    color: var(--ink);
+    border: 1px solid var(--tan);
+  }
+  .links a:hover { opacity: 0.9; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="paw">🐾</div>
+    <p class="eyebrow">Nothing here</p>
+    <h1>This One Got <em>Away</em></h1>
+    <p>Whatever you were looking for isn't at this address — maybe it sold, maybe the link's old. Either way, there's plenty more to dig through.</p>
+    <div class="links">
+      <a class="primary" href="/">Back to the Shop</a>
+      <a class="secondary" href="/community-sell.html">Sell Something</a>
+    </div>
+  </div>
+</body>
+</html>

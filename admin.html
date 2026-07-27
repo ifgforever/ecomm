@@ -332,6 +332,23 @@
             width: auto;
         }
 
+        .cat-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,.06);
+        }
+        .cat-row:last-child { border-bottom: none; }
+        .cat-row .cat-count-badge {
+            font-size: 11px;
+            color: #9ca3af;
+            min-width: 70px;
+        }
+        .cat-row input[type="text"] {
+            flex: 1;
+        }
+
         .star-btn {
             background: none;
             border: none;
@@ -350,6 +367,13 @@
     <div class="wrap">
         <h1 style="margin:0 0 6px;">Inventory Admin</h1>
         <p class="muted">Add/edit products. Changes save to Cloudflare KV automatically.</p>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin:12px 0 20px;">
+            <a class="btn small" href="/" target="_blank" rel="noopener">🛒 View live site</a>
+            <a class="btn small" href="/sold-check.html" target="_blank" rel="noopener">🧹 Sold Check</a>
+            <a class="btn small" href="/gallery-review.html" target="_blank" rel="noopener">🖼️ Gallery Review</a>
+            <a class="btn small" href="/gallery-submit.html" target="_blank" rel="noopener">📷 Gallery Submit (visitor view)</a>
+        </div>
 
         <div id="statusMsg" class="status hidden"></div>
 
@@ -472,6 +496,12 @@
                     </table>
                 </div>
             </div>
+        </div>
+
+        <div class="card" style="margin-top:20px;">
+            <h3 style="margin-top:0;">Manage Categories</h3>
+            <p class="muted">Rename any category — every item using it updates at once. Rename two categories to the same name to merge them.</p>
+            <div id="categoryManagerList" style="margin-top:12px;"></div>
         </div>
 
     </div>
@@ -830,6 +860,7 @@ Respond with ONLY a raw JSON array — your entire reply must be the array itsel
             }
             render();
             if (!els.id.value.trim()) els.id.value = nextSku();
+            renderCategoryManager();
         }
 
         async function saveToCloud() {
@@ -937,6 +968,59 @@ Respond with ONLY a raw JSON array — your entire reply must be the array itsel
 
             render();
             await saveToCloud();
+        }
+
+        // ==========================
+        // MANAGE CATEGORIES
+        // ==========================
+
+        function renderCategoryManager() {
+            const counts = {};
+            for (const p of PRODUCTS) {
+                const c = (p.category || "").trim() || "(none)";
+                counts[c] = (counts[c] || 0) + 1;
+            }
+            const cats = Object.keys(counts).sort();
+
+            const container = document.getElementById("categoryManagerList");
+            container.innerHTML = "";
+
+            if (cats.length === 0) {
+                container.innerHTML = '<p class="muted">No categories yet.</p>';
+                return;
+            }
+
+            for (const c of cats) {
+                const row = document.createElement("div");
+                row.className = "cat-row";
+                row.innerHTML = `
+                    <span class="cat-count-badge">${counts[c]} item${counts[c] === 1 ? "" : "s"}</span>
+                    <input type="text" value="${esc(c)}" data-original="${esc(c)}" />
+                    <button type="button" class="btn small" data-rename-btn>Rename</button>
+                `;
+                const input = row.querySelector("input");
+                const btn = row.querySelector("[data-rename-btn]");
+                btn.addEventListener("click", () => renameCategory(input.dataset.original, input.value));
+                container.appendChild(row);
+            }
+        }
+
+        async function renameCategory(oldName, newNameRaw) {
+            const newName = newNameRaw.trim();
+            if (!newName || newName === oldName) return;
+
+            const affected = PRODUCTS.filter(p => ((p.category || "").trim() || "(none)") === oldName);
+            const confirmed = confirm(`Rename "${oldName}" to "${newName}" across ${affected.length} item(s)?`);
+            if (!confirmed) return;
+
+            for (const p of affected) {
+                p.category = newName;
+            }
+
+            renderCategoryManager();
+            render();
+            await saveToCloud();
+            showStatus(`Renamed "${oldName}" to "${newName}"`, "success");
         }
 
         function esc(s) {

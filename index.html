@@ -1,3 +1,7 @@
+#!/usr/bin/env bash
+set -e
+echo "Applying gallery jump-link fix to index.html..."
+cat > "index.html" << '__CLAUDE_FILE_EOF__'
 <!doctype html>
 <html lang="en">
 
@@ -1107,9 +1111,9 @@
                     </div>
                 </div>
                 <div class="user-controls" id="user-controls">
-                    <a class="btn wishlist-toggle" id="gallery-jump-link" href="#gallery-section" hidden>
+                    <button type="button" class="btn wishlist-toggle" id="gallery-jump-link" hidden>
                         📸 Gallery
-                    </a>
+                    </button>
                     <button class="btn wishlist-toggle" id="wishlist-btn">
                         ♡ Saved
                         <span class="badge" id="wishlist-badge"></span>
@@ -1584,8 +1588,7 @@
             renderCategoryTiles(PRODUCTS);
         });
 
-        document.getElementById('gallery-jump-link').addEventListener('click', (e) => {
-            e.preventDefault();
+        document.getElementById('gallery-jump-link').addEventListener('click', () => {
             document.getElementById('gallery-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
 
@@ -1628,3 +1631,5 @@
     </script>
 </body>
 </html>
+__CLAUDE_FILE_EOF__
+echo "  wrote index.html"

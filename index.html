@@ -446,7 +446,70 @@
             .about-jojin { flex-direction: column; }
         }
 
-        /* ── Community gallery ── */
+        /* ── Category tiles ── */
+        #cat { display: none; }
+
+        .category-tiles-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+
+        .category-tile {
+            background: var(--card, #fff);
+            border: 1.5px solid var(--tan);
+            border-radius: var(--r);
+            padding: 20px 14px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: var(--shadow-soft);
+            transition: transform 0.14s, box-shadow 0.14s;
+            font-family: var(--font-body);
+        }
+
+        .category-tile:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+
+        .category-tile .cat-name {
+            font-family: var(--font-display);
+            font-weight: 900;
+            font-size: 17px;
+            color: var(--ink);
+            margin-bottom: 4px;
+        }
+
+        .category-tile .cat-count {
+            font-size: 12px;
+            color: var(--ink-soft);
+        }
+
+        .category-tile.all-tile {
+            background: var(--amber);
+            border-color: var(--amber-dark);
+        }
+        .category-tile.all-tile .cat-name,
+        .category-tile.all-tile .cat-count {
+            color: #fff;
+        }
+
+        .back-to-categories {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            font-family: var(--font-body);
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--teal);
+            cursor: pointer;
+            margin-bottom: 16px;
+            padding: 0;
+        }
+        .back-to-categories:hover { text-decoration: underline; }
         .gallery-section { margin: 8px 0 36px; }
 
         .gallery-title {
@@ -1040,12 +1103,16 @@
                 <div class="section-divider"></div>
             </div>
 
-            <div class="view-controls" id="view-controls">
+            <button class="back-to-categories" id="backToCategories">← All Categories</button>
+
+            <div class="category-tiles-row" id="category-tiles-row"></div>
+
+            <div class="view-controls" id="view-controls" hidden>
                 <button class="view-btn active" data-view="all">All Items</button>
                 <button class="view-btn" data-view="saved">♡ My Saved Items</button>
             </div>
 
-            <div class="grid" id="grid"></div>
+            <div class="grid" id="grid" hidden></div>
 
             <div class="gallery-section" id="gallery-section" hidden>
                 <h2 class="gallery-title">You're Part of the <em>Story</em></h2>
@@ -1082,6 +1149,8 @@
         const grid       = document.getElementById('grid');
         const q          = document.getElementById('q');
         const cat        = document.getElementById('cat');
+        const categoryTilesRow = document.getElementById('category-tiles-row');
+        const backToCategoriesBtn = document.getElementById('backToCategories');
         const count      = document.getElementById('count');
         const callTop    = document.getElementById('callTop');
 
@@ -1184,6 +1253,63 @@
                 opt.value = c; opt.textContent = c;
                 cat.appendChild(opt);
             }
+        }
+
+        // ── Category-tiles browsing ──────────────────────
+        let shopMode = 'categories'; // 'categories' | 'grid'
+
+        function renderCategoryTiles(items) {
+            const counts = {};
+            let totalInStock = 0;
+            for (const p of items) {
+                if (p.inStock === false) continue;
+                const c = (p.category || '').trim() || 'Misc';
+                counts[c] = (counts[c] || 0) + 1;
+                totalInStock++;
+            }
+            const cats = Object.keys(counts).sort();
+
+            categoryTilesRow.innerHTML = '';
+
+            const allTile = document.createElement('div');
+            allTile.className = 'category-tile all-tile';
+            allTile.innerHTML = `<div class="cat-name">All Items</div><div class="cat-count">${totalInStock} item${totalInStock === 1 ? '' : 's'}</div>`;
+            allTile.addEventListener('click', () => selectCategory(''));
+            categoryTilesRow.appendChild(allTile);
+
+            for (const c of cats) {
+                const tile = document.createElement('div');
+                tile.className = 'category-tile';
+                tile.innerHTML = `<div class="cat-name">${escapeHtml(c)}</div><div class="cat-count">${counts[c]} item${counts[c] === 1 ? '' : 's'}</div>`;
+                tile.addEventListener('click', () => selectCategory(c));
+                categoryTilesRow.appendChild(tile);
+            }
+        }
+
+        function showCategoryMode() {
+            shopMode = 'categories';
+            categoryTilesRow.hidden = false;
+            backToCategoriesBtn.style.display = 'none';
+            viewControls.hidden = true;
+            grid.hidden = true;
+            count.textContent = '';
+        }
+
+        function showGridMode() {
+            shopMode = 'grid';
+            categoryTilesRow.hidden = true;
+            backToCategoriesBtn.style.display = 'flex';
+            viewControls.hidden = false;
+            grid.hidden = false;
+        }
+
+        function selectCategory(categoryName) {
+            cat.value = categoryName;
+            currentView = 'all';
+            updateViewButtons();
+            showGridMode();
+            render(getFilteredProducts());
+            document.querySelector('.section-header').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function matches(p, queryText, category) {
@@ -1366,6 +1492,7 @@
         wishlistBtn.addEventListener('click', () => {
             currentView = currentView === 'saved' ? 'all' : 'saved';
             updateViewButtons();
+            showGridMode();
             render(getFilteredProducts());
         });
 
@@ -1377,7 +1504,19 @@
             }
         });
 
-        q.addEventListener('input', applyFilters);
+        backToCategoriesBtn.addEventListener('click', () => {
+            q.value = '';
+            cat.value = '';
+            currentView = 'all';
+            updateViewButtons();
+            showCategoryMode();
+            renderCategoryTiles(PRODUCTS);
+        });
+
+        q.addEventListener('input', () => {
+            if (shopMode === 'categories' && q.value.trim()) showGridMode();
+            applyFilters();
+        });
         cat.addEventListener('change', applyFilters);
 
         document.addEventListener('keydown', e => {
@@ -1397,6 +1536,8 @@
                 PRODUCTS = await res.json();
             }
             populateCategories(PRODUCTS);
+            renderCategoryTiles(PRODUCTS);
+            showCategoryMode();
             renderPicks(PRODUCTS);
             render(getFilteredProducts());
             loadGallery();

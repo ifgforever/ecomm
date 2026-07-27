@@ -1107,7 +1107,7 @@
 
     <!-- Announce bar -->
     <div class="announce-bar">
-        🐾 Jojin's Kitty Thrift Shop &nbsp;·&nbsp; <span>Every item hand-picked by Jojin</span> &nbsp;·&nbsp; Chicago, IL &nbsp;·&nbsp; Mon–Sat 11am–4pm
+        🐾 Jojin's Kitty Thrift Shop &nbsp;·&nbsp; <span>Every item hand-picked by Jojin</span> &nbsp;·&nbsp; Chicago, IL &nbsp;·&nbsp; <span id="announce-hours">Mon–Sat 11am–4pm</span>
     </div>
 
     <!-- Social bar -->
@@ -1225,7 +1225,7 @@
         <div class="wrap">
             <div class="footer-inner">
                 <div class="footer-text">
-                    <div>Come say hi — <strong>Mon–Sat 11am–4pm</strong> at 4100 N. Pulaski Rd., Chicago</div>
+                    <div>Come say hi — <strong id="footer-hours">Mon–Sat 11am–4pm</strong> at 4100 N. Pulaski Rd., Chicago</div>
                     <div>Outside those hours? Leave a message or text and Jojin will get back to you.</div>
                     <div>Things move fast — give us a call at <strong>+1 (312) 610-0321</strong> to reserve something before you visit.</div>
                     <div style="margin-top:10px; opacity:.65; font-size:12px;">Site built by Lance Lee, who also mounts TVs around Chicago for $100 flat — <a href="https://tvserviceschicago.com" target="_blank" rel="noopener" style="color:inherit;">tvserviceschicago.com</a></div>
@@ -1467,6 +1467,19 @@
             }
         }
 
+        async function loadHours() {
+            try {
+                const res = await fetch('/api/hours', { cache: 'no-store' });
+                if (!res.ok) return;
+                const { hours } = await res.json();
+                if (!hours) return;
+                document.getElementById('announce-hours').textContent = hours;
+                document.getElementById('footer-hours').textContent = hours;
+            } catch {
+                // Falls back to the hardcoded default already in the HTML.
+            }
+        }
+
         let picksCount = 0;
 
         function updatePicksVisibility() {
@@ -1652,6 +1665,7 @@
             renderPicks(PRODUCTS);
             render(getFilteredProducts());
             loadGallery();
+            loadHours();
         }
 
         init().catch(err => {

@@ -510,6 +510,57 @@
             padding: 0;
         }
         .back-to-categories:hover { text-decoration: underline; }
+        /* ── Cross-promo banner ── */
+        .promo-banner {
+            margin: 8px 0 32px;
+            background: var(--card, #fff);
+            border: 1.5px solid var(--tan);
+            border-radius: var(--r);
+            box-shadow: 4px 4px 0 var(--teal);
+            padding: 18px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+
+        .promo-banner .promo-eyebrow {
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--teal);
+            font-weight: 700;
+            margin: 0 0 4px;
+        }
+
+        .promo-banner h3 {
+            font-family: var(--font-display);
+            font-size: 18px;
+            margin: 0 0 4px;
+        }
+
+        .promo-banner p {
+            margin: 0;
+            font-size: 13px;
+            color: var(--ink-soft);
+            max-width: 46ch;
+        }
+
+        .promo-banner .promo-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .promo-banner .btn-teal {
+            white-space: nowrap;
+        }
+
+        @media (max-width: 600px) {
+            .promo-banner { flex-direction: column; align-items: flex-start; }
+        }
+
         .gallery-section { margin: 8px 0 36px; }
 
         .gallery-title {
@@ -1123,6 +1174,18 @@
                 <div class="gallery-row" id="gallery-row"></div>
             </div>
 
+            <div class="promo-banner">
+                <div>
+                    <p class="promo-eyebrow">🔧 Also from the guy who built this site</p>
+                    <h3>Need a TV Mounted?</h3>
+                    <p>$100 flat rate — any TV, any size, anywhere in Chicago. No hidden fees.</p>
+                </div>
+                <div class="promo-actions">
+                    <a class="btn btn-teal" href="tel:+13129317096">📞 (312) 931-7096</a>
+                    <a class="btn" href="https://tvserviceschicago.com" target="_blank" rel="noopener">TV Install Chicago →</a>
+                </div>
+            </div>
+
         </div>
     </main>
 
@@ -1133,6 +1196,7 @@
                     <div>Come say hi — <strong>Mon–Sat 11am–4pm</strong> at 4100 N. Pulaski Rd., Chicago</div>
                     <div>Outside those hours? Leave a message or text and Jojin will get back to you.</div>
                     <div>Things move fast — give us a call at <strong>+1 (312) 610-0321</strong> to reserve something before you visit.</div>
+                    <div style="margin-top:10px; opacity:.65; font-size:12px;">Site built by Lance Lee, who also mounts TVs around Chicago for $100 flat — <a href="https://tvserviceschicago.com" target="_blank" rel="noopener" style="color:inherit;">tvserviceschicago.com</a></div>
                 </div>
                 <div class="footer-stamp">🐾 Jojin's Kitty Thrift</div>
             </div>

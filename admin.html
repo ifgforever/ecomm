@@ -373,6 +373,9 @@
             <a class="btn small" href="/sold-check.html" target="_blank" rel="noopener">🧹 Sold Check</a>
             <a class="btn small" href="/gallery-review.html" target="_blank" rel="noopener">🖼️ Gallery Review</a>
             <a class="btn small" href="/gallery-submit.html" target="_blank" rel="noopener">📷 Gallery Submit (visitor view)</a>
+            <a class="btn small" href="/community-listings-review.html" target="_blank" rel="noopener">🛍️ Community Listings Review</a>
+            <a class="btn small" href="/community-sell.html" target="_blank" rel="noopener">👋 Sell With Us (visitor view)</a>
+            <a class="btn small" href="#store-hours-section">🕒 Store Hours</a>
         </div>
 
         <div id="statusMsg" class="status hidden"></div>
@@ -502,6 +505,16 @@
             <h3 style="margin-top:0;">Manage Categories</h3>
             <p class="muted">Rename any category — every item using it updates at once. Rename two categories to the same name to merge them.</p>
             <div id="categoryManagerList" style="margin-top:12px;"></div>
+        </div>
+
+        <div class="card" style="margin-top:20px;" id="store-hours-section">
+            <h3 style="margin-top:0;">Store Hours</h3>
+            <p class="muted">Shown at the top and in the footer of the live site.</p>
+            <input id="storeHoursInput" placeholder="e.g. Mon–Sat 11am–4pm" style="margin-top:10px;" />
+            <div style="display:flex; gap:10px; align-items:center; margin-top:12px;">
+                <button class="btn primary" id="saveHoursBtn">💾 Save Hours</button>
+                <span class="ai-err" id="hoursErr"></span>
+            </div>
         </div>
 
     </div>
@@ -1180,6 +1193,8 @@ Respond with ONLY a raw JSON array — your entire reply must be the array itsel
                 els.image.value = url;
             }
 
+            const existing = PRODUCTS.find(x => x.id === id);
+
             const p = {
                 id,
                 name: els.name.value.trim(),
@@ -1191,7 +1206,8 @@ Respond with ONLY a raw JSON array — your entire reply must be the array itsel
                 rotation: normalizeRotation(parseInt(els.rotation.value) || 0),
                 description: els.description.value.trim(),
                 featured: els.featured.checked,
-                pickNote: els.pickNote.value.trim()
+                pickNote: els.pickNote.value.trim(),
+                createdAt: existing?.createdAt || new Date().toISOString()
             };
 
             const idx = PRODUCTS.findIndex(x => x.id === id);
@@ -1218,6 +1234,53 @@ Respond with ONLY a raw JSON array — your entire reply must be the array itsel
         document.getElementById("save").addEventListener("click", save);
         document.getElementById("clear").addEventListener("click", clearForm);
         document.getElementById("download").addEventListener("click", download);
+
+        // ── Store Hours ──────────────────────────────────
+        const storeHoursInput = document.getElementById("storeHoursInput");
+        const saveHoursBtn = document.getElementById("saveHoursBtn");
+        const hoursErr = document.getElementById("hoursErr");
+
+        async function loadHours() {
+            try {
+                const res = await fetch("/api/hours", { cache: "no-store" });
+                const data = await res.json();
+                if (res.ok && data.hours) storeHoursInput.value = data.hours;
+            } catch {
+                // Leave the placeholder if this fails; not worth blocking the page over.
+            }
+        }
+
+        async function saveHours() {
+            hoursErr.style.display = "none";
+            const hours = storeHoursInput.value.trim();
+            if (!hours) {
+                hoursErr.textContent = "Enter some hours text first.";
+                hoursErr.style.display = "inline";
+                return;
+            }
+
+            saveHoursBtn.disabled = true;
+            saveHoursBtn.textContent = "Saving…";
+            try {
+                const res = await fetch("/api/hours", {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ hours }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+                showStatus("✓ Hours updated", "success");
+            } catch (err) {
+                hoursErr.textContent = `Couldn't save (${err.message}).`;
+                hoursErr.style.display = "inline";
+            } finally {
+                saveHoursBtn.disabled = false;
+                saveHoursBtn.textContent = "💾 Save Hours";
+            }
+        }
+
+        saveHoursBtn.addEventListener("click", saveHours);
+        loadHours();
 
         load();
     </script>

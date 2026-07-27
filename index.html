@@ -13,6 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
         :root {
@@ -92,6 +93,41 @@
             font-weight: 600;
             letter-spacing: 0.06em;
             text-transform: uppercase;
+        }
+
+        .social-bar {
+            background: var(--ink);
+            text-align: center;
+            padding: 7px 16px;
+            font-size: 12.5px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .social-bar a {
+            color: var(--paper-warm);
+            text-decoration: none;
+            margin: 0 12px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .social-bar a:hover {
+            color: var(--amber-light);
+            text-decoration: underline;
+        }
+
+        .social-bar-label {
+            color: var(--amber-light);
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            margin-right: 6px;
+        }
+
+        .social-bar-stars {
+            margin-left: 14px;
+            color: #ffd700;
+            font-size: 13px;
+            letter-spacing: 1px;
         }
 
         .announce-bar span {
@@ -495,6 +531,15 @@
             color: #fff;
         }
 
+        .category-tile.new-arrivals-tile {
+            background: var(--teal);
+            border-color: var(--teal);
+        }
+        .category-tile.new-arrivals-tile .cat-name,
+        .category-tile.new-arrivals-tile .cat-count {
+            color: #fff;
+        }
+
         .back-to-categories {
             display: none;
             align-items: center;
@@ -628,6 +673,100 @@
             text-align: center;
         }
 
+        /* ── Community Listings ── */
+        .community-section { margin: 8px 0 36px; }
+
+        .community-title {
+            font-family: var(--font-display);
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--ink);
+            margin: 0 0 4px;
+            letter-spacing: -0.02em;
+        }
+        .community-title em { font-style: italic; color: var(--rust); }
+
+        .community-sub {
+            margin: 0 0 18px;
+            color: var(--ink-soft);
+            font-size: 13px;
+        }
+
+        .community-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .community-card {
+            position: relative;
+            background: var(--card);
+            border: 1.5px solid var(--teal);
+            border-radius: var(--r);
+            overflow: hidden;
+            box-shadow: 5px 5px 0 var(--teal);
+            transition: transform 0.18s, box-shadow 0.18s;
+        }
+        .community-card:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 7px 7px 0 var(--teal-dark, var(--teal));
+        }
+        .community-card .ribbon {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 3;
+            background: var(--teal);
+            color: #fff;
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 5px 10px;
+            border-radius: 2px;
+        }
+        .community-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            display: block;
+            background: var(--paper-warm);
+        }
+        .community-card .content { padding: 12px 14px 14px; }
+        .community-card .name {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 17px;
+            margin: 4px 0 6px;
+        }
+        .community-card .desc {
+            font-size: 13px;
+            color: var(--ink-soft);
+            margin: 0 0 10px;
+            line-height: 1.5;
+        }
+        .community-card .price {
+            font-weight: 800;
+            color: var(--amber-dark);
+            margin-right: 10px;
+        }
+        .community-card .contact-btn {
+            display: inline-block;
+            margin-top: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+            background: var(--teal);
+            border-radius: var(--r);
+            padding: 8px 12px;
+            text-decoration: none;
+        }
+        .community-card .no-contact {
+            font-size: 12px;
+            color: var(--ink-soft);
+            font-style: italic;
+        }
+
         /* ── Handpicked by Jojin ── */
         .picks-section { margin-bottom: 36px; }
 
@@ -704,6 +843,8 @@
         }
 
         /* ── Product Grid ── */
+        [hidden] { display: none !important; }
+
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -1084,7 +1225,20 @@
 
     <!-- Announce bar -->
     <div class="announce-bar">
-        🐾 Jojin's Kitty Thrift Shop &nbsp;·&nbsp; <span>Every item hand-picked by Jojin</span> &nbsp;·&nbsp; Chicago, IL &nbsp;·&nbsp; Mon–Sat 11am–4pm
+        🐾 Jojin's Kitty Thrift Shop &nbsp;·&nbsp; <span>Every item hand-picked by Jojin</span> &nbsp;·&nbsp; Chicago, IL &nbsp;·&nbsp; <span id="announce-hours">Mon–Sat 11am–4pm</span>
+    </div>
+
+    <!-- Social bar -->
+    <div class="social-bar">
+        <span class="social-bar-label">🐾 Follow us →</span>
+        <a href="https://www.yelp.com/biz/jojins-kitty-chicago-2" target="_blank" rel="noopener"><i class="fa-brands fa-yelp" style="color:#d32323;"></i> Yelp</a>
+        <a href="https://www.facebook.com/p/Jojins-Kitty-Thrift-Shop-61585291957385/" target="_blank" rel="noopener"><i class="fa-brands fa-facebook" style="color:#1877f2;"></i> Facebook</a>
+        <a href="https://www.tiktok.com/@jojinteston" target="_blank" rel="noopener"><i class="fa-brands fa-tiktok" style="color:#ffffff;"></i> TikTok</a>
+        <a href="https://www.instagram.com/jinlovegodfirst" target="_blank" rel="noopener"><i class="fa-brands fa-instagram" style="color:#e1306c;"></i> Instagram</a>
+        <a href="https://share.google/Ulhsi8pst9S7QpiaL" target="_blank" rel="noopener"><i class="fa-brands fa-google" style="color:#4285f4;"></i> Google</a>
+        <span class="social-bar-stars" aria-label="5 stars">
+            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+        </span>
     </div>
 
     <!-- Lightbox -->
@@ -1124,6 +1278,7 @@
                 <label for="cat" class="sr-only">Filter by category</label>
                 <select id="cat">
                     <option value="">All categories</option>
+                    <option value="__new_arrivals__">New Arrivals</option>
                 </select>
 
                 <a class="call-badge" id="callTop" href="tel:+13126100321">
@@ -1157,7 +1312,7 @@
                 <div class="section-divider"></div>
             </div>
 
-            <button class="back-to-categories" id="backToCategories">← All Categories</button>
+            <button class="back-to-categories" id="backToCategories">← Back to Home</button>
 
             <div class="category-tiles-row" id="category-tiles-row"></div>
 
@@ -1172,6 +1327,12 @@
                 <h2 class="gallery-title">You're Part of the <em>Story</em></h2>
                 <p class="gallery-sub">Snapped by folks who stopped by the shop.</p>
                 <div class="gallery-row" id="gallery-row"></div>
+            </div>
+
+            <div class="community-section" id="community-section" hidden>
+                <h2 class="community-title">From the <em>Community</em></h2>
+                <p class="community-sub">Posted by other folks, not the shop — reach out to them directly if you're interested.</p>
+                <div class="community-row" id="community-row"></div>
             </div>
 
             <div class="promo-banner">
@@ -1193,7 +1354,7 @@
         <div class="wrap">
             <div class="footer-inner">
                 <div class="footer-text">
-                    <div>Come say hi — <strong>Mon–Sat 11am–4pm</strong> at 4100 N. Pulaski Rd., Chicago</div>
+                    <div>Come say hi — <strong id="footer-hours">Mon–Sat 11am–4pm</strong> at 4100 N. Pulaski Rd., Chicago</div>
                     <div>Outside those hours? Leave a message or text and Jojin will get back to you.</div>
                     <div>Things move fast — give us a call at <strong>+1 (312) 610-0321</strong> to reserve something before you visit.</div>
                     <div style="margin-top:10px; opacity:.65; font-size:12px;">Site built by Lance Lee, who also mounts TVs around Chicago for $100 flat — <a href="https://tvserviceschicago.com" target="_blank" rel="noopener" style="color:inherit;">tvserviceschicago.com</a></div>
@@ -1325,14 +1486,26 @@
         // ── Category-tiles browsing ──────────────────────
         let shopMode = 'categories'; // 'categories' | 'grid'
 
+        const NEW_ARRIVALS_KEY = '__new_arrivals__';
+        const NEW_ARRIVALS_WINDOW_MS = 15 * 24 * 60 * 60 * 1000; // 15 days
+
+        function isNewArrival(p) {
+            if (!p.createdAt) return false;
+            const added = new Date(p.createdAt).getTime();
+            if (Number.isNaN(added)) return false;
+            return (Date.now() - added) <= NEW_ARRIVALS_WINDOW_MS;
+        }
+
         function renderCategoryTiles(items) {
             const counts = {};
             let totalInStock = 0;
+            let newArrivalsCount = 0;
             for (const p of items) {
                 if (p.inStock === false) continue;
                 const c = (p.category || '').trim() || 'Misc';
                 counts[c] = (counts[c] || 0) + 1;
                 totalInStock++;
+                if (isNewArrival(p)) newArrivalsCount++;
             }
             const cats = Object.keys(counts).sort();
 
@@ -1343,6 +1516,14 @@
             allTile.innerHTML = `<div class="cat-name">All Items</div><div class="cat-count">${totalInStock} item${totalInStock === 1 ? '' : 's'}</div>`;
             allTile.addEventListener('click', () => selectCategory(''));
             categoryTilesRow.appendChild(allTile);
+
+            if (newArrivalsCount > 0) {
+                const newTile = document.createElement('div');
+                newTile.className = 'category-tile new-arrivals-tile';
+                newTile.innerHTML = `<div class="cat-name">✨ New Arrivals</div><div class="cat-count">${newArrivalsCount} item${newArrivalsCount === 1 ? '' : 's'}</div>`;
+                newTile.addEventListener('click', () => selectCategory(NEW_ARRIVALS_KEY));
+                categoryTilesRow.appendChild(newTile);
+            }
 
             for (const c of cats) {
                 const tile = document.createElement('div');
@@ -1356,7 +1537,7 @@
         let galleryApprovedCount = 0;
 
         function updateGalleryVisibility() {
-            const visible = galleryApprovedCount > 0 && shopMode === 'grid';
+            const visible = galleryApprovedCount > 0;
             document.getElementById('gallery-section').hidden = !visible;
             document.getElementById('gallery-jump-link').hidden = !visible;
         }
@@ -1369,6 +1550,7 @@
             grid.hidden = true;
             count.textContent = '';
             updateGalleryVisibility();
+            updatePicksVisibility();
         }
 
         function showGridMode() {
@@ -1378,6 +1560,7 @@
             viewControls.hidden = false;
             grid.hidden = false;
             updateGalleryVisibility();
+            updatePicksVisibility();
         }
 
         function selectCategory(categoryName) {
@@ -1386,19 +1569,79 @@
             updateViewButtons();
             showGridMode();
             render(getFilteredProducts());
-            document.querySelector('.section-header').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            backToCategoriesBtn.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // ── Smarter search ──────────────────────────────
+        // Standard edit-distance calc, used below to tolerate small typos.
+        function levenshtein(a, b) {
+            if (a === b) return 0;
+            const al = a.length, bl = b.length;
+            if (al === 0) return bl;
+            if (bl === 0) return al;
+            let prev = Array.from({ length: bl + 1 }, (_, i) => i);
+            for (let i = 1; i <= al; i++) {
+                const cur = [i];
+                for (let j = 1; j <= bl; j++) {
+                    const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+                    cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+                }
+                prev = cur;
+            }
+            return prev[bl];
+        }
+
+        function tokenize(text) {
+            return (text || '').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+        }
+
+        // True if a word from the item's text plausibly matches a typed query word —
+        // as a direct substring/prefix, or (for longer words) within a small typo tolerance.
+        function wordFuzzyMatch(word, queryToken) {
+            if (word.includes(queryToken)) return true;
+            if (queryToken.length >= 4) {
+                const maxDist = queryToken.length >= 7 ? 2 : 1;
+                if (Math.abs(word.length - queryToken.length) <= 2 && levenshtein(word, queryToken) <= maxDist) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         function matches(p, queryText, category) {
-            const qt = queryText.trim().toLowerCase();
-            if (category && (p.category || '') !== category) return false;
-            if (!qt) return true;
-            return `${p.name} ${p.id} ${p.description} ${p.category}`.toLowerCase().includes(qt);
+            if (category === NEW_ARRIVALS_KEY) {
+                if (!isNewArrival(p)) return false;
+            } else if (category && (p.category || '') !== category) {
+                return false;
+            }
+
+            const queryTokens = tokenize(queryText);
+            if (queryTokens.length === 0) return true;
+
+            const words = tokenize(`${p.name} ${p.id} ${p.description} ${p.category}`);
+            // Every typed word needs a plausible match somewhere — in any order.
+            return queryTokens.every(token => words.some(word => wordFuzzyMatch(word, token)));
+        }
+
+        // Matches in the item's name count for more than matches only in the description/category,
+        // so the most relevant items float to the top when there's an active search.
+        function matchScore(p, queryTokens) {
+            const nameWords = tokenize(p.name);
+            let score = 0;
+            for (const token of queryTokens) {
+                score += nameWords.some(w => wordFuzzyMatch(w, token)) ? 2 : 1;
+            }
+            return score;
         }
 
         function getFilteredProducts() {
             let items = PRODUCTS.filter(p => matches(p, q.value, cat.value));
             if (currentView === 'saved') items = items.filter(p => savedItems.has(p.id));
+
+            const queryTokens = tokenize(q.value);
+            if (queryTokens.length > 0) {
+                items = [...items].sort((a, b) => matchScore(b, queryTokens) - matchScore(a, queryTokens));
+            }
             return items;
         }
 
@@ -1433,18 +1676,76 @@
             }
         }
 
-        function renderPicks(items) {
-            const section = document.getElementById('picks-section');
-            const row = document.getElementById('picks-row');
-            const picks = items.filter(p => p.featured);
+        async function loadHours() {
+            try {
+                const res = await fetch('/api/hours', { cache: 'no-store' });
+                if (!res.ok) return;
+                const { hours } = await res.json();
+                if (!hours) return;
+                document.getElementById('announce-hours').textContent = hours;
+                document.getElementById('footer-hours').textContent = hours;
+            } catch {
+                // Falls back to the hardcoded default already in the HTML.
+            }
+        }
 
-            if (picks.length === 0) {
+        function renderCommunityListings(items) {
+            const section = document.getElementById('community-section');
+            const row = document.getElementById('community-row');
+            const approved = items.filter(l => l.approved);
+
+            if (approved.length === 0) {
                 section.hidden = true;
                 row.innerHTML = '';
                 return;
             }
 
             section.hidden = false;
+            row.innerHTML = '';
+
+            for (const l of approved) {
+                const card = document.createElement('article');
+                card.className = 'community-card';
+                const contact = l.email
+                    ? `<a class="contact-btn" href="mailto:${escapeHtml(l.email)}?subject=${encodeURIComponent('About your listing: ' + (l.name || ''))}">📧 Contact seller</a>`
+                    : `<span class="no-contact">No contact info left — ask Jojin about it in person.</span>`;
+                card.innerHTML = `
+                    <span class="ribbon">👋 From the Community</span>
+                    <img src="${escapeHtml(l.image)}" alt="${escapeHtml(l.name || '')}" loading="lazy">
+                    <div class="content">
+                        <h3 class="name">${escapeHtml(l.name || 'Untitled item')}</h3>
+                        <p class="desc">${escapeHtml(l.description || '')}</p>
+                        ${l.price != null ? `<span class="price">$${Number(l.price).toFixed(0)}</span>` : ''}
+                        <div>${contact}</div>
+                    </div>
+                `;
+                row.appendChild(card);
+            }
+        }
+
+        async function loadCommunityListings() {
+            try {
+                const res = await fetch('/api/community-listings', { cache: 'no-store' });
+                if (!res.ok) return;
+                const listings = await res.json();
+                renderCommunityListings(listings);
+            } catch {
+                // Nice-to-have; fail quietly if unavailable.
+            }
+        }
+
+        let picksCount = 0;
+
+        function updatePicksVisibility() {
+            document.getElementById('picks-section').hidden = !(picksCount > 0);
+        }
+
+        function renderPicks(items) {
+            const row = document.getElementById('picks-row');
+            const picks = items.filter(p => p.featured);
+            picksCount = picks.length;
+            updatePicksVisibility();
+
             row.innerHTML = '';
 
             for (const p of picks) {
@@ -1481,6 +1782,8 @@
 
                 row.appendChild(card);
             }
+
+            updatePicksVisibility();
         }
 
         function render(items) {
@@ -1616,6 +1919,8 @@
             renderPicks(PRODUCTS);
             render(getFilteredProducts());
             loadGallery();
+            loadHours();
+            loadCommunityListings();
         }
 
         init().catch(err => {

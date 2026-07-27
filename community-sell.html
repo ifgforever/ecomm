@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Sell With Us — Jojin's Kitty Thrift</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32'>🐾</text></svg>">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #1c1610;
+    --ink-soft: #6b5d4f;
+    --paper: #f7f2eb;
+    --paper-warm: #f0e9de;
+    --tan: #d4c4a8;
+    --amber: #c8863a;
+    --amber-dark: #a06820;
+    --teal: #3d7a6e;
+    --rust: #b8522a;
+    --card: #ffffff;
+    --r: 4px;
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'Karla', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    color: var(--ink);
+    background: var(--paper);
+    padding-bottom: 40px;
+  }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 36px 20px 20px; }
+
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--rust);
+    font-weight: 700;
+    margin: 0 0 8px;
+    text-align: center;
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 900;
+    text-align: center;
+    margin: 0 0 10px;
+    letter-spacing: -0.02em;
+  }
+  h1 em { font-style: italic; color: var(--amber-dark); }
+  .sub {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0 0 12px;
+  }
+  .fine-print {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 12px;
+    line-height: 1.5;
+    margin: 0 0 26px;
+    padding: 0 8px;
+    opacity: .85;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1.5px solid var(--tan);
+    border-radius: var(--r);
+    padding: 20px;
+    box-shadow: 5px 5px 0 var(--amber);
+  }
+
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 16px 0 6px;
+  }
+  label:first-child { margin-top: 0; }
+
+  .dropzone {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 2px dashed var(--tan);
+    border-radius: var(--r);
+    padding: 14px;
+    cursor: pointer;
+    background: var(--paper-warm);
+  }
+  .dropzone input { display: none; }
+  .dropzone .thumb {
+    width: 56px; height: 56px;
+    border-radius: 4px;
+    background: var(--paper);
+    border: 1px solid var(--tan);
+    flex-shrink: 0;
+    background-size: cover;
+    background-position: center;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+  }
+  .dropzone .txt { font-size: 13px; color: var(--ink-soft); }
+
+  input[type="text"], input[type="email"], input[type="number"], textarea {
+    width: 100%;
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--paper-warm);
+    border: 1px solid var(--tan);
+    border-radius: var(--r);
+    padding: 10px 12px;
+  }
+  textarea { min-height: 70px; resize: vertical; }
+
+  .ai-btn {
+    width: 100%;
+    margin-top: 10px;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 13.5px;
+    color: var(--rust);
+    background: #fff;
+    border: 2px solid var(--rust);
+    border-radius: var(--r);
+    padding: 10px;
+    cursor: pointer;
+  }
+  .ai-btn:disabled { opacity: .55; cursor: default; }
+
+  .hint {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  .submit-btn {
+    width: 100%;
+    margin-top: 22px;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+    color: #fff;
+    background: var(--teal);
+    border: none;
+    border-radius: var(--r);
+    padding: 14px;
+    cursor: pointer;
+  }
+  .submit-btn:disabled { opacity: .55; cursor: default; }
+
+  .err {
+    margin-top: 10px;
+    font-size: 12.5px;
+    color: var(--rust);
+    display: none;
+  }
+
+  .success {
+    display: none;
+    text-align: center;
+    padding: 30px 10px;
+  }
+  .success .big { font-size: 40px; margin-bottom: 10px; }
+  .success h2 {
+    font-family: var(--font-display);
+    font-size: 22px;
+    margin: 0 0 8px;
+  }
+  .success p { color: var(--ink-soft); font-size: 14px; line-height: 1.6; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="eyebrow">Community listings</p>
+    <h1>Sell Something <em>Here</em></h1>
+    <p class="sub">Got something to sell? Post it here — if it's a good fit, it'll show up on the site for people to see.</p>
+    <p class="fine-print">This isn't consignment — the shop doesn't hold your item or handle the sale. If you leave an email, interested buyers will reach out to you directly and you'll arrange everything yourselves.</p>
+
+    <div class="card" id="formCard">
+      <label>Photo</label>
+      <label class="dropzone" tabindex="0">
+        <div class="thumb" id="thumb">📷</div>
+        <span class="txt" id="dropText">Tap to take or choose a photo</span>
+        <input type="file" accept="image/*" capture="environment" id="photoInput" />
+      </label>
+
+      <label>Quick note about it</label>
+      <textarea id="noteInput" placeholder="e.g. barely-used bike helmet, adjustable, one small scuff on the side"></textarea>
+      <button class="ai-btn" id="aiBtn">✨ Help me write this with AI</button>
+      <p class="hint" id="aiHint" style="display:none;">Filled in below — feel free to edit anything.</p>
+
+      <label>Title</label>
+      <input type="text" id="nameInput" placeholder="e.g. Adjustable Bike Helmet" />
+
+      <label>Description</label>
+      <textarea id="descInput" placeholder="A couple sentences about the item and its condition"></textarea>
+
+      <label>Asking price <span style="opacity:.6; text-transform:none;">(optional)</span></label>
+      <input type="number" id="priceInput" placeholder="e.g. 20" min="0" step="1" />
+
+      <label>Your email <span style="opacity:.6; text-transform:none;">(optional — so buyers can reach you)</span></label>
+      <input type="email" id="emailInput" placeholder="you@example.com" />
+
+      <button class="submit-btn" id="submitBtn">Submit listing</button>
+      <div class="err" id="errBox"></div>
+    </div>
+
+    <div class="success" id="successBox">
+      <div class="big">🐾</div>
+      <h2>Got it!</h2>
+      <p>Jojin will take a look, and if it's approved it'll show up on the site soon.</p>
+    </div>
+  </div>
+
+<script>
+(function () {
+  const photoInput = document.getElementById('photoInput');
+  const thumb = document.getElementById('thumb');
+  const dropText = document.getElementById('dropText');
+  const noteInput = document.getElementById('noteInput');
+  const aiBtn = document.getElementById('aiBtn');
+  const aiHint = document.getElementById('aiHint');
+  const nameInput = document.getElementById('nameInput');
+  const descInput = document.getElementById('descInput');
+  const priceInput = document.getElementById('priceInput');
+  const emailInput = document.getElementById('emailInput');
+  const submitBtn = document.getElementById('submitBtn');
+  const errBox = document.getElementById('errBox');
+  const formCard = document.getElementById('formCard');
+  const successBox = document.getElementById('successBox');
+
+  let base64 = null;
+  let mediaType = null;
+
+  photoInput.addEventListener('change', () => {
+    const file = photoInput.files && photoInput.files[0];
+    if (!file) return;
+    mediaType = file.type || 'image/jpeg';
+    const reader = new FileReader();
+    reader.onload = () => {
+      base64 = reader.result.split(',')[1];
+      thumb.style.backgroundImage = `url(${reader.result})`;
+      thumb.textContent = '';
+      dropText.textContent = 'Looks good — tap to change';
+    };
+    reader.onerror = () => showError("Couldn't read that photo. Try again.");
+    reader.readAsDataURL(file);
+  });
+
+  function showError(msg) {
+    errBox.textContent = msg;
+    errBox.style.display = 'block';
+  }
+  function clearError() {
+    errBox.style.display = 'none';
+    errBox.textContent = '';
+  }
+
+  function extractJson(text) {
+    const cleaned = text.replace(/```json|```/g, '').trim();
+    const start = cleaned.indexOf('{');
+    const end = cleaned.lastIndexOf('}');
+    return (start === -1 || end === -1) ? cleaned : cleaned.slice(start, end + 1);
+  }
+
+  async function generateWithAI() {
+    clearError();
+    const note = noteInput.value.trim();
+    if (!note) {
+      showError('Add a quick note first — that\'s what the AI works from.');
+      return;
+    }
+
+    aiBtn.disabled = true;
+    aiBtn.textContent = 'Thinking…';
+
+    const contentBlocks = [];
+    if (base64) {
+      contentBlocks.push({ type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } });
+    }
+    contentBlocks.push({
+      type: 'text',
+      text: `Seller's note: "${note}"${base64 ? '' : ' (no photo provided — work from the note alone)'}`
+    });
+
+    const systemPrompt = `You help a stranger write a listing for their own item, to be posted on the "community listings" section of Jojin's Kitty Thrift's website (items from other people, not the shop's own inventory). Given a photo (if provided) and a short note, write:
+- a short, catchy, honest title
+- a 2-3 sentence description in a friendly, plain voice. Mention real flaws honestly, don't oversell.
+- a fair suggested asking price in USD (a single number)
+
+Respond with ONLY a raw JSON object — your entire reply must be the JSON object itself, starting with { and ending with }. No markdown fences, no commentary. Shape:
+{"title": "...", "description": "...", "price": 0}`;
+
+    try {
+      const res = await fetch('/api/ai-assist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system: systemPrompt,
+          messages: [{ role: 'user', content: contentBlocks }],
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+
+      const textBlock = (data.content || []).find(b => b.type === 'text');
+      if (!textBlock) throw new Error('No response text');
+
+      const parsed = JSON.parse(extractJson(textBlock.text));
+      nameInput.value = parsed.title || '';
+      descInput.value = parsed.description || '';
+      if (parsed.price != null) priceInput.value = parsed.price;
+      aiHint.style.display = 'block';
+    } catch (err) {
+      showError(`Couldn't generate a draft (${err.message}). You can still fill it in yourself.`);
+    } finally {
+      aiBtn.disabled = false;
+      aiBtn.textContent = '✨ Help me write this with AI';
+    }
+  }
+
+  aiBtn.addEventListener('click', generateWithAI);
+
+  async function submit() {
+    clearError();
+    if (!base64) {
+      showError('Add a photo first.');
+      return;
+    }
+    if (!nameInput.value.trim()) {
+      showError('Give it a title.');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting…';
+
+    try {
+      const res = await fetch('/api/community-listing-submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: nameInput.value,
+          description: descInput.value,
+          price: priceInput.value,
+          email: emailInput.value,
+          mediaType,
+          base64,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+
+      formCard.style.display = 'none';
+      successBox.style.display = 'block';
+    } catch (err) {
+      showError(`Couldn't submit (${err.message}). Try again.`);
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit listing';
+    }
+  }
+
+  submitBtn.addEventListener('click', submit);
+})();
+</script>
+</body>
+</html>

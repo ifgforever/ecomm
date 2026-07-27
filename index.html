@@ -446,7 +446,121 @@
             .about-jojin { flex-direction: column; }
         }
 
-        /* ── Community gallery ── */
+        /* ── Category tiles ── */
+        #cat { display: none; }
+
+        .category-tiles-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+
+        .category-tile {
+            background: var(--card, #fff);
+            border: 1.5px solid var(--tan);
+            border-radius: var(--r);
+            padding: 20px 14px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: var(--shadow-soft);
+            transition: transform 0.14s, box-shadow 0.14s;
+            font-family: var(--font-body);
+        }
+
+        .category-tile:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+
+        .category-tile .cat-name {
+            font-family: var(--font-display);
+            font-weight: 900;
+            font-size: 17px;
+            color: var(--ink);
+            margin-bottom: 4px;
+        }
+
+        .category-tile .cat-count {
+            font-size: 12px;
+            color: var(--ink-soft);
+        }
+
+        .category-tile.all-tile {
+            background: var(--amber);
+            border-color: var(--amber-dark);
+        }
+        .category-tile.all-tile .cat-name,
+        .category-tile.all-tile .cat-count {
+            color: #fff;
+        }
+
+        .back-to-categories {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            font-family: var(--font-body);
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--teal);
+            cursor: pointer;
+            margin-bottom: 16px;
+            padding: 0;
+        }
+        .back-to-categories:hover { text-decoration: underline; }
+        /* ── Cross-promo banner ── */
+        .promo-banner {
+            margin: 8px 0 32px;
+            background: var(--card, #fff);
+            border: 1.5px solid var(--tan);
+            border-radius: var(--r);
+            box-shadow: 4px 4px 0 var(--teal);
+            padding: 18px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+
+        .promo-banner .promo-eyebrow {
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--teal);
+            font-weight: 700;
+            margin: 0 0 4px;
+        }
+
+        .promo-banner h3 {
+            font-family: var(--font-display);
+            font-size: 18px;
+            margin: 0 0 4px;
+        }
+
+        .promo-banner p {
+            margin: 0;
+            font-size: 13px;
+            color: var(--ink-soft);
+            max-width: 46ch;
+        }
+
+        .promo-banner .promo-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .promo-banner .btn-teal {
+            white-space: nowrap;
+        }
+
+        @media (max-width: 600px) {
+            .promo-banner { flex-direction: column; align-items: flex-start; }
+        }
+
         .gallery-section { margin: 8px 0 36px; }
 
         .gallery-title {
@@ -993,6 +1107,9 @@
                     </div>
                 </div>
                 <div class="user-controls" id="user-controls">
+                    <button type="button" class="btn wishlist-toggle" id="gallery-jump-link" hidden>
+                        📸 Gallery
+                    </button>
                     <button class="btn wishlist-toggle" id="wishlist-btn">
                         ♡ Saved
                         <span class="badge" id="wishlist-badge"></span>
@@ -1040,17 +1157,33 @@
                 <div class="section-divider"></div>
             </div>
 
-            <div class="view-controls" id="view-controls">
+            <button class="back-to-categories" id="backToCategories">← All Categories</button>
+
+            <div class="category-tiles-row" id="category-tiles-row"></div>
+
+            <div class="view-controls" id="view-controls" hidden>
                 <button class="view-btn active" data-view="all">All Items</button>
                 <button class="view-btn" data-view="saved">♡ My Saved Items</button>
             </div>
 
-            <div class="grid" id="grid"></div>
+            <div class="grid" id="grid" hidden></div>
 
             <div class="gallery-section" id="gallery-section" hidden>
                 <h2 class="gallery-title">You're Part of the <em>Story</em></h2>
                 <p class="gallery-sub">Snapped by folks who stopped by the shop.</p>
                 <div class="gallery-row" id="gallery-row"></div>
+            </div>
+
+            <div class="promo-banner">
+                <div>
+                    <p class="promo-eyebrow">🔧 Also from the guy who built this site</p>
+                    <h3>Need a TV Mounted?</h3>
+                    <p>$100 flat rate — any TV, any size, anywhere in Chicago. No hidden fees.</p>
+                </div>
+                <div class="promo-actions">
+                    <a class="btn btn-teal" href="tel:+13129317096">📞 (312) 931-7096</a>
+                    <a class="btn" href="https://tvserviceschicago.com" target="_blank" rel="noopener">TV Install Chicago →</a>
+                </div>
             </div>
 
         </div>
@@ -1063,6 +1196,7 @@
                     <div>Come say hi — <strong>Mon–Sat 11am–4pm</strong> at 4100 N. Pulaski Rd., Chicago</div>
                     <div>Outside those hours? Leave a message or text and Jojin will get back to you.</div>
                     <div>Things move fast — give us a call at <strong>+1 (312) 610-0321</strong> to reserve something before you visit.</div>
+                    <div style="margin-top:10px; opacity:.65; font-size:12px;">Site built by Lance Lee, who also mounts TVs around Chicago for $100 flat — <a href="https://tvserviceschicago.com" target="_blank" rel="noopener" style="color:inherit;">tvserviceschicago.com</a></div>
                 </div>
                 <div class="footer-stamp">🐾 Jojin's Kitty Thrift</div>
             </div>
@@ -1082,6 +1216,8 @@
         const grid       = document.getElementById('grid');
         const q          = document.getElementById('q');
         const cat        = document.getElementById('cat');
+        const categoryTilesRow = document.getElementById('category-tiles-row');
+        const backToCategoriesBtn = document.getElementById('backToCategories');
         const count      = document.getElementById('count');
         const callTop    = document.getElementById('callTop');
 
@@ -1186,6 +1322,73 @@
             }
         }
 
+        // ── Category-tiles browsing ──────────────────────
+        let shopMode = 'categories'; // 'categories' | 'grid'
+
+        function renderCategoryTiles(items) {
+            const counts = {};
+            let totalInStock = 0;
+            for (const p of items) {
+                if (p.inStock === false) continue;
+                const c = (p.category || '').trim() || 'Misc';
+                counts[c] = (counts[c] || 0) + 1;
+                totalInStock++;
+            }
+            const cats = Object.keys(counts).sort();
+
+            categoryTilesRow.innerHTML = '';
+
+            const allTile = document.createElement('div');
+            allTile.className = 'category-tile all-tile';
+            allTile.innerHTML = `<div class="cat-name">All Items</div><div class="cat-count">${totalInStock} item${totalInStock === 1 ? '' : 's'}</div>`;
+            allTile.addEventListener('click', () => selectCategory(''));
+            categoryTilesRow.appendChild(allTile);
+
+            for (const c of cats) {
+                const tile = document.createElement('div');
+                tile.className = 'category-tile';
+                tile.innerHTML = `<div class="cat-name">${escapeHtml(c)}</div><div class="cat-count">${counts[c]} item${counts[c] === 1 ? '' : 's'}</div>`;
+                tile.addEventListener('click', () => selectCategory(c));
+                categoryTilesRow.appendChild(tile);
+            }
+        }
+
+        let galleryApprovedCount = 0;
+
+        function updateGalleryVisibility() {
+            const visible = galleryApprovedCount > 0 && shopMode === 'grid';
+            document.getElementById('gallery-section').hidden = !visible;
+            document.getElementById('gallery-jump-link').hidden = !visible;
+        }
+
+        function showCategoryMode() {
+            shopMode = 'categories';
+            categoryTilesRow.hidden = false;
+            backToCategoriesBtn.style.display = 'none';
+            viewControls.hidden = true;
+            grid.hidden = true;
+            count.textContent = '';
+            updateGalleryVisibility();
+        }
+
+        function showGridMode() {
+            shopMode = 'grid';
+            categoryTilesRow.hidden = true;
+            backToCategoriesBtn.style.display = 'flex';
+            viewControls.hidden = false;
+            grid.hidden = false;
+            updateGalleryVisibility();
+        }
+
+        function selectCategory(categoryName) {
+            cat.value = categoryName;
+            currentView = 'all';
+            updateViewButtons();
+            showGridMode();
+            render(getFilteredProducts());
+            document.querySelector('.section-header').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
         function matches(p, queryText, category) {
             const qt = queryText.trim().toLowerCase();
             if (category && (p.category || '') !== category) return false;
@@ -1200,19 +1403,11 @@
         }
 
         function renderGallery(items) {
-            const section = document.getElementById('gallery-section');
             const row = document.getElementById('gallery-row');
             const approved = items.filter(g => g.approved);
+            galleryApprovedCount = approved.length;
 
-            if (approved.length === 0) {
-                section.hidden = true;
-                row.innerHTML = '';
-                return;
-            }
-
-            section.hidden = false;
             row.innerHTML = '';
-
             for (const g of approved) {
                 const card = document.createElement('figure');
                 card.className = 'polaroid';
@@ -1223,6 +1418,8 @@
                 `;
                 row.appendChild(card);
             }
+
+            updateGalleryVisibility();
         }
 
         async function loadGallery() {
@@ -1366,6 +1563,7 @@
         wishlistBtn.addEventListener('click', () => {
             currentView = currentView === 'saved' ? 'all' : 'saved';
             updateViewButtons();
+            showGridMode();
             render(getFilteredProducts());
         });
 
@@ -1377,7 +1575,23 @@
             }
         });
 
-        q.addEventListener('input', applyFilters);
+        backToCategoriesBtn.addEventListener('click', () => {
+            q.value = '';
+            cat.value = '';
+            currentView = 'all';
+            updateViewButtons();
+            showCategoryMode();
+            renderCategoryTiles(PRODUCTS);
+        });
+
+        document.getElementById('gallery-jump-link').addEventListener('click', () => {
+            document.getElementById('gallery-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+
+        q.addEventListener('input', () => {
+            if (shopMode === 'categories' && q.value.trim()) showGridMode();
+            applyFilters();
+        });
         cat.addEventListener('change', applyFilters);
 
         document.addEventListener('keydown', e => {
@@ -1397,6 +1611,8 @@
                 PRODUCTS = await res.json();
             }
             populateCategories(PRODUCTS);
+            renderCategoryTiles(PRODUCTS);
+            showCategoryMode();
             renderPicks(PRODUCTS);
             render(getFilteredProducts());
             loadGallery();

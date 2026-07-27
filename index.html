@@ -1356,7 +1356,7 @@
         let galleryApprovedCount = 0;
 
         function updateGalleryVisibility() {
-            const visible = galleryApprovedCount > 0 && shopMode === 'grid';
+            const visible = galleryApprovedCount > 0;
             document.getElementById('gallery-section').hidden = !visible;
             document.getElementById('gallery-jump-link').hidden = !visible;
         }
@@ -1438,13 +1438,14 @@
         let picksCount = 0;
 
         function updatePicksVisibility() {
-            document.getElementById('picks-section').hidden = !(picksCount > 0 && shopMode === 'grid');
+            document.getElementById('picks-section').hidden = !(picksCount > 0);
         }
 
         function renderPicks(items) {
             const row = document.getElementById('picks-row');
             const picks = items.filter(p => p.featured);
             picksCount = picks.length;
+            updatePicksVisibility();
 
             row.innerHTML = '';
 

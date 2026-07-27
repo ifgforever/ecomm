@@ -1353,6 +1353,14 @@
             }
         }
 
+        let galleryApprovedCount = 0;
+
+        function updateGalleryVisibility() {
+            const visible = galleryApprovedCount > 0 && shopMode === 'grid';
+            document.getElementById('gallery-section').hidden = !visible;
+            document.getElementById('gallery-jump-link').hidden = !visible;
+        }
+
         function showCategoryMode() {
             shopMode = 'categories';
             categoryTilesRow.hidden = false;
@@ -1360,6 +1368,7 @@
             viewControls.hidden = true;
             grid.hidden = true;
             count.textContent = '';
+            updateGalleryVisibility();
         }
 
         function showGridMode() {
@@ -1368,6 +1377,7 @@
             backToCategoriesBtn.style.display = 'flex';
             viewControls.hidden = false;
             grid.hidden = false;
+            updateGalleryVisibility();
         }
 
         function selectCategory(categoryName) {
@@ -1393,22 +1403,11 @@
         }
 
         function renderGallery(items) {
-            const section = document.getElementById('gallery-section');
             const row = document.getElementById('gallery-row');
-            const jumpLink = document.getElementById('gallery-jump-link');
             const approved = items.filter(g => g.approved);
+            galleryApprovedCount = approved.length;
 
-            if (approved.length === 0) {
-                section.hidden = true;
-                jumpLink.hidden = true;
-                row.innerHTML = '';
-                return;
-            }
-
-            section.hidden = false;
-            jumpLink.hidden = false;
             row.innerHTML = '';
-
             for (const g of approved) {
                 const card = document.createElement('figure');
                 card.className = 'polaroid';
@@ -1419,6 +1418,8 @@
                 `;
                 row.appendChild(card);
             }
+
+            updateGalleryVisibility();
         }
 
         async function loadGallery() {

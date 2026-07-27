@@ -1369,6 +1369,7 @@
             grid.hidden = true;
             count.textContent = '';
             updateGalleryVisibility();
+            updatePicksVisibility();
         }
 
         function showGridMode() {
@@ -1378,6 +1379,7 @@
             viewControls.hidden = false;
             grid.hidden = false;
             updateGalleryVisibility();
+            updatePicksVisibility();
         }
 
         function selectCategory(categoryName) {
@@ -1433,18 +1435,17 @@
             }
         }
 
+        let picksCount = 0;
+
+        function updatePicksVisibility() {
+            document.getElementById('picks-section').hidden = !(picksCount > 0 && shopMode === 'grid');
+        }
+
         function renderPicks(items) {
-            const section = document.getElementById('picks-section');
             const row = document.getElementById('picks-row');
             const picks = items.filter(p => p.featured);
+            picksCount = picks.length;
 
-            if (picks.length === 0) {
-                section.hidden = true;
-                row.innerHTML = '';
-                return;
-            }
-
-            section.hidden = false;
             row.innerHTML = '';
 
             for (const p of picks) {
@@ -1481,6 +1482,8 @@
 
                 row.appendChild(card);
             }
+
+            updatePicksVisibility();
         }
 
         function render(items) {

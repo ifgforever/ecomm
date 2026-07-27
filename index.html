@@ -625,6 +625,21 @@
             font-size: 13px;
         }
 
+        .invite-link {
+            color: var(--teal);
+            font-weight: 700;
+            text-decoration: none;
+            margin-left: 4px;
+        }
+        .invite-link:hover { text-decoration: underline; }
+
+        .empty-state {
+            color: var(--ink-soft);
+            font-style: italic;
+            font-size: 13px;
+            padding: 6px 0 2px;
+        }
+
         .gallery-row {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -766,6 +781,57 @@
             color: var(--ink-soft);
             font-style: italic;
         }
+
+        /* ── Nearby Stores ── */
+        .nearby-section { margin: 8px 0 36px; }
+
+        .nearby-title {
+            font-family: var(--font-display);
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--ink);
+            margin: 0 0 4px;
+            letter-spacing: -0.02em;
+        }
+        .nearby-title em { font-style: italic; color: var(--amber-dark); }
+
+        .nearby-sub {
+            margin: 0 0 18px;
+            color: var(--ink-soft);
+            font-size: 13px;
+        }
+
+        .nearby-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .nearby-card {
+            background: var(--card);
+            border: 1px solid var(--tan);
+            border-radius: var(--r);
+            padding: 14px 16px;
+            box-shadow: var(--shadow-soft);
+        }
+        .nearby-card .name {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 15px;
+            margin: 0 0 4px;
+        }
+        .nearby-card .addr {
+            font-size: 12.5px;
+            color: var(--ink-soft);
+            margin: 0 0 8px;
+        }
+        .nearby-card .directions {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: var(--teal);
+            text-decoration: none;
+        }
+        .nearby-card .directions:hover { text-decoration: underline; }
 
         /* ── Handpicked by Jojin ── */
         .picks-section { margin-bottom: 36px; }
@@ -1323,16 +1389,24 @@
 
             <div class="grid" id="grid" hidden></div>
 
-            <div class="gallery-section" id="gallery-section" hidden>
+            <div class="gallery-section" id="gallery-section">
                 <h2 class="gallery-title">You're Part of the <em>Story</em></h2>
-                <p class="gallery-sub">Snapped by folks who stopped by the shop.</p>
+                <p class="gallery-sub">Snapped by folks who stopped by the shop. <a href="gallery-submit.html" class="invite-link">📷 Share your own photo →</a></p>
                 <div class="gallery-row" id="gallery-row"></div>
+                <p class="empty-state" id="gallery-empty" hidden>Nothing shared yet — be the first!</p>
             </div>
 
-            <div class="community-section" id="community-section" hidden>
+            <div class="community-section" id="community-section">
                 <h2 class="community-title">From the <em>Community</em></h2>
-                <p class="community-sub">Posted by other folks, not the shop — reach out to them directly if you're interested.</p>
+                <p class="community-sub">Posted by other folks, not the shop — reach out to them directly if you're interested. <a href="community-sell.html" class="invite-link">👋 Post your own item →</a></p>
                 <div class="community-row" id="community-row"></div>
+                <p class="empty-state" id="community-empty" hidden>Nothing posted yet — be the first!</p>
+            </div>
+
+            <div class="nearby-section" id="nearby-section" hidden>
+                <h2 class="nearby-title">While You're in the <em>Neighborhood</em></h2>
+                <p class="nearby-sub">A few other shops close by, worth a look while you're out.</p>
+                <div class="nearby-row" id="nearby-row"></div>
             </div>
 
             <div class="promo-banner">
@@ -1537,9 +1611,9 @@
         let galleryApprovedCount = 0;
 
         function updateGalleryVisibility() {
-            const visible = galleryApprovedCount > 0;
-            document.getElementById('gallery-section').hidden = !visible;
-            document.getElementById('gallery-jump-link').hidden = !visible;
+            // Section and jump-button both always show now — even with nothing approved yet,
+            // there's still the invite to be the first to share a photo.
+            document.getElementById('gallery-jump-link').hidden = false;
         }
 
         function showCategoryMode() {
@@ -1647,10 +1721,13 @@
 
         function renderGallery(items) {
             const row = document.getElementById('gallery-row');
+            const emptyState = document.getElementById('gallery-empty');
             const approved = items.filter(g => g.approved);
             galleryApprovedCount = approved.length;
 
             row.innerHTML = '';
+            emptyState.hidden = approved.length > 0;
+
             for (const g of approved) {
                 const card = document.createElement('figure');
                 card.className = 'polaroid';
@@ -1690,18 +1767,12 @@
         }
 
         function renderCommunityListings(items) {
-            const section = document.getElementById('community-section');
             const row = document.getElementById('community-row');
+            const emptyState = document.getElementById('community-empty');
             const approved = items.filter(l => l.approved);
 
-            if (approved.length === 0) {
-                section.hidden = true;
-                row.innerHTML = '';
-                return;
-            }
-
-            section.hidden = false;
             row.innerHTML = '';
+            emptyState.hidden = approved.length > 0;
 
             for (const l of approved) {
                 const card = document.createElement('article');
@@ -1729,6 +1800,42 @@
                 if (!res.ok) return;
                 const listings = await res.json();
                 renderCommunityListings(listings);
+            } catch {
+                // Nice-to-have; fail quietly if unavailable.
+            }
+        }
+
+        function renderNearbyStores(stores) {
+            const section = document.getElementById('nearby-section');
+            const row = document.getElementById('nearby-row');
+
+            if (!stores || stores.length === 0) {
+                section.hidden = true;
+                row.innerHTML = '';
+                return;
+            }
+
+            section.hidden = false;
+            row.innerHTML = '';
+
+            for (const s of stores) {
+                const card = document.createElement('div');
+                card.className = 'nearby-card';
+                card.innerHTML = `
+                    <p class="name">${escapeHtml(s.name)}</p>
+                    <p class="addr">${escapeHtml(s.address || '')}</p>
+                    ${s.mapsUrl ? `<a class="directions" href="${escapeHtml(s.mapsUrl)}" target="_blank" rel="noopener">📍 Get Directions</a>` : ''}
+                `;
+                row.appendChild(card);
+            }
+        }
+
+        async function loadNearbyStores() {
+            try {
+                const res = await fetch('/api/nearby-stores', { cache: 'no-store' });
+                if (!res.ok) return;
+                const data = await res.json();
+                renderNearbyStores(data.stores);
             } catch {
                 // Nice-to-have; fail quietly if unavailable.
             }
@@ -1921,6 +2028,7 @@
             loadGallery();
             loadHours();
             loadCommunityListings();
+            loadNearbyStores();
         }
 
         init().catch(err => {

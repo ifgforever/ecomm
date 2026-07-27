@@ -376,6 +376,12 @@
             <a class="btn small" href="/community-listings-review.html" target="_blank" rel="noopener">🛍️ Community Listings Review</a>
             <a class="btn small" href="/community-sell.html" target="_blank" rel="noopener">👋 Sell With Us (visitor view)</a>
             <a class="btn small" href="#store-hours-section">🕒 Store Hours</a>
+            <a class="btn small" href="/api/admin-logout">🚪 Log Out</a>
+            <a class="btn small" href="https://www.yelp.com/biz/jojins-kitty-chicago-2" target="_blank" rel="noopener">⭐ Yelp</a>
+            <a class="btn small" href="https://www.facebook.com/p/Jojins-Kitty-Thrift-Shop-61585291957385/" target="_blank" rel="noopener">📘 Facebook</a>
+            <a class="btn small" href="https://www.tiktok.com/@jojinteston" target="_blank" rel="noopener">🎵 TikTok</a>
+            <a class="btn small" href="https://www.instagram.com/jinlovegodfirst" target="_blank" rel="noopener">📸 Instagram</a>
+            <a class="btn small" href="https://share.google/Ulhsi8pst9S7QpiaL" target="_blank" rel="noopener">📍 Google</a>
         </div>
 
         <div id="statusMsg" class="status hidden"></div>
@@ -480,6 +486,11 @@
                 <div style="margin-top:8px;">
                     <button type="button" class="btn ai small" id="refreshPicksBtn">🔄 Refresh Handpicked Picks (AI)</button>
                     <span class="ai-err" id="refreshErr"></span>
+                </div>
+                <div style="margin-top:8px;">
+                    <button type="button" class="btn small" id="refreshNearbyBtn">🏘️ Refresh Nearby Stores (Google)</button>
+                    <span class="muted" id="nearbyStatus" style="margin-left:8px;"></span>
+                    <span class="ai-err" id="nearbyErr"></span>
                 </div>
                 <div style="overflow:auto; margin-top:10px;">
                     <table>
@@ -848,6 +859,49 @@ Respond with ONLY a raw JSON array — your entire reply must be the array itsel
         }
 
         els.refreshPicksBtn.addEventListener("click", refreshPicks);
+
+        // ── Nearby Stores (Google Places) ──────────────────
+        const refreshNearbyBtn = document.getElementById("refreshNearbyBtn");
+        const nearbyStatus = document.getElementById("nearbyStatus");
+        const nearbyErr = document.getElementById("nearbyErr");
+
+        async function loadNearbyStatus() {
+            try {
+                const res = await fetch("/api/nearby-stores", { cache: "no-store" });
+                const data = await res.json();
+                if (data.refreshedAt) {
+                    const when = new Date(data.refreshedAt).toLocaleString();
+                    nearbyStatus.textContent = `${data.stores.length} stores — last refreshed ${when}`;
+                } else {
+                    nearbyStatus.textContent = "Never refreshed yet";
+                }
+            } catch {
+                nearbyStatus.textContent = "";
+            }
+        }
+
+        async function refreshNearbyStores() {
+            nearbyErr.style.display = "none";
+            refreshNearbyBtn.disabled = true;
+            refreshNearbyBtn.textContent = "Asking Google…";
+
+            try {
+                const res = await fetch("/api/refresh-nearby-stores", { method: "POST" });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+                showStatus(`✓ Found ${data.count} nearby stores`, "success");
+                await loadNearbyStatus();
+            } catch (err) {
+                nearbyErr.textContent = `Couldn't refresh (${err.message}).`;
+                nearbyErr.style.display = "inline";
+            } finally {
+                refreshNearbyBtn.disabled = false;
+                refreshNearbyBtn.textContent = "🏘️ Refresh Nearby Stores (Google)";
+            }
+        }
+
+        refreshNearbyBtn.addEventListener("click", refreshNearbyStores);
+        loadNearbyStatus();
 
         function showStatus(message, type = "info") {
             els.statusMsg.textContent = message;

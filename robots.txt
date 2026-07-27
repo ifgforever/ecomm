@@ -1,4 +1,14 @@
 User-agent: *
 Allow: /
+Disallow: /admin.html
+Disallow: /admin
+Disallow: /admin-price.html
+Disallow: /admin-price
+Disallow: /sold-check.html
+Disallow: /sold-check
+Disallow: /gallery-review.html
+Disallow: /gallery-review
+Disallow: /community-listings-review.html
+Disallow: /community-listings-review
 
 Sitemap: https://jinkittys.com/sitemap.xml

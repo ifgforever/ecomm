@@ -116,6 +116,13 @@
             text-decoration: underline;
         }
 
+        .social-bar-label {
+            color: var(--amber-light);
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            margin-right: 6px;
+        }
+
         .announce-bar span {
             color: var(--amber-light);
         }
@@ -1113,6 +1120,7 @@
 
     <!-- Social bar -->
     <div class="social-bar">
+        <span class="social-bar-label">🐾 Follow us →</span>
         <a href="https://www.yelp.com/biz/jojins-kitty-chicago-2" target="_blank" rel="noopener"><i class="fa-brands fa-yelp" style="color:#d32323;"></i> Yelp</a>
         <a href="https://www.facebook.com/p/Jojins-Kitty-Thrift-Shop-61585291957385/" target="_blank" rel="noopener"><i class="fa-brands fa-facebook" style="color:#1877f2;"></i> Facebook</a>
         <a href="https://www.tiktok.com/@jojinteston" target="_blank" rel="noopener"><i class="fa-brands fa-tiktok" style="color:#ffffff;"></i> TikTok</a>
@@ -1424,16 +1432,72 @@
             backToCategoriesBtn.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
+        // ── Smarter search ──────────────────────────────
+        // Standard edit-distance calc, used below to tolerate small typos.
+        function levenshtein(a, b) {
+            if (a === b) return 0;
+            const al = a.length, bl = b.length;
+            if (al === 0) return bl;
+            if (bl === 0) return al;
+            let prev = Array.from({ length: bl + 1 }, (_, i) => i);
+            for (let i = 1; i <= al; i++) {
+                const cur = [i];
+                for (let j = 1; j <= bl; j++) {
+                    const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+                    cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+                }
+                prev = cur;
+            }
+            return prev[bl];
+        }
+
+        function tokenize(text) {
+            return (text || '').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+        }
+
+        // True if a word from the item's text plausibly matches a typed query word —
+        // as a direct substring/prefix, or (for longer words) within a small typo tolerance.
+        function wordFuzzyMatch(word, queryToken) {
+            if (word.includes(queryToken)) return true;
+            if (queryToken.length >= 4) {
+                const maxDist = queryToken.length >= 7 ? 2 : 1;
+                if (Math.abs(word.length - queryToken.length) <= 2 && levenshtein(word, queryToken) <= maxDist) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         function matches(p, queryText, category) {
-            const qt = queryText.trim().toLowerCase();
             if (category && (p.category || '') !== category) return false;
-            if (!qt) return true;
-            return `${p.name} ${p.id} ${p.description} ${p.category}`.toLowerCase().includes(qt);
+
+            const queryTokens = tokenize(queryText);
+            if (queryTokens.length === 0) return true;
+
+            const words = tokenize(`${p.name} ${p.id} ${p.description} ${p.category}`);
+            // Every typed word needs a plausible match somewhere — in any order.
+            return queryTokens.every(token => words.some(word => wordFuzzyMatch(word, token)));
+        }
+
+        // Matches in the item's name count for more than matches only in the description/category,
+        // so the most relevant items float to the top when there's an active search.
+        function matchScore(p, queryTokens) {
+            const nameWords = tokenize(p.name);
+            let score = 0;
+            for (const token of queryTokens) {
+                score += nameWords.some(w => wordFuzzyMatch(w, token)) ? 2 : 1;
+            }
+            return score;
         }
 
         function getFilteredProducts() {
             let items = PRODUCTS.filter(p => matches(p, q.value, cat.value));
             if (currentView === 'saved') items = items.filter(p => savedItems.has(p.id));
+
+            const queryTokens = tokenize(q.value);
+            if (queryTokens.length > 0) {
+                items = [...items].sort((a, b) => matchScore(b, queryTokens) - matchScore(a, queryTokens));
+            }
             return items;
         }
 

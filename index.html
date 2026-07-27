@@ -446,6 +446,74 @@
             .about-jojin { flex-direction: column; }
         }
 
+        /* ── Community gallery ── */
+        .gallery-section { margin: 8px 0 36px; }
+
+        .gallery-title {
+            font-family: var(--font-display);
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--ink);
+            margin: 0 0 4px;
+            letter-spacing: -0.02em;
+        }
+
+        .gallery-title em { font-style: italic; color: var(--teal); }
+
+        .gallery-sub {
+            margin: 0 0 18px;
+            color: var(--ink-soft);
+            font-size: 13px;
+        }
+
+        .gallery-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 28px 22px;
+        }
+
+        .polaroid {
+            background: #fff;
+            padding: 10px 10px 26px;
+            box-shadow: var(--shadow-soft);
+            transition: transform 0.18s;
+            cursor: default;
+        }
+
+        .polaroid:nth-child(3n) { transform: rotate(-2deg); }
+        .polaroid:nth-child(3n+1) { transform: rotate(1.4deg); }
+        .polaroid:nth-child(3n+2) { transform: rotate(-1deg); }
+
+        .polaroid:hover {
+            transform: rotate(0deg) scale(1.04);
+            box-shadow: var(--shadow);
+            z-index: 2;
+            position: relative;
+        }
+
+        .polaroid img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            display: block;
+            background: var(--paper-warm);
+        }
+
+        .polaroid .cap {
+            font-family: var(--font-display);
+            font-style: italic;
+            font-size: 13px;
+            color: var(--ink);
+            text-align: center;
+            margin: 10px 0 2px;
+        }
+
+        .polaroid .who {
+            font-size: 11px;
+            color: var(--ink-soft);
+            text-align: center;
+        }
+
         /* ── Handpicked by Jojin ── */
         .picks-section { margin-bottom: 36px; }
 
@@ -979,6 +1047,12 @@
 
             <div class="grid" id="grid"></div>
 
+            <div class="gallery-section" id="gallery-section" hidden>
+                <h2 class="gallery-title">You're Part of the <em>Story</em></h2>
+                <p class="gallery-sub">Snapped by folks who stopped by the shop.</p>
+                <div class="gallery-row" id="gallery-row"></div>
+            </div>
+
         </div>
     </main>
 
@@ -1123,6 +1197,43 @@
             let items = PRODUCTS.filter(p => matches(p, q.value, cat.value));
             if (currentView === 'saved') items = items.filter(p => savedItems.has(p.id));
             return items;
+        }
+
+        function renderGallery(items) {
+            const section = document.getElementById('gallery-section');
+            const row = document.getElementById('gallery-row');
+            const approved = items.filter(g => g.approved);
+
+            if (approved.length === 0) {
+                section.hidden = true;
+                row.innerHTML = '';
+                return;
+            }
+
+            section.hidden = false;
+            row.innerHTML = '';
+
+            for (const g of approved) {
+                const card = document.createElement('figure');
+                card.className = 'polaroid';
+                card.innerHTML = `
+                    <img src="${escapeHtml(g.image)}" alt="${escapeHtml(g.caption || 'Shared by a visitor')}" loading="lazy">
+                    ${g.caption ? `<div class="cap">${escapeHtml(g.caption)}</div>` : ''}
+                    ${g.name ? `<div class="who">— ${escapeHtml(g.name)}</div>` : ''}
+                `;
+                row.appendChild(card);
+            }
+        }
+
+        async function loadGallery() {
+            try {
+                const res = await fetch('/api/gallery', { cache: 'no-store' });
+                if (!res.ok) return;
+                const gallery = await res.json();
+                renderGallery(gallery);
+            } catch {
+                // Gallery is a nice-to-have; fail quietly if it's unavailable.
+            }
         }
 
         function renderPicks(items) {
@@ -1288,6 +1399,7 @@
             populateCategories(PRODUCTS);
             renderPicks(PRODUCTS);
             render(getFilteredProducts());
+            loadGallery();
         }
 
         init().catch(err => {

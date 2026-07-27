@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Share Your Moment — Jojin's Kitty Thrift</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32'>🐾</text></svg>">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #1c1610;
+    --ink-soft: #6b5d4f;
+    --paper: #f7f2eb;
+    --paper-warm: #f0e9de;
+    --tan: #d4c4a8;
+    --amber: #c8863a;
+    --amber-dark: #a06820;
+    --teal: #3d7a6e;
+    --rust: #b8522a;
+    --card: #ffffff;
+    --r: 4px;
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'Karla', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    color: var(--ink);
+    background: var(--paper);
+    min-height: 100%;
+    padding-bottom: 40px;
+  }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 36px 20px 20px; }
+
+  .eyebrow {
+    font-family: 'Karla', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--rust);
+    font-weight: 700;
+    margin: 0 0 8px;
+    text-align: center;
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 900;
+    text-align: center;
+    margin: 0 0 10px;
+    letter-spacing: -0.02em;
+  }
+  h1 em { font-style: italic; color: var(--amber-dark); }
+  .sub {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0 0 28px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1.5px solid var(--tan);
+    border-radius: var(--r);
+    padding: 20px;
+    box-shadow: 5px 5px 0 var(--amber);
+  }
+
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 16px 0 6px;
+  }
+  label:first-child { margin-top: 0; }
+
+  .dropzone {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 2px dashed var(--tan);
+    border-radius: var(--r);
+    padding: 14px;
+    cursor: pointer;
+    background: var(--paper-warm);
+  }
+  .dropzone input { display: none; }
+  .dropzone .thumb {
+    width: 56px; height: 56px;
+    border-radius: 4px;
+    background: var(--paper);
+    border: 1px solid var(--tan);
+    flex-shrink: 0;
+    background-size: cover;
+    background-position: center;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+  }
+  .dropzone .txt { font-size: 13px; color: var(--ink-soft); }
+
+  input[type="text"], textarea {
+    width: 100%;
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--paper-warm);
+    border: 1px solid var(--tan);
+    border-radius: var(--r);
+    padding: 10px 12px;
+  }
+  textarea { min-height: 60px; resize: vertical; }
+
+  .submit-btn {
+    width: 100%;
+    margin-top: 22px;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+    color: #fff;
+    background: var(--teal);
+    border: none;
+    border-radius: var(--r);
+    padding: 14px;
+    cursor: pointer;
+  }
+  .submit-btn:disabled { opacity: .55; cursor: default; }
+
+  .err {
+    margin-top: 10px;
+    font-size: 12.5px;
+    color: var(--rust);
+    display: none;
+  }
+
+  .success {
+    display: none;
+    text-align: center;
+    padding: 30px 10px;
+  }
+  .success .big { font-size: 40px; margin-bottom: 10px; }
+  .success h2 {
+    font-family: var(--font-display);
+    font-size: 22px;
+    margin: 0 0 8px;
+  }
+  .success p { color: var(--ink-soft); font-size: 14px; line-height: 1.6; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="eyebrow">You're part of the story</p>
+    <h1>Share a <em>Moment</em></h1>
+    <p class="sub">Snap a photo from your visit and it might just end up on our site. No pressure — Jojin looks at everything before it goes up.</p>
+
+    <div class="card" id="formCard">
+      <label>Your photo</label>
+      <label class="dropzone" tabindex="0">
+        <div class="thumb" id="thumb">📷</div>
+        <span class="txt" id="dropText">Tap to choose a photo</span>
+        <input type="file" accept="image/*" capture="environment" id="photoInput" />
+      </label>
+
+      <label>Your name <span style="opacity:.6; text-transform:none;">(optional)</span></label>
+      <input type="text" id="nameInput" placeholder="e.g. Sam" />
+
+      <label>Caption <span style="opacity:.6; text-transform:none;">(optional)</span></label>
+      <textarea id="captionInput" placeholder="Say a little about the moment..."></textarea>
+
+      <button class="submit-btn" id="submitBtn">Share it</button>
+      <div class="err" id="errBox"></div>
+    </div>
+
+    <div class="success" id="successBox">
+      <div class="big">🐾</div>
+      <h2>Thanks for sharing!</h2>
+      <p>Jojin will take a look, and if it's a good fit it'll show up on the site soon.</p>
+    </div>
+  </div>
+
+<script>
+(function () {
+  const photoInput = document.getElementById('photoInput');
+  const thumb = document.getElementById('thumb');
+  const dropText = document.getElementById('dropText');
+  const nameInput = document.getElementById('nameInput');
+  const captionInput = document.getElementById('captionInput');
+  const submitBtn = document.getElementById('submitBtn');
+  const errBox = document.getElementById('errBox');
+  const formCard = document.getElementById('formCard');
+  const successBox = document.getElementById('successBox');
+
+  let base64 = null;
+  let mediaType = null;
+
+  photoInput.addEventListener('change', () => {
+    const file = photoInput.files && photoInput.files[0];
+    if (!file) return;
+    mediaType = file.type || 'image/jpeg';
+    const reader = new FileReader();
+    reader.onload = () => {
+      base64 = reader.result.split(',')[1];
+      thumb.style.backgroundImage = `url(${reader.result})`;
+      thumb.textContent = '';
+      dropText.textContent = 'Looks good — tap to change';
+    };
+    reader.onerror = () => showError("Couldn't read that photo. Try again.");
+    reader.readAsDataURL(file);
+  });
+
+  function showError(msg) {
+    errBox.textContent = msg;
+    errBox.style.display = 'block';
+  }
+  function clearError() {
+    errBox.style.display = 'none';
+    errBox.textContent = '';
+  }
+
+  async function submit() {
+    clearError();
+    if (!base64) {
+      showError('Add a photo first.');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sharing…';
+
+    try {
+      const res = await fetch('/api/gallery-submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: nameInput.value,
+          caption: captionInput.value,
+          mediaType,
+          base64,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+
+      formCard.style.display = 'none';
+      successBox.style.display = 'block';
+    } catch (err) {
+      showError(`Couldn't share your photo (${err.message}). Try again.`);
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Share it';
+    }
+  }
+
+  submitBtn.addEventListener('click', submit);
+})();
+</script>
+</body>
+</html>

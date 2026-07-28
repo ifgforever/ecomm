@@ -360,6 +360,37 @@
         .star-btn:not(.is-featured) {
             opacity: .3;
         }
+
+        .intake-card {
+            width: 110px;
+            background: #0f172a;
+            border: 1px solid rgba(255,255,255,.12);
+            border-radius: 8px;
+            padding: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform .12s, border-color .12s;
+        }
+        .intake-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(168,85,247,.5);
+        }
+        .intake-card img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-bottom: 6px;
+        }
+        .intake-card .price {
+            font-weight: 700;
+            font-size: 14px;
+        }
+        .intake-card .finish-hint {
+            font-size: 10px;
+            color: #a855f7;
+            margin-top: 2px;
+        }
     </style>
 </head>
 
@@ -373,6 +404,7 @@
             <a class="btn small" href="/sold-check.html" target="_blank" rel="noopener">🧹 Sold Check</a>
             <a class="btn small" href="/gallery-review.html" target="_blank" rel="noopener">🖼️ Gallery Review</a>
             <a class="btn small" href="/gallery-submit.html" target="_blank" rel="noopener">📷 Gallery Submit (visitor view)</a>
+            <a class="btn small" href="/quick-add.html" target="_blank" rel="noopener">📥 Quick Add (phone view)</a>
             <a class="btn small" href="/community-listings-review.html" target="_blank" rel="noopener">🛍️ Community Listings Review</a>
             <a class="btn small" href="/community-sell.html" target="_blank" rel="noopener">👋 Sell With Us (visitor view)</a>
             <a class="btn small" href="#store-hours-section">🕒 Store Hours</a>
@@ -385,6 +417,12 @@
         </div>
 
         <div id="statusMsg" class="status hidden"></div>
+
+        <div class="card" id="intake-section" style="margin-bottom:20px;">
+            <h3 style="margin-top:0;">📥 Pending Intake <span class="muted" id="intakeCount"></span></h3>
+            <p class="muted">Quick-added from phones — click one to finish it below with the AI assist box.</p>
+            <div id="intakeList" style="display:flex; flex-wrap:wrap; gap:12px; margin-top:12px;"></div>
+        </div>
 
         <div class="row">
             <div class="card">
@@ -1202,6 +1240,7 @@ Respond with ONLY a raw JSON array — your entire reply must be the array itsel
             if (!confirm(`Delete product ${id}?`)) return;
             PRODUCTS = PRODUCTS.filter(x => x.id !== id);
             render();
+            renderCategoryManager();
             await saveToCloud();
         }
 
@@ -1269,6 +1308,7 @@ Respond with ONLY a raw JSON array — your entire reply must be the array itsel
             else PRODUCTS.unshift(p);
 
             render();
+            renderCategoryManager();
             clearForm();
             await saveToCloud();
         }
@@ -1335,6 +1375,87 @@ Respond with ONLY a raw JSON array — your entire reply must be the array itsel
 
         saveHoursBtn.addEventListener("click", saveHours);
         loadHours();
+
+        // ── Pending Intake queue ────────────────────────
+        let INTAKE_QUEUE = [];
+        const intakeList = document.getElementById("intakeList");
+        const intakeCount = document.getElementById("intakeCount");
+
+        function renderIntakeQueue() {
+            intakeCount.textContent = INTAKE_QUEUE.length ? `(${INTAKE_QUEUE.length})` : "";
+            intakeList.innerHTML = "";
+            if (INTAKE_QUEUE.length === 0) {
+                intakeList.innerHTML = `<span class="muted">Nothing waiting — quick-added items will show up here.</span>`;
+                return;
+            }
+            for (const item of INTAKE_QUEUE) {
+                const card = document.createElement("div");
+                card.className = "intake-card";
+                card.innerHTML = `
+                    <img src="${esc(item.image)}" alt="">
+                    <div class="price">$${Number(item.price).toFixed(0)}</div>
+                    <div class="finish-hint">Click to finish →</div>
+                `;
+                card.addEventListener("click", () => finishIntakeItem(item));
+                intakeList.appendChild(card);
+            }
+        }
+
+        async function loadIntakeQueue() {
+            try {
+                const res = await fetch("/api/pending-intake", { cache: "no-store" });
+                INTAKE_QUEUE = await res.json();
+                renderIntakeQueue();
+            } catch {
+                intakeList.innerHTML = `<span class="muted">Couldn't load the queue.</span>`;
+            }
+        }
+
+        async function saveIntakeQueue() {
+            try {
+                await fetch("/api/pending-intake", {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(INTAKE_QUEUE),
+                });
+            } catch {
+                // Non-critical; the item is still loaded into the form either way.
+            }
+        }
+
+        // Pulls a queued item into the Add/Update form, including loading its
+        // already-uploaded photo into the AI-assist box so Generate still works
+        // without needing to re-upload anything.
+        async function finishIntakeItem(item) {
+            clearForm();
+            els.price.value = item.price;
+            els.image.value = item.image;
+
+            try {
+                const resp = await fetch(item.image);
+                const blob = await resp.blob();
+                const reader = new FileReader();
+                reader.onload = () => {
+                    aiImageBase64 = reader.result.split(",")[1];
+                    aiImageMediaType = blob.type || "image/jpeg";
+                    aiImageUploadedUrl = item.image; // already uploaded — save() won't re-upload
+                    els.aiThumbLabel.style.backgroundImage = `url(${reader.result})`;
+                    els.aiThumbContent.textContent = "";
+                };
+                reader.readAsDataURL(blob);
+            } catch {
+                showStatus("Loaded the price, but couldn't pull the photo into the AI box — image path is still set.", "info");
+            }
+
+            INTAKE_QUEUE = INTAKE_QUEUE.filter(x => x.id !== item.id);
+            renderIntakeQueue();
+            await saveIntakeQueue();
+
+            window.scrollTo({ top: 0, behavior: "smooth" });
+            showStatus("Item loaded — add a note and hit Generate, or fill in the rest by hand.", "info");
+        }
+
+        loadIntakeQueue();
 
         load();
     </script>

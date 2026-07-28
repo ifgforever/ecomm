@@ -1008,13 +1008,20 @@
             color: var(--ink-soft);
             margin: 0 0 8px;
         }
-        .nearby-card .directions {
+        .nearby-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 14px;
+        }
+        .nearby-link {
             font-size: 12.5px;
             font-weight: 700;
             color: var(--teal);
             text-decoration: none;
+            white-space: nowrap;
         }
-        .nearby-card .directions:hover { text-decoration: underline; }
+        .nearby-link:hover { text-decoration: underline; }
+        .nearby-link.directions { color: var(--amber-dark); }
 
         /* ── Handpicked by Jojin ── */
         .picks-section { margin-bottom: 36px; }
@@ -2051,7 +2058,11 @@
                 card.innerHTML = `
                     <p class="name">${escapeHtml(s.name)}</p>
                     <p class="addr">${escapeHtml(s.address || '')}</p>
-                    ${s.mapsUrl ? `<a class="directions" href="${escapeHtml(s.mapsUrl)}" target="_blank" rel="noopener">📍 Get Directions</a>` : ''}
+                    <div class="nearby-links">
+                        ${s.phone ? `<a class="nearby-link" href="tel:${escapeHtml(s.phone.replace(/[^\d+]/g, ''))}">📞 ${escapeHtml(s.phone)}</a>` : ''}
+                        ${s.website ? `<a class="nearby-link" href="${escapeHtml(s.website)}" target="_blank" rel="noopener">🌐 Website</a>` : ''}
+                        ${s.mapsUrl ? `<a class="nearby-link directions" href="${escapeHtml(s.mapsUrl)}" target="_blank" rel="noopener">📍 Get Directions</a>` : ''}
+                    </div>
                 `;
                 row.appendChild(card);
             }

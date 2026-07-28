@@ -1,9 +1,14 @@
 // functions/api/quick-intake-submit.js
 //
-// Called by quick-add.html. Uploads the photo to R2 (in an intake/ folder)
-// and adds { image, price } to a pending queue in KV. No name, category, or
-// description yet — that gets filled in later in admin.html's "Pending
-// Intake" section, using the AI-assist box against this same photo.
+// Called by quick-add.html. This does everything in one shot, server-side:
+//   1. Uploads the photo to R2
+//   2. Asks Claude to draft name/category/description/pick-note from the
+//      photo alone (no note field on this form — it's photo + price only)
+//   3. Writes a complete product straight into live inventory
+//
+// The submitted price is the source of truth and is NEVER touched by the AI
+// — it's set once here and that's final, unless someone edits it later in
+// admin.html by hand.
 
 export async function onRequestPost(context) {
   try {
@@ -13,6 +18,7 @@ export async function onRequestPost(context) {
     if (!env.IMAGES) return error("Server is missing the IMAGES R2 binding.", 500);
     if (!env.IMAGE_BASE_URL) return error("Server is missing IMAGE_BASE_URL.", 500);
     if (!env.PRODUCTS_KV) return error("Server is missing the PRODUCTS_KV binding.", 500);
+    if (!env.ANTHROPIC_API_KEY) return error("Server is missing ANTHROPIC_API_KEY.", 500);
 
     let body;
     try {
@@ -37,34 +43,113 @@ export async function onRequestPost(context) {
       return error(`Couldn't decode photo data (${err.message}). Try again.`, 400);
     }
 
+    // 1. Upload the photo to R2
     const ext = extFromMediaType(mediaType);
     const key = `intake/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-
     await env.IMAGES.put(key, bytes, {
       httpMetadata: { contentType: mediaType || "image/jpeg" },
     });
+    const imageUrl = `${env.IMAGE_BASE_URL.replace(/\/$/, "")}/${key}`;
 
-    const url = `${env.IMAGE_BASE_URL.replace(/\/$/, "")}/${key}`;
+    // 2. Ask Claude to draft the listing from the photo (using the ORIGINAL
+    //    uploaded bytes, not re-fetched from the URL — more reliable)
+    const systemPrompt = `You draft resale listings for Jojin's Kitty Thrift, a small curated secondhand shop in Chicago, based only on a photo of the item — no note from the seller this time, work entirely from what's visible in the image. Write:
+- a short, honest, appealing product name (title case, no gimmicks)
+- a one or two word category (e.g. "Outerwear", "Denim", "Electronics", "Toys")
+- a 2-3 sentence description in a warm, honest voice — mention any visible condition issues, don't oversell
+- a short one-sentence "pick note" in Jojin's own voice, the kind of personal blurb she'd write if featuring this item
 
-    const raw = await env.PRODUCTS_KV.get("pending-intake");
-    const queue = raw ? JSON.parse(raw) : [];
+Do NOT include a price — pricing is handled separately and is already final.
 
-    queue.unshift({
-      id: `INTAKE-${Date.now()}`,
-      image: url,
-      price: Number(price),
-      submittedAt: new Date().toISOString(),
+Respond with ONLY a raw JSON object — your entire reply must be the JSON object itself, starting with { and ending with }. No markdown fences, no preamble, no commentary. Shape:
+{"name": "...", "category": "...", "description": "...", "pickNote": "..."}`;
+
+    const aiRes = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": env.ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-5",
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "image", source: { type: "base64", media_type: mediaType || "image/jpeg", data: base64 } },
+              { type: "text", text: "Draft the listing for this item." },
+            ],
+          },
+        ],
+      }),
     });
 
-    await env.PRODUCTS_KV.put("pending-intake", JSON.stringify(queue));
+    const aiData = await aiRes.json();
+    if (!aiRes.ok) {
+      return error(aiData?.error?.message || `AI request failed (${aiRes.status})`, aiRes.status);
+    }
 
-    return new Response(JSON.stringify({ ok: true }), {
+    const textBlock = (aiData.content || []).find((b) => b.type === "text");
+    if (!textBlock) return error("AI response had no usable text", 500);
+
+    let draft;
+    try {
+      draft = JSON.parse(extractJson(textBlock.text));
+    } catch {
+      return error("Couldn't parse the AI's draft — try again.", 500);
+    }
+
+    // 3. Build the product and write it straight into live inventory
+    const raw = await env.PRODUCTS_KV.get("products");
+    const products = raw ? JSON.parse(raw) : [];
+
+    const product = {
+      id: nextSku(products),
+      name: draft.name || "Untitled item",
+      price: Number(price), // fixed — from the app, never from the AI
+      category: draft.category || "",
+      quantity: 1,
+      inStock: true,
+      image: imageUrl,
+      rotation: 0,
+      description: draft.description || "",
+      featured: false,
+      pickNote: draft.pickNote || "",
+      createdAt: new Date().toISOString(),
+    };
+
+    products.unshift(product);
+    await env.PRODUCTS_KV.put("products", JSON.stringify(products));
+
+    return new Response(JSON.stringify({ ok: true, name: product.name, id: product.id }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
   } catch (err) {
     return error(`Unexpected server error: ${err.message}`, 500);
   }
+}
+
+function nextSku(products) {
+  let maxNum = 1000;
+  for (const p of products) {
+    const match = /^SKU-(\d+)$/.exec(p.id || "");
+    if (match) {
+      const num = parseInt(match[1], 10);
+      if (num > maxNum) maxNum = num;
+    }
+  }
+  return `SKU-${maxNum + 1}`;
+}
+
+function extractJson(text) {
+  const cleaned = text.replace(/```json|```/g, "").trim();
+  const start = cleaned.indexOf("{");
+  const end = cleaned.lastIndexOf("}");
+  return start === -1 || end === -1 ? cleaned : cleaned.slice(start, end + 1);
 }
 
 function extFromMediaType(mediaType) {

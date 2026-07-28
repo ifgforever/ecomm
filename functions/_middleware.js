@@ -25,7 +25,6 @@ const PROTECTED_WRITE_PATHS = new Set([
   "/api/community-listings",
   "/api/hours",
   "/api/refresh-nearby-stores",
-  "/api/pending-intake",
 ]);
 
 export async function onRequest(context) {

@@ -173,7 +173,7 @@
     <div class="success" id="successBox">
       <div class="big">✅</div>
       <h2>Added!</h2>
-      <p>It's in the queue — details get finished in admin later.</p>
+      <p id="successMsg">It's live in inventory now.</p>
       <button id="addAnotherBtn">+ Add Another</button>
     </div>
   </div>
@@ -188,6 +188,7 @@
   const errBox = document.getElementById('errBox');
   const formCard = document.getElementById('formCard');
   const successBox = document.getElementById('successBox');
+  const successMsg = document.getElementById('successMsg');
   const addAnotherBtn = document.getElementById('addAnotherBtn');
 
   let base64 = null;
@@ -223,7 +224,7 @@
     if (!priceInput.value) return showError('Enter a price.');
 
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Adding…';
+    submitBtn.textContent = 'Adding & drafting with AI…';
 
     try {
       const res = await fetch('/api/quick-intake-submit', {
@@ -234,6 +235,7 @@
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
 
+      successMsg.textContent = data.name ? `"${data.name}" is live — $${priceInput.value}` : 'It\'s live in inventory now.';
       formCard.style.display = 'none';
       successBox.style.display = 'block';
     } catch (err) {

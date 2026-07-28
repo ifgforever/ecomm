@@ -2199,6 +2199,7 @@
         // ── Events ───────────────────────────────────────
         wishlistBtn.addEventListener('click', () => {
             currentView = currentView === 'saved' ? 'all' : 'saved';
+            if (currentView === 'saved') cat.value = ''; // show ALL saved items, not just ones in a leftover category filter
             updateViewButtons();
             showGridMode();
             render(getFilteredProducts());
@@ -2207,6 +2208,7 @@
         viewControls.addEventListener('click', e => {
             if (e.target.classList.contains('view-btn')) {
                 currentView = e.target.dataset.view;
+                if (currentView === 'saved') cat.value = ''; // same fix as the header Saved button
                 updateViewButtons();
                 render(getFilteredProducts());
             }

@@ -31,7 +31,7 @@ export async function onRequestPost(context) {
       headers: {
         "Content-Type": "application/json",
         "X-Goog-Api-Key": env.GOOGLE_PLACES_API_KEY,
-        "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.location,places.types,places.googleMapsUri",
+        "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.location,places.types,places.googleMapsUri,places.websiteUri,places.nationalPhoneNumber",
       },
       body: JSON.stringify({
         includedTypes: INCLUDED_TYPES,
@@ -56,6 +56,8 @@ export async function onRequestPost(context) {
       address: p.formattedAddress || "",
       types: p.types || [],
       mapsUrl: p.googleMapsUri || "",
+      website: p.websiteUri || "",
+      phone: p.nationalPhoneNumber || "",
     }));
 
     const cached = {

@@ -11,6 +11,8 @@
 // admin.html by hand.
 
 export async function onRequestPost(context) {
+  let stage = "starting the request";
+
   try {
     const { env } = context;
     const { request } = context;
@@ -20,6 +22,23 @@ export async function onRequestPost(context) {
     if (!env.PRODUCTS_KV) return error("Server is missing the PRODUCTS_KV binding.", 500);
     if (!env.ANTHROPIC_API_KEY) return error("Server is missing ANTHROPIC_API_KEY.", 500);
 
+    const anthropicApiKey = String(env.ANTHROPIC_API_KEY)
+      .trim()
+      .replace(/^['"]|['"]$/g, "");
+    if (!anthropicApiKey) return error("Server has an empty ANTHROPIC_API_KEY.", 500);
+
+    const imageBaseUrl = String(env.IMAGE_BASE_URL)
+      .trim()
+      .replace(/^['"]|['"]$/g, "")
+      .replace(/\/$/, "");
+    try {
+      const parsedImageBaseUrl = new URL(imageBaseUrl);
+      if (!["http:", "https:"].includes(parsedImageBaseUrl.protocol)) throw new Error();
+    } catch {
+      return error("Server has an invalid IMAGE_BASE_URL.", 500);
+    }
+
+    stage = "reading the submitted photo";
     let body;
     try {
       body = await request.json();
@@ -27,7 +46,8 @@ export async function onRequestPost(context) {
       return error("Invalid JSON body", 400);
     }
 
-    const { price, mediaType } = body || {};
+    const { price } = body || {};
+    const mediaType = String(body?.mediaType || "image/jpeg").trim().toLowerCase();
     const base64 = (body?.base64 || "").replace(/\s/g, "");
 
     if (!price) return error("Missing price", 400);
@@ -48,7 +68,8 @@ export async function onRequestPost(context) {
     // bytes if the transform ever fails, so an upload never gets blocked
     // over an optimization step.
     let storeBytes = bytes;
-    let contentType = mediaType || "image/jpeg";
+    let contentType = mediaType;
+    stage = "optimizing the photo";
     if (env.IMAGE_TRANSFORM) {
       try {
         const resized = await env.IMAGE_TRANSFORM.input(new Response(bytes).body)
@@ -61,16 +82,28 @@ export async function onRequestPost(context) {
       }
     }
 
+    const supportedAiTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
+    if (!supportedAiTypes.has(contentType)) {
+      return error("This phone photo format could not be converted. Try taking a new photo or choose a JPEG/PNG image.", 400);
+    }
+
+    const aiBase64 = contentType === mediaType
+      ? base64
+      : bytesToBase64(new Uint8Array(storeBytes));
+
     // 2. Upload the photo to R2
+    stage = "saving the photo";
     const ext = contentType === "image/webp" ? "webp" : extFromMediaType(mediaType);
     const key = `intake/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
     await env.IMAGES.put(key, storeBytes, {
       httpMetadata: { contentType },
     });
-    const imageUrl = `${env.IMAGE_BASE_URL.replace(/\/$/, "")}/${key}`;
+    const imageUrl = `${imageBaseUrl}/${key}`;
 
-    // 3. Ask Claude to draft the listing from the photo (using the ORIGINAL
-    //    uploaded bytes, not re-fetched from the URL — more reliable)
+    // 3. Ask Claude to draft the listing from the prepared photo bytes rather
+    //    than re-fetching the public URL. If the Images binding converted a
+    //    phone-native format, send the resulting WebP to the AI as well.
+    stage = "drafting the listing";
     const systemPrompt = `You draft resale listings for Jojin's Kitty Thrift, a small curated secondhand shop in Chicago, based only on a photo of the item — no note from the seller this time, work entirely from what's visible in the image. Write:
 - a short, honest, appealing product name (title case, no gimmicks)
 - a one or two word category (e.g. "Outerwear", "Denim", "Electronics", "Toys")
@@ -86,7 +119,7 @@ Respond with ONLY a raw JSON object — your entire reply must be the JSON objec
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": env.ANTHROPIC_API_KEY,
+        "x-api-key": anthropicApiKey,
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
@@ -97,7 +130,7 @@ Respond with ONLY a raw JSON object — your entire reply must be the JSON objec
           {
             role: "user",
             content: [
-              { type: "image", source: { type: "base64", media_type: mediaType || "image/jpeg", data: base64 } },
+              { type: "image", source: { type: "base64", media_type: contentType, data: aiBase64 } },
               { type: "text", text: "Draft the listing for this item." },
             ],
           },
@@ -121,6 +154,7 @@ Respond with ONLY a raw JSON object — your entire reply must be the JSON objec
     }
 
     // 4. Build the product and write it straight into live inventory
+    stage = "loading inventory";
     const raw = await env.PRODUCTS_KV.get("products");
     const products = raw ? JSON.parse(raw) : [];
 
@@ -140,6 +174,7 @@ Respond with ONLY a raw JSON object — your entire reply must be the JSON objec
     };
 
     products.unshift(product);
+    stage = "saving inventory";
     await env.PRODUCTS_KV.put("products", JSON.stringify(products));
 
     return new Response(JSON.stringify({ ok: true, name: product.name, id: product.id }), {
@@ -147,7 +182,7 @@ Respond with ONLY a raw JSON object — your entire reply must be the JSON objec
       headers: { "Content-Type": "application/json" },
     });
   } catch (err) {
-    return error(`Unexpected server error: ${err.message}`, 500);
+    return error(`Quick Add failed while ${stage}: ${err.message}`, 500);
   }
 }
 
@@ -181,6 +216,15 @@ function extFromMediaType(mediaType) {
     "image/gif": "gif",
   };
   return map[mediaType] || "jpg";
+}
+
+function bytesToBase64(bytes) {
+  let binary = "";
+  const chunkSize = 0x8000;
+  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(offset, offset + chunkSize));
+  }
+  return btoa(binary);
 }
 
 function error(message, status) {

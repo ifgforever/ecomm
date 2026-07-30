@@ -193,21 +193,93 @@
 
   let base64 = null;
   let mediaType = null;
+  let photoPreparing = false;
 
-  photoInput.addEventListener('change', () => {
+  photoInput.addEventListener('change', async () => {
     const file = photoInput.files && photoInput.files[0];
     if (!file) return;
-    mediaType = file.type || 'image/jpeg';
-    const reader = new FileReader();
-    reader.onload = () => {
-      base64 = reader.result.split(',')[1];
-      thumb.style.backgroundImage = `url(${reader.result})`;
+
+    clearError();
+    base64 = null;
+    photoPreparing = true;
+    submitBtn.disabled = true;
+    dropText.textContent = 'Preparing photo…';
+
+    try {
+      const prepared = await preparePhoto(file);
+      base64 = prepared.dataUrl.split(',')[1];
+      mediaType = prepared.mediaType;
+      thumb.style.backgroundImage = `url("${prepared.dataUrl}")`;
       thumb.textContent = '';
       dropText.textContent = 'Tap to retake';
-    };
-    reader.onerror = () => showError("Couldn't read that photo. Try again.");
-    reader.readAsDataURL(file);
+    } catch {
+      showError("Couldn't prepare that photo. Try taking it again.");
+      thumb.style.backgroundImage = '';
+      thumb.textContent = '📷';
+      dropText.textContent = 'Tap to take a photo';
+    } finally {
+      photoPreparing = false;
+      submitBtn.disabled = false;
+    }
   });
+
+  function readAsDataUrl(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ''));
+      reader.onerror = () => reject(reader.error || new Error('Photo read failed'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function loadImage(source) {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => resolve(image);
+      image.onerror = () => reject(new Error('Photo decode failed'));
+      image.src = source;
+    });
+  }
+
+  function canvasToBlob(canvas) {
+    return new Promise((resolve, reject) => {
+      canvas.toBlob(
+        (blob) => blob ? resolve(blob) : reject(new Error('Photo conversion failed')),
+        'image/jpeg',
+        0.86
+      );
+    });
+  }
+
+  async function preparePhoto(file) {
+    const originalDataUrl = await readAsDataUrl(file);
+
+    try {
+      const image = await loadImage(originalDataUrl);
+      const maxSide = 1600;
+      const scale = Math.min(1, maxSide / Math.max(image.naturalWidth, image.naturalHeight));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+      canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+
+      const context = canvas.getContext('2d');
+      if (!context) throw new Error('Canvas unavailable');
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+      const jpegBlob = await canvasToBlob(canvas);
+      return {
+        dataUrl: await readAsDataUrl(jpegBlob),
+        mediaType: 'image/jpeg',
+      };
+    } catch {
+      // If an older phone cannot use canvas for this format, keep the
+      // original photo and let the server return a specific format error.
+      return {
+        dataUrl: originalDataUrl,
+        mediaType: file.type || 'image/jpeg',
+      };
+    }
+  }
 
   function showError(msg) {
     errBox.textContent = msg;
@@ -220,6 +292,7 @@
 
   async function submit() {
     clearError();
+    if (photoPreparing) return showError('Wait for the photo to finish preparing.');
     if (!base64) return showError('Take a photo first.');
     if (!priceInput.value) return showError('Enter a price.');
 
@@ -227,12 +300,21 @@
     submitBtn.textContent = 'Adding & drafting with AI…';
 
     try {
-      const res = await fetch('/api/quick-intake-submit', {
+      const endpoint = new URL('/api/quick-intake-submit', window.location.origin);
+      const res = await fetch(endpoint.href, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
         body: JSON.stringify({ price: priceInput.value, mediaType, base64 }),
       });
-      const data = await res.json();
+
+      const responseText = await res.text();
+      let data = {};
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        throw new Error(`The server returned an unreadable response (${res.status})`);
+      }
       if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
 
       successMsg.textContent = data.name ? `"${data.name}" is live — $${priceInput.value}` : 'It\'s live in inventory now.';

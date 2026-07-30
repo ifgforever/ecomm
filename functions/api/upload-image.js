@@ -51,12 +51,38 @@ export async function onRequestPost(context) {
       return error("Image data doesn't look like valid base64 — try picking the photo again.", 400);
     }
 
+    let bytes;
+    try {
+      bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+    } catch (err) {
+      return error(`Couldn't decode image data (${err.message}). Try picking the photo again.`, 400);
+    }
+
+    // Resize/re-encode before storing — full-res photos are way bigger than
+    // a product photo needs to be. Falls back to the original bytes if the
+    // transform ever fails, so an upload never gets blocked over it.
+    let storeBytes = bytes;
+    let contentType = mediaType || "image/jpeg";
+    let resizedOk = false;
+    if (env.IMAGE_TRANSFORM) {
+      try {
+        const resized = await env.IMAGE_TRANSFORM.input(new Response(bytes).body)
+          .transform({ width: 1600, fit: "scale-down" })
+          .output({ format: "image/webp", quality: 82 });
+        storeBytes = await resized.response().arrayBuffer();
+        contentType = "image/webp";
+        resizedOk = true;
+      } catch {
+        // Fall back to the original, unresized bytes.
+      }
+    }
+
     // Strip any "images/" prefix left over from the old convention, and keep
     // the key safe (letters, numbers, dot, dash, underscore only).
     const cleanName = filename.replace(/^images\//, "").replace(/[^a-zA-Z0-9._-]/g, "-");
     const dot = cleanName.lastIndexOf(".");
     const base = dot > -1 ? cleanName.slice(0, dot) : cleanName;
-    const ext = dot > -1 ? cleanName.slice(dot) : "";
+    const ext = resizedOk ? ".webp" : (dot > -1 ? cleanName.slice(dot) : "");
 
     // R2 is the source of truth for uniqueness — check for a real collision
     // rather than trusting whatever the client already suggested.
@@ -67,15 +93,8 @@ export async function onRequestPost(context) {
       n++;
     }
 
-    let bytes;
-    try {
-      bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
-    } catch (err) {
-      return error(`Couldn't decode image data (${err.message}). Try picking the photo again.`, 400);
-    }
-
-    await env.IMAGES.put(key, bytes, {
-      httpMetadata: { contentType: mediaType || "image/jpeg" },
+    await env.IMAGES.put(key, storeBytes, {
+      httpMetadata: { contentType },
     });
 
     const url = `${env.IMAGE_BASE_URL.replace(/\/$/, "")}/${key}`;

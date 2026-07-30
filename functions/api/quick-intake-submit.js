@@ -43,15 +43,33 @@ export async function onRequestPost(context) {
       return error(`Couldn't decode photo data (${err.message}). Try again.`, 400);
     }
 
-    // 1. Upload the photo to R2
-    const ext = extFromMediaType(mediaType);
+    // 1. Resize/re-encode before storing — full-res phone photos are way
+    // bigger than a product photo needs to be. Falls back to the original
+    // bytes if the transform ever fails, so an upload never gets blocked
+    // over an optimization step.
+    let storeBytes = bytes;
+    let contentType = mediaType || "image/jpeg";
+    if (env.IMAGE_TRANSFORM) {
+      try {
+        const resized = await env.IMAGE_TRANSFORM.input(new Response(bytes).body)
+          .transform({ width: 1600, fit: "scale-down" })
+          .output({ format: "image/webp", quality: 82 });
+        storeBytes = await resized.response().arrayBuffer();
+        contentType = "image/webp";
+      } catch {
+        // Fall back to the original, unresized bytes.
+      }
+    }
+
+    // 2. Upload the photo to R2
+    const ext = contentType === "image/webp" ? "webp" : extFromMediaType(mediaType);
     const key = `intake/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-    await env.IMAGES.put(key, bytes, {
-      httpMetadata: { contentType: mediaType || "image/jpeg" },
+    await env.IMAGES.put(key, storeBytes, {
+      httpMetadata: { contentType },
     });
     const imageUrl = `${env.IMAGE_BASE_URL.replace(/\/$/, "")}/${key}`;
 
-    // 2. Ask Claude to draft the listing from the photo (using the ORIGINAL
+    // 3. Ask Claude to draft the listing from the photo (using the ORIGINAL
     //    uploaded bytes, not re-fetched from the URL — more reliable)
     const systemPrompt = `You draft resale listings for Jojin's Kitty Thrift, a small curated secondhand shop in Chicago, based only on a photo of the item — no note from the seller this time, work entirely from what's visible in the image. Write:
 - a short, honest, appealing product name (title case, no gimmicks)
@@ -102,7 +120,7 @@ Respond with ONLY a raw JSON object — your entire reply must be the JSON objec
       return error("Couldn't parse the AI's draft — try again.", 500);
     }
 
-    // 3. Build the product and write it straight into live inventory
+    // 4. Build the product and write it straight into live inventory
     const raw = await env.PRODUCTS_KV.get("products");
     const products = raw ? JSON.parse(raw) : [];
 

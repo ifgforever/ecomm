@@ -36,11 +36,29 @@ export async function onRequestPost(context) {
       return error(`Couldn't decode photo data (${err.message}). Try again.`, 400);
     }
 
-    const ext = extFromMediaType(mediaType);
+    // Resize/re-encode before storing — full-res phone photos are way
+    // bigger than a listing photo needs to be. Falls back to the original
+    // bytes if the transform ever fails, so a submission never gets
+    // blocked over an optimization step.
+    let storeBytes = bytes;
+    let contentType = mediaType || "image/jpeg";
+    if (env.IMAGE_TRANSFORM) {
+      try {
+        const resized = await env.IMAGE_TRANSFORM.input(new Response(bytes).body)
+          .transform({ width: 1600, fit: "scale-down" })
+          .output({ format: "image/webp", quality: 82 });
+        storeBytes = await resized.response().arrayBuffer();
+        contentType = "image/webp";
+      } catch {
+        // Fall back to the original, unresized bytes.
+      }
+    }
+
+    const ext = contentType === "image/webp" ? "webp" : extFromMediaType(mediaType);
     const key = `community/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
-    await env.IMAGES.put(key, bytes, {
-      httpMetadata: { contentType: mediaType || "image/jpeg" },
+    await env.IMAGES.put(key, storeBytes, {
+      httpMetadata: { contentType },
     });
 
     const url = `${env.IMAGE_BASE_URL.replace(/\/$/, "")}/${key}`;

@@ -17,6 +17,7 @@ const PROTECTED_PAGES = new Set([
   "/sold-check.html", "/sold-check",
   "/gallery-review.html", "/gallery-review",
   "/community-listings-review.html", "/community-listings-review",
+  "/admin-price.html", "/admin-price",
 ]);
 
 const PROTECTED_WRITE_PATHS = new Set([
@@ -25,6 +26,9 @@ const PROTECTED_WRITE_PATHS = new Set([
   "/api/community-listings",
   "/api/hours",
   "/api/refresh-nearby-stores",
+  "/api/upload-image",
+  "/api/pending-intake",
+  "/api/ai-assist",
 ]);
 
 export async function onRequest(context) {

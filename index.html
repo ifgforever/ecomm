@@ -59,7 +59,7 @@
             --ink: #1c1610;
             --ink-mid: #3d3228;
             --ink-soft: #6b5d4f;
-            --muted: #9a8878;
+            --muted: #6f6155;
             --paper: #f7f2eb;
             --paper-warm: #f0e9de;
             --paper-dark: #e8dfd3;
@@ -67,11 +67,11 @@
             --tan-dark: #b8a888;
             --amber: #c8863a;
             --amber-light: #e0a050;
-            --amber-dark: #a06820;
-            --teal: #3d7a6e;
-            --teal-light: #5a9e90;
-            --teal-dark: #2a5a50;
-            --rust: #b8522a;
+            --amber-dark: #8a5718;
+            --teal: #397367;
+            --teal-light: #32665c;
+            --teal-dark: #245046;
+            --rust: #a94422;
             --rust-light: #d4703a;
             --card: rgba(247, 242, 235, 0.97);
             --card-border: rgba(180, 155, 120, 0.3);
@@ -93,6 +93,24 @@
             background-color: var(--paper);
             overflow-x: hidden;
             min-height: 100vh;
+        }
+
+        .skip-link {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 3000;
+            padding: 10px 14px;
+            border: 2px solid var(--ink);
+            border-radius: var(--r2);
+            color: var(--ink);
+            background: var(--paper);
+            font-weight: 800;
+            transform: translateY(-160%);
+        }
+
+        .skip-link:focus {
+            transform: translateY(0);
         }
 
         /* ── Grain texture overlay ── */
@@ -653,7 +671,7 @@
         }
         .category-tile.all-tile .cat-name,
         .category-tile.all-tile .cat-count {
-            color: #fff;
+            color: var(--ink);
         }
 
         .category-tile.new-arrivals-tile {
@@ -771,7 +789,7 @@
             overflow: hidden;
             box-shadow: var(--shadow-soft);
         }
-        .findus-map iframe { display: block; width: 100%; }
+        .findus-map iframe { display: block; width: 100%; border: 0; }
 
         .findus-directions {
             display: inline-block;
@@ -1208,7 +1226,16 @@
             padding: 12px;
         }
 
-        .img.has-image { cursor: zoom-in; }
+        .img.has-image {
+            width: 100%;
+            padding: 0;
+            border-top: 0;
+            border-right: 0;
+            border-left: 0;
+            border-radius: 0;
+            font: inherit;
+            cursor: zoom-in;
+        }
 
         .img-overlay {
             position: absolute;
@@ -1226,6 +1253,9 @@
 
         .img-overlay span {
             color: var(--paper);
+            background: rgba(28, 22, 16, 0.92);
+            border-radius: 2px;
+            padding: 4px 7px;
             font-size: 12px;
             font-weight: 700;
             letter-spacing: 0.06em;
@@ -1456,9 +1486,10 @@
         }
 
         /* ── Accessibility ── */
-        a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
-            outline: 2px solid var(--teal);
-            outline-offset: 2px;
+        a:focus-visible, button:focus-visible, input:focus-visible,
+        select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
+            outline: 3px solid var(--teal-dark);
+            outline-offset: 3px;
         }
 
         .sr-only {
@@ -1467,8 +1498,13 @@
         }
 
         @media (prefers-reduced-motion: reduce) {
-            .card { transition: none; }
-            .card:hover { transform: none; }
+            *, *::before, *::after {
+                scroll-behavior: auto !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            .card:hover, .pick-card:hover, .polaroid:hover { transform: none; }
             .save-btn.pop { animation: none; }
         }
     </style>
@@ -1476,20 +1512,24 @@
 
 <body>
 
-    <div class="enter-overlay" id="enterOverlay">
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
+    <div class="enter-overlay" id="enterOverlay" role="dialog" aria-modal="true"
+         aria-labelledby="enter-title" aria-describedby="enter-description">
         <div class="enter-card">
-            <div class="enter-paw">🐾</div>
+            <div class="enter-paw" aria-hidden="true">🐾</div>
             <p class="enter-eyebrow">Welcome</p>
-            <h1 class="enter-title">Come On <em>In</em></h1>
-            <p class="enter-sub">A little music while you browse — like stepping into the shop.</p>
-            <button class="enter-btn" id="enterWithMusic">🎵 Enter the Shop</button>
-            <button class="enter-skip" id="enterSkip">No thanks, just browsing</button>
+            <h2 class="enter-title" id="enter-title">Come On <em>In</em></h2>
+            <p class="enter-sub" id="enter-description">A little music while you browse — like stepping into the shop.</p>
+            <button type="button" class="enter-btn" id="enterWithMusic">🎵 Enter the Shop</button>
+            <button type="button" class="enter-skip" id="enterSkip">No thanks, just browsing</button>
         </div>
     </div>
 
     <audio id="bgMusic" preload="none"></audio>
 
-    <button class="music-toggle" id="musicToggle" hidden aria-label="Toggle music">🔊</button>
+    <button type="button" class="music-toggle" id="musicToggle" hidden
+            aria-label="Play background music" aria-pressed="false">🔊</button>
 
     <!-- Accent bar -->
     <div class="accent-bar"></div>
@@ -1500,23 +1540,24 @@
     </div>
 
     <!-- Social bar -->
-    <div class="social-bar">
+    <nav class="social-bar" aria-label="Social media and reviews">
         <span class="social-bar-label">🐾 Follow us →</span>
-        <a href="https://www.yelp.com/biz/jojins-kitty-chicago-2" target="_blank" rel="noopener"><i class="fa-brands fa-yelp" style="color:#d32323;"></i> Yelp</a>
-        <a href="https://www.facebook.com/p/Jojins-Kitty-Thrift-Shop-61585291957385/" target="_blank" rel="noopener"><i class="fa-brands fa-facebook" style="color:#1877f2;"></i> Facebook</a>
-        <a href="https://www.tiktok.com/@jojinteston" target="_blank" rel="noopener"><i class="fa-brands fa-tiktok" style="color:#ffffff;"></i> TikTok</a>
-        <a href="https://www.instagram.com/jinlovegodfirst" target="_blank" rel="noopener"><i class="fa-brands fa-instagram" style="color:#e1306c;"></i> Instagram</a>
-        <a href="https://share.google/Ulhsi8pst9S7QpiaL" target="_blank" rel="noopener"><i class="fa-brands fa-google" style="color:#4285f4;"></i> Google</a>
-        <span class="social-bar-stars" aria-label="5 stars">
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+        <a href="https://www.yelp.com/biz/jojins-kitty-chicago-2" target="_blank" rel="noopener"><i class="fa-brands fa-yelp" style="color:#d32323;" aria-hidden="true"></i> Yelp</a>
+        <a href="https://www.facebook.com/p/Jojins-Kitty-Thrift-Shop-61585291957385/" target="_blank" rel="noopener"><i class="fa-brands fa-facebook" style="color:#1877f2;" aria-hidden="true"></i> Facebook</a>
+        <a href="https://www.tiktok.com/@jojinteston" target="_blank" rel="noopener"><i class="fa-brands fa-tiktok" style="color:#ffffff;" aria-hidden="true"></i> TikTok</a>
+        <a href="https://www.instagram.com/jinlovegodfirst" target="_blank" rel="noopener"><i class="fa-brands fa-instagram" style="color:#e1306c;" aria-hidden="true"></i> Instagram</a>
+        <a href="https://share.google/Ulhsi8pst9S7QpiaL" target="_blank" rel="noopener"><i class="fa-brands fa-google" style="color:#4285f4;" aria-hidden="true"></i> Google</a>
+        <span class="social-bar-stars" role="img" aria-label="5 stars">
+            <i class="fa-solid fa-star" aria-hidden="true"></i><i class="fa-solid fa-star" aria-hidden="true"></i><i class="fa-solid fa-star" aria-hidden="true"></i><i class="fa-solid fa-star" aria-hidden="true"></i><i class="fa-solid fa-star" aria-hidden="true"></i>
         </span>
-    </div>
+    </nav>
 
     <!-- Lightbox -->
-    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged product image">
+    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true"
+         aria-label="Enlarged product image" inert>
         <div class="lightbox-content">
-            <button class="lightbox-close" id="lightbox-close" aria-label="Close enlarged image">✕</button>
-            <img id="lightbox-img" src="" alt="" />
+            <button type="button" class="lightbox-close" id="lightbox-close" aria-label="Close enlarged image">✕</button>
+            <img id="lightbox-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" alt="">
             <div class="lightbox-info" id="lightbox-info"></div>
         </div>
     </div>
@@ -1535,7 +1576,7 @@
                     <button type="button" class="btn wishlist-toggle" id="gallery-jump-link" hidden>
                         📸 Gallery
                     </button>
-                    <button class="btn wishlist-toggle" id="wishlist-btn">
+                    <button type="button" class="btn wishlist-toggle" id="wishlist-btn">
                         ♡ Saved
                         <span class="badge" id="wishlist-badge"></span>
                     </button>
@@ -1561,7 +1602,7 @@
         </div>
     </header>
 
-    <main>
+    <main id="main-content" tabindex="-1">
         <div class="wrap">
 
             <div class="about-jojin">
@@ -1583,13 +1624,13 @@
                 <div class="section-divider"></div>
             </div>
 
-            <button class="back-to-categories" id="backToCategories">← Back to Home</button>
+            <button type="button" class="back-to-categories" id="backToCategories">← Back to Home</button>
 
             <div class="category-tiles-row" id="category-tiles-row"></div>
 
             <div class="view-controls" id="view-controls" hidden>
-                <button class="view-btn active" data-view="all">All Items</button>
-                <button class="view-btn" data-view="saved">♡ My Saved Items</button>
+                <button type="button" class="view-btn active" data-view="all">All Items</button>
+                <button type="button" class="view-btn" data-view="saved">♡ My Saved Items</button>
             </div>
 
             <div class="grid" id="grid" hidden></div>
@@ -1647,7 +1688,8 @@
                 <div class="findus-map">
                     <iframe
                         src="https://maps.google.com/maps?q=41.9556017,-87.7278817&z=15&output=embed"
-                        width="100%" height="320" style="border:0;"
+                        title="Map showing Jojin's Kitty Thrift Shop at 4100 N Pulaski Road in Chicago"
+                        height="320"
                         loading="lazy" allowfullscreen
                         referrerpolicy="no-referrer-when-downgrade">
                     </iframe>
@@ -1695,6 +1737,7 @@
         const lightboxImg   = document.getElementById('lightbox-img');
         const lightboxInfo  = document.getElementById('lightbox-info');
         const lightboxClose = document.getElementById('lightbox-close');
+        let lightboxReturnFocus = null;
 
         const wishlistBtn   = document.getElementById('wishlist-btn');
         const wishlistBadge = document.getElementById('wishlist-badge');
@@ -1725,8 +1768,11 @@
 
         function updateViewButtons() {
             document.querySelectorAll('.view-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.view === currentView);
+                const isActive = btn.dataset.view === currentView;
+                btn.classList.toggle('active', isActive);
+                btn.setAttribute('aria-pressed', String(isActive));
             });
+            wishlistBtn.setAttribute('aria-pressed', String(currentView === 'saved'));
         }
 
         function updateUI() { updateWishlistBadge(); updateViewButtons(); }
@@ -1752,6 +1798,7 @@
 
         // ── Lightbox ──────────────────────────────────────
         function openLightbox(src, name, rotation = 0) {
+            lightboxReturnFocus = document.activeElement;
             lightboxImg.src = src;
             lightboxImg.alt = name;
             lightboxInfo.textContent = name;
@@ -1761,13 +1808,18 @@
             const cls = getRotationClass(rotation);
             if (cls) lightboxImg.classList.add(cls);
             lightbox.classList.add('open');
+            lightbox.removeAttribute('inert');
             document.body.style.overflow = 'hidden';
             lightboxClose.focus();
         }
 
         function closeLightbox() {
             lightbox.classList.remove('open');
+            lightbox.setAttribute('inert', '');
             document.body.style.overflow = '';
+            if (lightboxReturnFocus && typeof lightboxReturnFocus.focus === 'function') {
+                lightboxReturnFocus.focus();
+            }
         }
 
         lightboxClose.addEventListener('click', closeLightbox);
@@ -1820,14 +1872,16 @@
 
             categoryTilesRow.innerHTML = '';
 
-            const allTile = document.createElement('div');
+            const allTile = document.createElement('button');
+            allTile.type = 'button';
             allTile.className = 'category-tile all-tile';
             allTile.innerHTML = `<div class="cat-name">All Items</div><div class="cat-count">${totalInStock} item${totalInStock === 1 ? '' : 's'}</div>`;
             allTile.addEventListener('click', () => selectCategory(''));
             categoryTilesRow.appendChild(allTile);
 
             if (newArrivalsCount > 0) {
-                const newTile = document.createElement('div');
+                const newTile = document.createElement('button');
+                newTile.type = 'button';
                 newTile.className = 'category-tile new-arrivals-tile';
                 newTile.innerHTML = `<div class="cat-name">✨ New Arrivals</div><div class="cat-count">${newArrivalsCount} item${newArrivalsCount === 1 ? '' : 's'}</div>`;
                 newTile.addEventListener('click', () => selectCategory(NEW_ARRIVALS_KEY));
@@ -1835,7 +1889,8 @@
             }
 
             for (const c of cats) {
-                const tile = document.createElement('div');
+                const tile = document.createElement('button');
+                tile.type = 'button';
                 tile.className = 'category-tile';
                 tile.innerHTML = `<div class="cat-name">${escapeHtml(c)}</div><div class="cat-count">${counts[c]} item${counts[c] === 1 ? '' : 's'}</div>`;
                 tile.addEventListener('click', () => selectCategory(c));
@@ -2099,12 +2154,12 @@
                 card.className = 'pick-card';
                 card.innerHTML = `
                     <span class="pick-ribbon">🐾 Jojin's Pick</span>
-                    <div class="img ${p.image ? 'has-image' : ''}" ${p.image ? `data-image="${escapeHtml(p.image)}" data-name="${escapeHtml(p.name)}" data-rotation="${p.rotation || 0}"` : ''}>
-                        ${p.image
-                            ? `<img src="${p.image}" alt="${escapeHtml(p.name)}" loading="lazy">`
-                            : `<div class="noimg">No photo yet</div>`
-                        }
-                    </div>
+                    ${p.image
+                        ? `<button type="button" class="img has-image" data-image="${escapeHtml(p.image)}" data-name="${escapeHtml(p.name)}" data-rotation="${p.rotation || 0}" aria-label="Enlarge image of ${escapeHtml(p.name)}">
+                               <img src="${p.image}" alt="${escapeHtml(p.name)}" loading="lazy">
+                           </button>`
+                        : `<div class="img"><div class="noimg">No photo yet</div></div>`
+                    }
                     <div class="content">
                         <div class="meta-top">
                             <span class="category-tag">${escapeHtml(p.category || 'Misc')}</span>
@@ -2147,16 +2202,16 @@
                 const card = document.createElement('article');
                 card.className = 'card';
                 card.innerHTML = `
-                    <button class="save-btn ${isSaved ? 'saved' : ''}" data-id="${escapeHtml(p.id)}" aria-label="${isSaved ? 'Remove from' : 'Add to'} saved items">
+                    <button type="button" class="save-btn ${isSaved ? 'saved' : ''}" data-id="${escapeHtml(p.id)}" aria-label="${isSaved ? 'Remove from' : 'Add to'} saved items" aria-pressed="${isSaved}">
                         ${isSaved ? '♥' : '♡'}
                     </button>
-                    <div class="img ${p.image ? 'has-image' : ''}" ${p.image ? `data-image="${escapeHtml(p.image)}" data-name="${escapeHtml(p.name)}" data-rotation="${rotation}"` : ''}>
-                        ${p.image
-                            ? `<img src="${p.image}" alt="${escapeHtml(p.name)}" loading="lazy" class="${rotClass}" style="${rotStyle}">
-                               <div class="img-overlay"><span>Enlarge ↗</span></div>`
-                            : `<div class="noimg">No photo yet</div>`
-                        }
-                    </div>
+                    ${p.image
+                        ? `<button type="button" class="img has-image" data-image="${escapeHtml(p.image)}" data-name="${escapeHtml(p.name)}" data-rotation="${rotation}" aria-label="Enlarge image of ${escapeHtml(p.name)}">
+                               <img src="${p.image}" alt="${escapeHtml(p.name)}" loading="lazy" class="${rotClass}" style="${rotStyle}">
+                               <span class="img-overlay"><span>Enlarge ↗</span></span>
+                           </button>`
+                        : `<div class="img"><div class="noimg">No photo yet</div></div>`
+                    }
                     <div class="content">
                         <div class="meta-top">
                             <span class="category-tag">${escapeHtml(p.category || 'Misc')}</span>
@@ -2193,6 +2248,8 @@
                     updateWishlistBadge();
                     saveBtn.classList.toggle('saved');
                     saveBtn.innerHTML = was ? '♡' : '♥';
+                    saveBtn.setAttribute('aria-label', `${was ? 'Add to' : 'Remove from'} saved items`);
+                    saveBtn.setAttribute('aria-pressed', String(!was));
                     saveBtn.classList.add('pop');
                     setTimeout(() => saveBtn.classList.remove('pop'), 250);
                     if (currentView === 'saved' && was) render(getFilteredProducts());
@@ -2246,7 +2303,13 @@
         cat.addEventListener('change', applyFilters);
 
         document.addEventListener('keydown', e => {
-            if (e.key === 'Escape' && lightbox.classList.contains('open')) closeLightbox();
+            if (!lightbox.classList.contains('open')) return;
+            if (e.key === 'Escape') {
+                closeLightbox();
+            } else if (e.key === 'Tab') {
+                e.preventDefault();
+                lightboxClose.focus();
+            }
         });
 
         // ── Init ─────────────────────────────────────────
@@ -2303,6 +2366,7 @@
 
             function closeOverlay() {
                 overlay.hidden = true;
+                q.focus();
             }
 
             function startMusic() {
@@ -2313,6 +2377,8 @@
                 });
                 toggle.hidden = false;
                 toggle.textContent = '🔊';
+                toggle.setAttribute('aria-label', 'Pause background music');
+                toggle.setAttribute('aria-pressed', 'true');
                 localStorage.setItem(MUTE_KEY, 'false');
             }
 
@@ -2325,6 +2391,8 @@
                 closeOverlay();
                 toggle.hidden = false;
                 toggle.textContent = '🔇';
+                toggle.setAttribute('aria-label', 'Play background music');
+                toggle.setAttribute('aria-pressed', 'false');
                 localStorage.setItem(MUTE_KEY, 'true');
             });
 
@@ -2332,13 +2400,34 @@
                 if (music.paused) {
                     music.play().catch(() => {});
                     toggle.textContent = '🔊';
+                    toggle.setAttribute('aria-label', 'Pause background music');
+                    toggle.setAttribute('aria-pressed', 'true');
                     localStorage.setItem(MUTE_KEY, 'false');
                 } else {
                     music.pause();
                     toggle.textContent = '🔇';
+                    toggle.setAttribute('aria-label', 'Play background music');
+                    toggle.setAttribute('aria-pressed', 'false');
                     localStorage.setItem(MUTE_KEY, 'true');
                 }
             });
+
+            overlay.addEventListener('keydown', event => {
+                if (event.key === 'Escape') {
+                    skipBtn.click();
+                    return;
+                }
+                if (event.key !== 'Tab') return;
+                if (event.shiftKey && document.activeElement === enterBtn) {
+                    event.preventDefault();
+                    skipBtn.focus();
+                } else if (!event.shiftKey && document.activeElement === skipBtn) {
+                    event.preventDefault();
+                    enterBtn.focus();
+                }
+            });
+
+            enterBtn.focus();
         })();
     </script>
 </body>

@@ -1,0 +1,11 @@
+BEGIN:VCARD
+VERSION:3.0
+N:;Jojin's Kitty Thrift Shop;;;
+FN:Jojin's Kitty Thrift Shop
+ORG:Jojin's Kitty Thrift Shop
+TEL;TYPE=CELL,VOICE:+13126100321
+TEL;TYPE=CELL,TEXT:+13126100321
+ADR;TYPE=WORK:;;4100 N Pulaski Rd;Chicago;IL;;US
+URL:https://jinkittys.com
+NOTE:Unique thrift finds in Chicago. Open Mon-Sat, 11am-4pm.
+END:VCARD

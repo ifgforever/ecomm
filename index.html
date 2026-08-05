@@ -1837,6 +1837,16 @@
                 .replaceAll("'", '&#039;');
         }
 
+        // Resizes any product photo on the fly via Cloudflare's URL-based
+        // Image Resizing (no upload-time processing needed -- works for
+        // every photo automatically, old and new, full-size originals or
+        // not). Grid thumbnails only need to be a few hundred px; the
+        // lightbox loads the untouched original for a real zoom-in.
+        function thumbUrl(url, width) {
+            if (!url) return url;
+            return `/cdn-cgi/image/width=${width},quality=75,format=auto,fit=cover/${url}`;
+        }
+
         function populateCategories(items) {
             const cats = [...new Set(items.map(p => (p.category || '').trim()).filter(Boolean))].sort();
             for (const c of cats) {
@@ -2024,7 +2034,7 @@
                 const card = document.createElement('figure');
                 card.className = 'polaroid';
                 card.innerHTML = `
-                    <img src="${escapeHtml(g.image)}" alt="${escapeHtml(g.caption || 'Shared by a visitor')}" loading="lazy">
+                    <img src="${escapeHtml(thumbUrl(g.image, 400))}" alt="${escapeHtml(g.caption || 'Shared by a visitor')}" loading="lazy">
                     ${g.caption ? `<div class="cap">${escapeHtml(g.caption)}</div>` : ''}
                     ${g.name ? `<div class="who">— ${escapeHtml(g.name)}</div>` : ''}
                 `;
@@ -2074,7 +2084,7 @@
                     : `<span class="no-contact">No contact info left — ask Jojin about it in person.</span>`;
                 card.innerHTML = `
                     <span class="ribbon">👋 From the Community</span>
-                    <img src="${escapeHtml(l.image)}" alt="${escapeHtml(l.name || '')}" loading="lazy">
+                    <img src="${escapeHtml(thumbUrl(l.image, 400))}" alt="${escapeHtml(l.name || '')}" loading="lazy">
                     <div class="content">
                         <h3 class="name">${escapeHtml(l.name || 'Untitled item')}</h3>
                         <p class="desc">${escapeHtml(l.description || '')}</p>
@@ -2158,7 +2168,7 @@
                     <span class="pick-ribbon">🐾 Jojin's Pick</span>
                     ${p.image
                         ? `<button type="button" class="img has-image" data-image="${escapeHtml(p.image)}" data-name="${escapeHtml(p.name)}" data-rotation="${p.rotation || 0}" aria-label="Enlarge image of ${escapeHtml(p.name)}">
-                               <img src="${p.image}" alt="${escapeHtml(p.name)}" loading="lazy">
+                               <img src="${escapeHtml(thumbUrl(p.image, 500))}" alt="${escapeHtml(p.name)}" loading="lazy">
                            </button>`
                         : `<div class="img"><div class="noimg">No photo yet</div></div>`
                     }
@@ -2209,7 +2219,7 @@
                     </button>
                     ${p.image
                         ? `<button type="button" class="img has-image" data-image="${escapeHtml(p.image)}" data-name="${escapeHtml(p.name)}" data-rotation="${rotation}" aria-label="Enlarge image of ${escapeHtml(p.name)}">
-                               <img src="${p.image}" alt="${escapeHtml(p.name)}" loading="lazy" class="${rotClass}" style="${rotStyle}">
+                               <img src="${escapeHtml(thumbUrl(p.image, 500))}" alt="${escapeHtml(p.name)}" loading="lazy" class="${rotClass}" style="${rotStyle}">
                                <span class="img-overlay"><span>Enlarge ↗</span></span>
                            </button>`
                         : `<div class="img"><div class="noimg">No photo yet</div></div>`

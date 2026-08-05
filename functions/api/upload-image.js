@@ -66,9 +66,12 @@ export async function onRequestPost(context) {
     let resizedOk = false;
     if (env.IMAGE_TRANSFORM) {
       try {
+        // 1000px is plenty for both the product grid (~330px cards) and the
+        // lightbox zoom on any phone/tablet screen -- was 1600px, which is
+        // needlessly large for how these actually get displayed.
         const resized = await env.IMAGE_TRANSFORM.input(new Response(bytes).body)
-          .transform({ width: 1600, fit: "scale-down" })
-          .output({ format: "image/webp", quality: 82 });
+          .transform({ width: 1000, fit: "scale-down" })
+          .output({ format: "image/webp", quality: 78 });
         storeBytes = await resized.response().arrayBuffer();
         contentType = "image/webp";
         resizedOk = true;

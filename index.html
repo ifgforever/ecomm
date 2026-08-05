@@ -1230,6 +1230,7 @@
 
         .img.has-image {
             width: 100%;
+            aspect-ratio: 1 / 1;
             padding: 0;
             border-top: 0;
             border-right: 0;
@@ -1237,6 +1238,13 @@
             border-radius: 0;
             font: inherit;
             cursor: zoom-in;
+        }
+
+        .img.has-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
         }
 
         .img-overlay {
@@ -1842,9 +1850,13 @@
         // every photo automatically, old and new, full-size originals or
         // not). Grid thumbnails only need to be a few hundred px; the
         // lightbox loads the untouched original for a real zoom-in.
-        function thumbUrl(url, width) {
+        function thumbUrl(url, size) {
             if (!url) return url;
-            return `/cdn-cgi/image/width=${width},quality=75,format=auto,fit=cover/${url}`;
+            // Square crop (fit=cover needs both dimensions to actually crop,
+            // not just scale) -- gives every card the same aspect ratio, so
+            // the CSS aspect-ratio below can reserve the right space before
+            // the image loads instead of the grid jumping as each one pops in.
+            return `/cdn-cgi/image/width=${size},height=${size},quality=75,format=auto,fit=cover/${url}`;
         }
 
         function populateCategories(items) {

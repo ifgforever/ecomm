@@ -861,11 +861,13 @@
         .polaroid:nth-child(3n+1) { transform: rotate(1.4deg); }
         .polaroid:nth-child(3n+2) { transform: rotate(-1deg); }
 
-        .polaroid:hover {
-            transform: rotate(0deg) scale(1.04);
-            box-shadow: var(--shadow);
-            z-index: 2;
-            position: relative;
+        @media (hover: hover) and (pointer: fine) {
+            .polaroid:hover {
+                transform: rotate(0deg) scale(1.04);
+                box-shadow: var(--shadow);
+                z-index: 2;
+                position: relative;
+            }
         }
 
         .polaroid img {
@@ -1079,9 +1081,11 @@
             transition: transform 0.18s, box-shadow 0.18s;
         }
 
-        .pick-card:hover {
-            transform: translate(-2px, -2px);
-            box-shadow: 7px 7px 0 var(--amber-dark);
+        @media (hover: hover) and (pointer: fine) {
+            .pick-card:hover {
+                transform: translate(-2px, -2px);
+                box-shadow: 7px 7px 0 var(--amber-dark);
+            }
         }
 
         .pick-ribbon {
@@ -1138,9 +1142,11 @@
             transition: transform 0.18s, box-shadow 0.18s;
         }
 
-        .card:hover {
-            transform: translate(-2px, -2px);
-            box-shadow: 7px 7px 0 var(--amber-dark);
+        @media (hover: hover) and (pointer: fine) {
+            .card:hover {
+                transform: translate(-2px, -2px);
+                box-shadow: 7px 7px 0 var(--amber-dark);
+            }
         }
 
         /* ── Save button ── */
@@ -1218,7 +1224,9 @@
             padding: 8px;
         }
 
-        .card:hover .img img { transform: scale(1.03); }
+        @media (hover: hover) and (pointer: fine) {
+            .card:hover .img img { transform: scale(1.03); }
+        }
 
         .noimg {
             color: var(--muted);

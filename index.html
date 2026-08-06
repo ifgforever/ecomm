@@ -2211,76 +2211,117 @@
             updatePicksVisibility();
         }
 
+        // Rendering the entire catalog (700+ items) into the DOM at once was
+        // the single biggest performance problem on this page -- it alone
+        // produced 16,000+ DOM nodes on a plain page load, which tanks
+        // Lighthouse's performance score regardless of how small the network
+        // payload is. Instead we render one batch at a time and grow the
+        // grid as the visitor actually scrolls toward the bottom.
+        const GRID_PAGE_SIZE = 30;
+        let gridItems = [];
+        let gridRenderedCount = 0;
+        let gridSentinelObserver = null;
+
+        function buildProductCard(p) {
+            const inStock  = !!p.inStock && (p.quantity ?? 1) > 0;
+            const isSaved  = savedItems.has(p.id);
+            const rotation = normalizeRotation(p.rotation || 0);
+            const rotStyle = getRotationStyle(rotation);
+            const rotClass = getRotationClass(rotation);
+
+            const card = document.createElement('article');
+            card.className = 'card';
+            card.innerHTML = `
+                <button type="button" class="save-btn ${isSaved ? 'saved' : ''}" data-id="${escapeHtml(p.id)}" aria-label="${isSaved ? 'Remove from' : 'Add to'} saved items" aria-pressed="${isSaved}">
+                    ${isSaved ? '♥' : '♡'}
+                </button>
+                ${p.image
+                    ? `<button type="button" class="img has-image" data-image="${escapeHtml(p.image)}" data-name="${escapeHtml(p.name)}" data-rotation="${rotation}" aria-label="Enlarge image of ${escapeHtml(p.name)}">
+                           <img src="${escapeHtml(thumbUrl(p.image, 500))}" alt="${escapeHtml(p.name)}" loading="lazy" class="${rotClass}" style="${rotStyle}">
+                           <span class="img-overlay"><span>Enlarge ↗</span></span>
+                       </button>`
+                    : `<div class="img"><div class="noimg">No photo yet</div></div>`
+                }
+                <div class="content">
+                    <div class="meta-top">
+                        <span class="category-tag">${escapeHtml(p.category || 'Misc')}</span>
+                        <span class="price">${money(Number(p.price || 0))}</span>
+                    </div>
+                    <h2 class="name">${escapeHtml(p.name || 'Unnamed Item')}</h2>
+                    <div class="meta-row">
+                        <span><strong>SKU:</strong> ${escapeHtml(p.id || '—')}</span>
+                        <span><strong>Qty:</strong> ${p.quantity ?? '—'}</span>
+                    </div>
+                    <p class="desc">${escapeHtml(p.description || '')}</p>
+                    <div class="card-footer">
+                        <span class="stock ${inStock ? 'good' : 'bad'}">${inStock ? '✓ In stock' : 'Ask about it'}</span>
+                        <a class="btn btn-teal" href="tel:${CONFIG.storePhone}" aria-label="Call about ${escapeHtml(p.name)}">📞 Call</a>
+                    </div>
+                    <div class="sku-hint">Mention SKU: <strong>${escapeHtml(p.id || '')}</strong></div>
+                </div>
+            `;
+
+            const imgDiv = card.querySelector('.img.has-image');
+            if (imgDiv) {
+                imgDiv.addEventListener('click', () => {
+                    openLightbox(imgDiv.dataset.image, imgDiv.dataset.name, parseInt(imgDiv.dataset.rotation) || 0);
+                });
+            }
+
+            const saveBtn = card.querySelector('.save-btn');
+            saveBtn.addEventListener('click', e => {
+                e.stopPropagation();
+                const id = saveBtn.dataset.id;
+                const was = savedItems.has(id);
+                if (was) savedItems.delete(id); else savedItems.add(id);
+                persistWishlist();
+                updateWishlistBadge();
+                saveBtn.classList.toggle('saved');
+                saveBtn.innerHTML = was ? '♡' : '♥';
+                saveBtn.setAttribute('aria-label', `${was ? 'Add to' : 'Remove from'} saved items`);
+                saveBtn.setAttribute('aria-pressed', String(!was));
+                saveBtn.classList.add('pop');
+                setTimeout(() => saveBtn.classList.remove('pop'), 250);
+                if (currentView === 'saved' && was) render(getFilteredProducts());
+            });
+
+            return card;
+        }
+
+        function renderNextGridPage() {
+            const nextBatch = gridItems.slice(gridRenderedCount, gridRenderedCount + GRID_PAGE_SIZE);
+            const sentinel = document.getElementById('grid-sentinel');
+            const frag = document.createDocumentFragment();
+            for (const p of nextBatch) frag.appendChild(buildProductCard(p));
+            if (sentinel) grid.insertBefore(frag, sentinel); else grid.appendChild(frag);
+            gridRenderedCount += nextBatch.length;
+
+            if (gridRenderedCount >= gridItems.length) {
+                if (sentinel) sentinel.remove();
+                if (gridSentinelObserver) { gridSentinelObserver.disconnect(); gridSentinelObserver = null; }
+            }
+        }
+
         function render(items) {
+            if (gridSentinelObserver) { gridSentinelObserver.disconnect(); gridSentinelObserver = null; }
             grid.innerHTML = '';
             count.textContent = `${items.length} item${items.length === 1 ? '' : 's'}`;
+            gridItems = items;
+            gridRenderedCount = 0;
             if (items.length === 0) return;
 
-            for (const p of items) {
-                const inStock  = !!p.inStock && (p.quantity ?? 1) > 0;
-                const isSaved  = savedItems.has(p.id);
-                const rotation = normalizeRotation(p.rotation || 0);
-                const rotStyle = getRotationStyle(rotation);
-                const rotClass = getRotationClass(rotation);
-
-                const card = document.createElement('article');
-                card.className = 'card';
-                card.innerHTML = `
-                    <button type="button" class="save-btn ${isSaved ? 'saved' : ''}" data-id="${escapeHtml(p.id)}" aria-label="${isSaved ? 'Remove from' : 'Add to'} saved items" aria-pressed="${isSaved}">
-                        ${isSaved ? '♥' : '♡'}
-                    </button>
-                    ${p.image
-                        ? `<button type="button" class="img has-image" data-image="${escapeHtml(p.image)}" data-name="${escapeHtml(p.name)}" data-rotation="${rotation}" aria-label="Enlarge image of ${escapeHtml(p.name)}">
-                               <img src="${escapeHtml(thumbUrl(p.image, 500))}" alt="${escapeHtml(p.name)}" loading="lazy" class="${rotClass}" style="${rotStyle}">
-                               <span class="img-overlay"><span>Enlarge ↗</span></span>
-                           </button>`
-                        : `<div class="img"><div class="noimg">No photo yet</div></div>`
-                    }
-                    <div class="content">
-                        <div class="meta-top">
-                            <span class="category-tag">${escapeHtml(p.category || 'Misc')}</span>
-                            <span class="price">${money(Number(p.price || 0))}</span>
-                        </div>
-                        <h2 class="name">${escapeHtml(p.name || 'Unnamed Item')}</h2>
-                        <div class="meta-row">
-                            <span><strong>SKU:</strong> ${escapeHtml(p.id || '—')}</span>
-                            <span><strong>Qty:</strong> ${p.quantity ?? '—'}</span>
-                        </div>
-                        <p class="desc">${escapeHtml(p.description || '')}</p>
-                        <div class="card-footer">
-                            <span class="stock ${inStock ? 'good' : 'bad'}">${inStock ? '✓ In stock' : 'Ask about it'}</span>
-                            <a class="btn btn-teal" href="tel:${CONFIG.storePhone}" aria-label="Call about ${escapeHtml(p.name)}">📞 Call</a>
-                        </div>
-                        <div class="sku-hint">Mention SKU: <strong>${escapeHtml(p.id || '')}</strong></div>
-                    </div>
-                `;
-
-                const imgDiv = card.querySelector('.img.has-image');
-                if (imgDiv) {
-                    imgDiv.addEventListener('click', () => {
-                        openLightbox(imgDiv.dataset.image, imgDiv.dataset.name, parseInt(imgDiv.dataset.rotation) || 0);
-                    });
-                }
-
-                const saveBtn = card.querySelector('.save-btn');
-                saveBtn.addEventListener('click', e => {
-                    e.stopPropagation();
-                    const id = saveBtn.dataset.id;
-                    const was = savedItems.has(id);
-                    if (was) savedItems.delete(id); else savedItems.add(id);
-                    persistWishlist();
-                    updateWishlistBadge();
-                    saveBtn.classList.toggle('saved');
-                    saveBtn.innerHTML = was ? '♡' : '♥';
-                    saveBtn.setAttribute('aria-label', `${was ? 'Add to' : 'Remove from'} saved items`);
-                    saveBtn.setAttribute('aria-pressed', String(!was));
-                    saveBtn.classList.add('pop');
-                    setTimeout(() => saveBtn.classList.remove('pop'), 250);
-                    if (currentView === 'saved' && was) render(getFilteredProducts());
-                });
-
-                grid.appendChild(card);
+            if (items.length > GRID_PAGE_SIZE) {
+                const sentinel = document.createElement('div');
+                sentinel.id = 'grid-sentinel';
+                sentinel.style.cssText = 'grid-column:1/-1; height:1px;';
+                grid.appendChild(sentinel);
+                gridSentinelObserver = new IntersectionObserver((entries) => {
+                    if (entries[0].isIntersecting) renderNextGridPage();
+                }, { rootMargin: '600px 0px' });
+                gridSentinelObserver.observe(sentinel);
             }
+
+            renderNextGridPage();
         }
 
         let searchTimeout;
@@ -2337,6 +2378,18 @@
         });
 
         // ── Init ─────────────────────────────────────────
+        // Fisher-Yates -- used so browsing (no search query typed) shows a
+        // mix of items instead of whatever order they happen to be listed
+        // in (which otherwise clusters everything added in the same batch
+        // right next to each other, in New Arrivals and every category).
+        function shuffleInPlace(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
         async function init() {
             loadWishlist();
             updateUI();
@@ -2348,6 +2401,7 @@
                 const res = await fetch('products.json', { cache: 'no-store' });
                 PRODUCTS = await res.json();
             }
+            shuffleInPlace(PRODUCTS);
             populateCategories(PRODUCTS);
             renderCategoryTiles(PRODUCTS);
             showCategoryMode();

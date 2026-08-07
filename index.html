@@ -53,10 +53,64 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Karla:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Karla:wght@400;500;600;700&display=swap"></noscript>
-    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
-
     <style>
+        /*
+          Fallback faces whose metrics are adjusted to match the webfonts.
+          While Karla/Playfair download, text renders in these at
+          near-identical widths and line heights, so the font swap doesn't
+          re-wrap anything (that swap re-wrapping the announce bar was most
+          of the page's 0.32 CLS on mobile Lighthouse).
+
+          size-adjust values are calibrated against real rendered text width
+          in Chrome (canvas measureText of this page's actual strings), NOT
+          the fonts' OS/2 metadata — the variable-font metadata is wildly
+          wrong (claims Karla needs 116%, Playfair 131%; reality is ~96-101%
+          and ~89.5%). Bold gets its own face because Arial Bold has
+          different proportions than Arial.
+        */
+        @font-face {
+            font-family: 'Karla Fallback';
+            font-weight: 400;
+            src: local('Arial'), local('Roboto'), local('Helvetica Neue');
+            size-adjust: 101%;
+            ascent-override: 90.79%;
+            descent-override: 24.95%;
+            line-gap-override: 0%;
+        }
+        @font-face {
+            font-family: 'Karla Fallback';
+            font-weight: 500 800;
+            src: local('Arial Bold'), local('Arial-BoldMT'), local('Arial'), local('Roboto'), local('Helvetica Neue');
+            size-adjust: 96%;
+            ascent-override: 95.52%;
+            descent-override: 26.25%;
+            line-gap-override: 0%;
+        }
+        @font-face {
+            font-family: 'Playfair Fallback';
+            font-weight: 400 900;
+            src: local('Georgia Bold'), local('Georgia-Bold'), local('Georgia'), local('Noto Serif'), local('Times New Roman');
+            size-adjust: 89.5%;
+            ascent-override: 120.89%;
+            descent-override: 28.04%;
+            line-gap-override: 0%;
+        }
+        /*
+          The announce bar renders in uppercase, where the Karla/Arial width
+          ratio is ~90% instead of ~96%, so it gets its own tuned face —
+          otherwise the swap changes how the bar wraps and the whole page
+          moves.
+        */
+        @font-face {
+            font-family: 'Karla Fallback Caps';
+            font-weight: 500 800;
+            src: local('Arial Bold'), local('Arial-BoldMT'), local('Arial'), local('Roboto'), local('Helvetica Neue');
+            size-adjust: 89.9%;
+            ascent-override: 102%;
+            descent-override: 28.03%;
+            line-gap-override: 0%;
+        }
+
         :root {
             --ink: #1c1610;
             --ink-mid: #3d3228;
@@ -81,8 +135,8 @@
             --shadow-soft: 0 3px 14px rgba(28, 22, 16, 0.07);
             --r: 4px;
             --r2: 3px;
-            --font-display: 'Playfair Display', Georgia, serif;
-            --font-body: 'Karla', system-ui, sans-serif;
+            --font-display: 'Playfair Display', 'Playfair Fallback', Georgia, serif;
+            --font-body: 'Karla', 'Karla Fallback', system-ui, sans-serif;
         }
 
         * { box-sizing: border-box; }
@@ -238,6 +292,9 @@
             font-weight: 600;
             letter-spacing: 0.06em;
             text-transform: uppercase;
+            font-family: 'Karla', 'Karla Fallback Caps', system-ui, sans-serif;
+            /* explicit line-height: the line box can't change when the webfont swaps in */
+            line-height: 1.2;
         }
 
         .social-bar {
@@ -246,6 +303,7 @@
             padding: 7px 16px;
             font-size: 12.5px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
+            line-height: 1.35;
         }
 
         .social-bar a {
@@ -273,6 +331,13 @@
             color: #ffd700;
             font-size: 13px;
             letter-spacing: 1px;
+        }
+
+        .sb-icon {
+            width: 1em;
+            height: 1em;
+            display: inline-block;
+            vertical-align: -0.125em;
         }
 
         .announce-bar span {
@@ -793,6 +858,24 @@
         }
         .findus-map iframe { display: block; width: 100%; border: 0; }
 
+        .map-facade {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+            height: 320px;
+            border: none;
+            background: var(--paper-warm);
+            font-family: var(--font-body);
+            cursor: pointer;
+        }
+        .map-facade:hover { background: var(--paper-dark); }
+        .map-facade-pin { font-size: 34px; }
+        .map-facade-label { font-weight: 700; font-size: 14px; color: var(--teal-dark); }
+        .map-facade-addr { font-size: 12.5px; color: var(--ink-soft); }
+
         .findus-directions {
             display: inline-block;
             font-size: 13.5px;
@@ -1105,6 +1188,20 @@
         }
 
         .pick-card .img { height: 180px; }
+
+        .pick-skeleton {
+            height: 310px;
+            border: 1.5px solid var(--tan);
+            border-radius: var(--r);
+            background: linear-gradient(100deg, var(--paper-warm) 40%, var(--paper-dark) 50%, var(--paper-warm) 60%);
+            background-size: 200% 100%;
+            animation: skeleton-shimmer 1.4s infinite;
+        }
+
+        @keyframes skeleton-shimmer {
+            from { background-position: 100% 0; }
+            to { background-position: -100% 0; }
+        }
 
         .pick-card .content { padding: 12px 14px 14px; }
 
@@ -1560,14 +1657,13 @@
     <!-- Social bar -->
     <nav class="social-bar" aria-label="Social media and reviews">
         <span class="social-bar-label">🐾 Follow us →</span>
-        <a href="https://www.yelp.com/biz/jojins-kitty-chicago-2" target="_blank" rel="noopener"><i class="fa-brands fa-yelp" style="color:#d32323;" aria-hidden="true"></i> Yelp</a>
-        <a href="https://www.facebook.com/p/Jojins-Kitty-Thrift-Shop-61585291957385/" target="_blank" rel="noopener"><i class="fa-brands fa-facebook" style="color:#1877f2;" aria-hidden="true"></i> Facebook</a>
-        <a href="https://www.tiktok.com/@jojinteston" target="_blank" rel="noopener"><i class="fa-brands fa-tiktok" style="color:#ffffff;" aria-hidden="true"></i> TikTok</a>
-        <a href="https://www.instagram.com/jinlovegodfirst" target="_blank" rel="noopener"><i class="fa-brands fa-instagram" style="color:#e1306c;" aria-hidden="true"></i> Instagram</a>
-        <a href="https://share.google/Ulhsi8pst9S7QpiaL" target="_blank" rel="noopener"><i class="fa-brands fa-google" style="color:#4285f4;" aria-hidden="true"></i> Google</a>
-        <span class="social-bar-stars" role="img" aria-label="5 stars">
-            <i class="fa-solid fa-star" aria-hidden="true"></i><i class="fa-solid fa-star" aria-hidden="true"></i><i class="fa-solid fa-star" aria-hidden="true"></i><i class="fa-solid fa-star" aria-hidden="true"></i><i class="fa-solid fa-star" aria-hidden="true"></i>
-        </span>
+        <!-- Icons: Font Awesome Free 6.5.1 (CC BY 4.0), inlined as SVG -->
+        <a href="https://www.yelp.com/biz/jojins-kitty-chicago-2" target="_blank" rel="noopener"><svg class="sb-icon" viewBox="0 0 384 512" fill="#d32323" aria-hidden="true"><path d="M42.9 240.32l99.62 48.61c19.2 9.4 16.2 37.51-4.5 42.71L30.5 358.45a22.79 22.79 0 0 1-28.21-19.6 197.16 197.16 0 0 1 9-85.32 22.8 22.8 0 0 1 31.61-13.21zm44 239.25a199.45 199.45 0 0 0 79.42 32.11A22.78 22.78 0 0 0 192.94 490l3.9-110.82c.7-21.3-25.5-31.91-39.81-16.1l-74.21 82.4a22.82 22.82 0 0 0 4.09 34.09zm145.34-109.92l58.81 94a22.93 22.93 0 0 0 34 5.5 198.36 198.36 0 0 0 52.71-67.61A23 23 0 0 0 364.17 370l-105.42-34.26c-20.31-6.5-37.81 15.8-26.51 33.91zm148.33-132.23a197.44 197.44 0 0 0-50.41-69.31 22.85 22.85 0 0 0-34 4.4l-62 91.92c-11.9 17.7 4.7 40.61 25.2 34.71L366 268.63a23 23 0 0 0 14.61-31.21zM62.11 30.18a22.86 22.86 0 0 0-9.9 32l104.12 180.44c11.7 20.2 42.61 11.9 42.61-11.4V22.88a22.67 22.67 0 0 0-24.5-22.8 320.37 320.37 0 0 0-112.33 30.1z"/></svg> Yelp</a>
+        <a href="https://www.facebook.com/p/Jojins-Kitty-Thrift-Shop-61585291957385/" target="_blank" rel="noopener"><svg class="sb-icon" viewBox="0 0 512 512" fill="#1877f2" aria-hidden="true"><path d="M512 256C512 114.6 397.4 0 256 0S0 114.6 0 256C0 376 82.7 476.8 194.2 504.5V334.2H141.4V256h52.8V222.3c0-87.1 39.4-127.5 125-127.5c16.2 0 44.2 3.2 55.7 6.4V172c-6-.6-16.5-1-29.6-1c-42 0-58.2 15.9-58.2 57.2V256h83.6l-14.4 78.2H287V510.1C413.8 494.8 512 386.9 512 256h0z"/></svg> Facebook</a>
+        <a href="https://www.tiktok.com/@jojinteston" target="_blank" rel="noopener"><svg class="sb-icon" viewBox="0 0 448 512" fill="#ffffff" aria-hidden="true"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg> TikTok</a>
+        <a href="https://www.instagram.com/jinlovegodfirst" target="_blank" rel="noopener"><svg class="sb-icon" viewBox="0 0 448 512" fill="#e1306c" aria-hidden="true"><path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"/></svg> Instagram</a>
+        <a href="https://share.google/Ulhsi8pst9S7QpiaL" target="_blank" rel="noopener"><svg class="sb-icon" viewBox="0 0 488 512" fill="#4285f4" aria-hidden="true"><path d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"/></svg> Google</a>
+        <span class="social-bar-stars" role="img" aria-label="5 stars">★★★★★</span>
     </nav>
 
     <!-- Lightbox -->
@@ -1631,10 +1727,18 @@
                 </p>
             </div>
 
-            <div class="picks-section" id="picks-section" hidden>
+            <!--
+              Shown from first paint with a placeholder card, not unhidden
+              after the products load — revealing this section post-load
+              pushed everything below it down (the other big CLS culprit).
+              It only collapses in the rare case there are no featured picks.
+            -->
+            <div class="picks-section" id="picks-section">
                 <h2 class="picks-title">Handpicked by <em>Jojin</em></h2>
                 <p class="picks-sub">A few she's especially excited about right now — good finds, good prices.</p>
-                <div class="picks-row" id="picks-row"></div>
+                <div class="picks-row" id="picks-row">
+                    <div class="pick-skeleton" aria-hidden="true"></div>
+                </div>
             </div>
 
             <div class="section-header">
@@ -1703,14 +1807,18 @@
                     <span class="findus-perk">🛣️ Minutes from I-90 (Kennedy Expressway)</span>
                     <span class="findus-perk">🚇 Near the Irving Park Blue Line stop</span>
                 </div>
+                <!--
+                  The Google Maps embed pulls in ~15 requests of Maps JS the
+                  moment the page loads (even with loading="lazy"), so the
+                  iframe only gets created when someone actually taps the map.
+                -->
                 <div class="findus-map">
-                    <iframe
-                        src="https://maps.google.com/maps?q=41.9556017,-87.7278817&z=15&output=embed"
-                        title="Map showing Jojin's Kitty Thrift Shop at 4100 N Pulaski Road in Chicago"
-                        height="320"
-                        loading="lazy" allowfullscreen
-                        referrerpolicy="no-referrer-when-downgrade">
-                    </iframe>
+                    <button type="button" class="map-facade" id="mapFacade"
+                            aria-label="Load interactive map of 4100 N Pulaski Rd, Chicago">
+                        <span class="map-facade-pin" aria-hidden="true">📍</span>
+                        <span class="map-facade-label">Tap to load the map</span>
+                        <span class="map-facade-addr">4100 N Pulaski Rd, Chicago</span>
+                    </button>
                 </div>
                 <a class="findus-directions" href="https://www.google.com/maps/dir/?api=1&destination=41.9556017,-87.7278817" target="_blank" rel="noopener">📍 Get Directions</a>
             </div>
@@ -2167,7 +2275,9 @@
             }
         }
 
-        let picksCount = 0;
+        // Starts at 1, not 0: the section shows a skeleton card until the
+        // products arrive, and only collapses if there are truly no picks.
+        let picksCount = 1;
 
         function updatePicksVisibility() {
             document.getElementById('picks-section').hidden = !(picksCount > 0);
@@ -2369,6 +2479,16 @@
             document.getElementById('gallery-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
 
+        document.getElementById('mapFacade').addEventListener('click', e => {
+            const iframe = document.createElement('iframe');
+            iframe.src = 'https://maps.google.com/maps?q=41.9556017,-87.7278817&z=15&output=embed';
+            iframe.title = 'Map showing Jojin\'s Kitty Thrift Shop at 4100 N Pulaski Road in Chicago';
+            iframe.height = 320;
+            iframe.allowFullscreen = true;
+            iframe.referrerPolicy = 'no-referrer-when-downgrade';
+            e.currentTarget.replaceWith(iframe);
+        });
+
         q.addEventListener('input', () => {
             if (shopMode === 'categories' && q.value.trim()) showGridMode();
             applyFilters();
@@ -2402,7 +2522,11 @@
             loadWishlist();
             updateUI();
             try {
-                const res = await fetch('/api/products', { cache: 'no-store' });
+                // Default caching (not no-store): the API serves this with a
+                // short max-age + stale-while-revalidate, so repeat visits
+                // skip re-downloading the full 80KB catalog. Admin pages
+                // still fetch with no-store, so editing is never stale.
+                const res = await fetch('/api/products');
                 if (res.ok) { PRODUCTS = await res.json(); }
                 else throw new Error();
             } catch {
@@ -2513,7 +2637,10 @@
                 }
             });
 
-            enterBtn.focus();
+            // focus() forces a synchronous layout of the whole fresh DOM
+            // (~260ms on a phone); waiting one frame lets first paint happen
+            // before we pay that cost.
+            requestAnimationFrame(() => enterBtn.focus());
         })();
     </script>
 </body>

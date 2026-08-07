@@ -26,7 +26,16 @@ export async function onRequest(context) {
     const raw = await env.PRODUCTS_KV.get(KEY);
     const data = raw ? JSON.parse(raw) : [];
     return new Response(JSON.stringify(data), {
-      headers: { "Content-Type": "application/json", ...corsHeaders },
+      headers: {
+        "Content-Type": "application/json",
+        // Storefront visitors can reuse this for a minute (and show a stale
+        // copy while revalidating) instead of re-downloading the full
+        // catalog on every page view. Admin pages fetch with
+        // { cache: "no-store" }, which bypasses this, so editing always
+        // sees the latest data.
+        "Cache-Control": "public, max-age=60, stale-while-revalidate=600",
+        ...corsHeaders,
+      },
     });
   }
 

@@ -1461,6 +1461,13 @@
             color: var(--ink);
         }
 
+        .name-link {
+            color: inherit;
+            text-decoration: none;
+        }
+        .name-link:hover,
+        .name-link:focus-visible { text-decoration: underline; }
+
         .meta-row {
             display: flex;
             gap: 14px;
@@ -2015,6 +2022,19 @@
                 .replaceAll("'", '&#039;');
         }
 
+        // Must stay in sync with slugFor() in functions/p/[slug].js and
+        // functions/sitemap.xml.js — the three have to agree or product
+        // links from the grid land on a redirect.
+        function slugFor(p) {
+            const id = String(p.id || '').toLowerCase();
+            const name = String(p.name || '')
+                .toLowerCase()
+                .replace(/['’]/g, '')
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+            return name ? `${id}-${name}` : id;
+        }
+
         // Resizes any product photo on the fly via Cloudflare's URL-based
         // Image Resizing (no upload-time processing needed -- works for
         // every photo automatically, old and new, full-size originals or
@@ -2419,7 +2439,7 @@
                         <span class="category-tag">${escapeHtml(p.category || 'Misc')}</span>
                         <span class="price">${money(Number(p.price || 0))}</span>
                     </div>
-                    <h2 class="name">${escapeHtml(p.name || 'Unnamed Item')}</h2>
+                    <h2 class="name"><a href="/p/${escapeHtml(slugFor(p))}" class="name-link">${escapeHtml(p.name || 'Unnamed Item')}</a></h2>
                     <div class="meta-row">
                         <span><strong>SKU:</strong> ${escapeHtml(p.id || '—')}</span>
                         <span><strong>Qty:</strong> ${p.quantity ?? '—'}</span>

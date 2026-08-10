@@ -109,7 +109,10 @@ function renderPage(product, related, slug) {
     `A one-of-a-kind secondhand find at ${SHOP_NAME} in Chicago.`;
 
   const shareText = `${name} — ${money(price)} at ${SHOP_NAME}`;
-  const ogImage = product.image || "";
+  // og:image has to be absolute — Facebook and Google fetch it from outside.
+  // Older products store a relative path into the legacy /images/ folder that
+  // no longer exists, so those are dropped rather than emitted as a dead tag.
+  const ogImage = /^https:\/\//i.test(product.image || "") ? product.image : "";
 
   const jsonLd = {
     "@context": "https://schema.org",

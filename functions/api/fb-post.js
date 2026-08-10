@@ -70,8 +70,19 @@ async function handle({ request, env }, { publish }) {
       }
     }
 
+    // Facebook fetches the photo by URL server-side, so anything that isn't a
+    // publicly reachable absolute URL is unusable. ~364 older products still
+    // point at the legacy /images/ folder that was deleted in 4fe40f5; every
+    // one of those 404s, so they're excluded here rather than failing the
+    // post. Fixing that data is a separate job.
     const eligible = (p) =>
-      p && p.id && p.image && p.inStock && (p.quantity ?? 1) > 0 && (p.category || "").trim();
+      p &&
+      p.id &&
+      typeof p.image === "string" &&
+      /^https:\/\//i.test(p.image) &&
+      p.inStock &&
+      (p.quantity ?? 1) > 0 &&
+      (p.category || "").trim();
 
     let pool = products.filter((p) => eligible(p) && !used.has(p.id));
 
@@ -83,7 +94,33 @@ async function handle({ request, env }, { publish }) {
       pool = products.filter(eligible);
     }
 
-    const picked = byCategory(pool, count, wantCategory);
+    let picked = byCategory(pool, count, wantCategory);
+
+    // Belt and braces: an absolute URL can still 404. Verify each photo is
+    // actually fetchable before handing the batch to Facebook, since one bad
+    // image fails the whole post.
+    if (picked.length) {
+      const checks = await Promise.all(
+        picked.map(async (p) => {
+          try {
+            const r = await fetch(p.image, { method: "HEAD" });
+            return r.ok;
+          } catch {
+            return false;
+          }
+        })
+      );
+      const good = picked.filter((_, i) => checks[i]);
+      if (good.length < picked.length) {
+        const dead = new Set(picked.filter((_, i) => !checks[i]).map((p) => p.id));
+        const spare = pool.filter(
+          (p) => (p.category || "") === picked[0].category && !picked.includes(p) && !dead.has(p.id)
+        );
+        picked = [...good, ...shuffle(spare).slice(0, picked.length - good.length)];
+      }
+      if (picked.length < 2) picked = [];
+    }
+
     if (picked.length === 0) {
       return json({
         ok: false,

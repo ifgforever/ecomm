@@ -29,6 +29,28 @@ jobs:
             exit 1
           fi
 
+      - name: Is the stored key actually the admin password?
+        env:
+          ADMIN_KEY: ${{ secrets.ADMIN_KEY }}
+        run: |
+          # Reports only length and pass/fail — never the value itself.
+          printf 'secret length: %s chars\n' "${#ADMIN_KEY}"
+          case "$ADMIN_KEY" in
+            *[[:space:]]*) echo "WARNING: the secret contains whitespace" ;;
+            *) echo "no whitespace in secret" ;;
+          esac
+          login=$(curl -sS -o /tmp/login.txt -w '%{http_code}' -X POST \
+            -H "Content-Type: application/json" \
+            --data "$(python3 -c 'import json,os;print(json.dumps({"password":os.environ["ADMIN_KEY"]}))')" \
+            "https://jinkittys.com/api/admin-login")
+          echo "login endpoint says: HTTP $login"
+          cat /tmp/login.txt
+          if [ "$login" = "200" ]; then
+            echo "=> the GitHub secret IS the correct admin password"
+          else
+            echo "=> the GitHub secret is NOT the admin password the site expects"
+          fi
+
       - name: Write to KV via the admin API
         env:
           ADMIN_KEY: ${{ secrets.ADMIN_KEY }}

@@ -1,14 +1,9 @@
 User-agent: *
 Allow: /
-Disallow: /admin.html
-Disallow: /admin
-Disallow: /admin-price.html
-Disallow: /admin-price
-Disallow: /sold-check.html
-Disallow: /sold-check
-Disallow: /gallery-review.html
-Disallow: /gallery-review
-Disallow: /community-listings-review.html
-Disallow: /community-listings-review
+
+# The admin and review tools are kept out of search by a noindex meta tag on
+# each page rather than a Disallow here. A Disallow would block the crawl that
+# lets Google see the noindex, which can leave a bare URL indexed anyway. The
+# pages are all behind the admin login, so allowing the crawl exposes nothing.
 
 Sitemap: https://jinkittys.com/sitemap.xml

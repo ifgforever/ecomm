@@ -5,11 +5,15 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://jinkittys.com/gallery-submit.html</loc>
+    <loc>https://jinkittys.com/gallery-submit</loc>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://jinkittys.com/community-sell.html</loc>
+    <loc>https://jinkittys.com/community-sell</loc>
     <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://jinkittys.com/terms</loc>
+    <priority>0.3</priority>
   </url>
 </urlset>

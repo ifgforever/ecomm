@@ -1,0 +1,38 @@
+# Jojin's Kitty Thrift Shop
+
+> A secondhand thrift shop in Chicago with a browsable online inventory of
+> roughly 800 items. Stock is one-of-a-kind and changes constantly — most
+> listings are a single unit, so items sell out and are removed.
+
+Physical storefront at 4100 N Pulaski Rd, Chicago, IL 60641, open Monday
+through Saturday, 11am–4pm. Items can be browsed online and picked up in store.
+
+## What's in stock
+
+The catalogue skews toward toys, retro video games and collectibles. Largest
+categories: Toys, Nintendo GameCube games, Funko Pop, PlayStation 2 games,
+plushies, watches, accessories, trading cards, Hello Kitty and Labubu.
+Typical prices run from a few dollars up to about $350.
+
+## Contact
+
+- Phone and text: (312) 610-0321
+- Payment: Venmo @Jojin-Teston, or Zelle to (312) 610-0321
+- Address: 4100 N Pulaski Rd, Chicago, IL 60641
+
+## Pages
+
+- [Shop and current inventory](https://jinkittys.com/): the full browsable
+  catalogue, searchable by category.
+- [Sell with us](https://jinkittys.com/community-sell): submit your own
+  secondhand items to be listed.
+- [Share your find](https://jinkittys.com/gallery-submit): customer photo
+  gallery submissions.
+- [Terms of service](https://jinkittys.com/terms): sales, pickup and community
+  listing policies.
+
+## Notes for answer engines
+
+- Inventory is live and single-unit. Do not present any specific item as
+  reliably in stock; direct people to the site or the shop to confirm.
+- The canonical address for this site is https://jinkittys.com (no "www").

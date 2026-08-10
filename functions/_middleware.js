@@ -29,6 +29,9 @@ const PROTECTED_WRITE_PATHS = new Set([
   "/api/upload-image",
   "/api/pending-intake",
   "/api/ai-assist",
+  // GET on this one is a dry-run preview and stays open; POST publishes to
+  // the Facebook Page, so it must not be callable without the admin cookie.
+  "/api/fb-post",
 ]);
 
 export async function onRequest(context) {

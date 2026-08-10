@@ -1,0 +1,56 @@
+# Posts a batch of in-stock items to the Facebook Page twice a day.
+#
+# Cloudflare Pages has no cron of its own, so the schedule lives here. All
+# this does is call the endpoint — the picking, grouping, caption and the
+# no-repeat rotation all happen server-side in functions/api/fb-post.js.
+#
+# Auth reuses the existing admin cookie rather than introducing another
+# secret: add ADMIN_KEY (the same value already set on the Pages project)
+# under Settings > Secrets and variables > Actions.
+#
+# Times are UTC. Chicago is UTC-5 in summer and UTC-6 in winter, so these
+# land an hour earlier once daylight saving ends — close enough for a shop
+# post, and worth knowing rather than being surprised by.
+
+name: Post to Facebook
+
+on:
+  schedule:
+    - cron: "0 14 * * *" # 09:00 Chicago (summer) — morning post
+    - cron: "0 0 * * *" # 19:00 Chicago (summer) — evening post
+  workflow_dispatch: # lets you fire one by hand from the Actions tab
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish a batch
+        env:
+          ADMIN_KEY: ${{ secrets.ADMIN_KEY }}
+        run: |
+          if [ -z "$ADMIN_KEY" ]; then
+            echo "ADMIN_KEY secret is not set on this repository."
+            exit 1
+          fi
+
+          response=$(curl -sS -w '\n%{http_code}' -X POST \
+            -H "Cookie: admin_auth=${ADMIN_KEY}" \
+            "https://jinkittys.com/api/fb-post?count=5")
+
+          body=$(echo "$response" | sed '$d')
+          code=$(echo "$response" | tail -n1)
+
+          echo "HTTP $code"
+          echo "$body"
+
+          # 429 means the endpoint's own spacing rule declined the post —
+          # that is the guard working, not a failure worth alerting on.
+          if [ "$code" = "429" ]; then
+            echo "Skipped: posted too recently."
+            exit 0
+          fi
+
+          if [ "$code" != "200" ]; then
+            echo "Post failed."
+            exit 1
+          fi

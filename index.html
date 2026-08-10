@@ -4,14 +4,21 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Jojin's Kitty Thrift Shop</title>
-    <meta name="description" content="Jojin's Kitty Thrift Shop — curated secondhand thrift finds in Chicago. Always-changing inventory at 4100 N Pulaski Rd, open Mon–Sat 11am–4pm." />
+    <!--
+      Title leads with the search people actually type ("thrift store
+      chicago", 1.9k/mo) and names the sections that differentiate this
+      shop from a clothing-rack thrift store, because those are what it
+      can realistically win on. Brand goes last -- nobody searches the
+      brand who isn't already coming.
+    -->
+    <title>Thrift Store in Chicago — Toys, Retro Games, Sanrio &amp; Collectibles | Jojin's Kitty Thrift Shop</title>
+    <meta name="description" content="A unique thrift store in Chicago at 4100 N Pulaski Rd — around 800 secondhand toys, retro video games, Hello Kitty &amp; Sanrio, Funko Pop and collectibles, with new finds weekly. Open Mon–Sat, 11am–4pm." />
     <link rel="canonical" href="https://jinkittys.com/" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Jojin's Kitty Thrift Shop" />
     <meta property="og:url" content="https://jinkittys.com/" />
-    <meta property="og:title" content="Jojin's Kitty Thrift Shop" />
-    <meta property="og:description" content="Curated secondhand thrift finds in Chicago — always-changing inventory." />
+    <meta property="og:title" content="Thrift Store in Chicago — Toys, Retro Games, Sanrio &amp; Collectibles" />
+    <meta property="og:description" content="Around 800 secondhand finds on Chicago's Northwest Side — toys, retro video games, Sanrio, Funko Pop and collectibles. Open Mon–Sat, 11am–4pm." />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32'>🐾</text></svg>">
 
     <!--
@@ -25,7 +32,7 @@
       "@context": "https://schema.org",
       "@type": "Store",
       "name": "Jojin's Kitty Thrift Shop",
-      "description": "Unique secondhand thrift finds in Chicago — curated, always-changing inventory.",
+      "description": "A unique thrift store in Chicago specialising in secondhand toys, retro video games, Hello Kitty and Sanrio, Funko Pop and collectibles — around 800 one-of-a-kind items, always changing.",
       "url": "https://jinkittys.com/",
       "telephone": "+13126100321",
       "priceRange": "$",
@@ -698,6 +705,41 @@
 
         /* ── Category tiles ── */
         #cat { display: none; }
+
+        /*
+          The collections row links out to the standalone landing pages
+          (/labubu, /hello-kitty, ...). The category tiles below it are
+          JS-only filters with no URL of their own, so search engines can
+          see nothing behind them -- these links are how the shop's
+          strongest sections actually become findable.
+        */
+        .collections-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 0 0 22px;
+        }
+
+        .collection-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 15px;
+            background: var(--card, #fff);
+            border: 1.5px solid var(--tan);
+            border-radius: var(--r);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--ink);
+            text-decoration: none;
+            transition: border-color 0.14s, transform 0.14s;
+        }
+
+        .collection-link:hover,
+        .collection-link:focus-visible {
+            border-color: var(--amber);
+            transform: translateY(-2px);
+        }
 
         .category-tiles-row {
             display: grid;
@@ -1748,6 +1790,14 @@
             <div class="section-header">
                 <h2 class="section-title">Browse the <em>Shop</em></h2>
                 <div class="section-divider"></div>
+            </div>
+
+            <div class="collections-row">
+                <a class="collection-link" href="/labubu">🧸 Labubu &amp; Pop Mart</a>
+                <a class="collection-link" href="/hello-kitty">🎀 Hello Kitty &amp; Sanrio</a>
+                <a class="collection-link" href="/retro-video-games">🎮 Retro Video Games</a>
+                <a class="collection-link" href="/toys">🚂 Vintage Toys</a>
+                <a class="collection-link" href="/funko-pop">📦 Funko Pop</a>
             </div>
 
             <button type="button" class="back-to-categories" id="backToCategories">← Back to Home</button>

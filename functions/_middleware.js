@@ -70,5 +70,5 @@ export async function onRequest(context) {
     });
   }
 
-  return Response.redirect(`${url.origin}/admin-login.html?next=${encodeURIComponent(path)}`, 302);
+  return Response.redirect(`${url.origin}/admin-login?next=${encodeURIComponent(path)}`, 302);
 }

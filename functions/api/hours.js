@@ -8,7 +8,7 @@
 export async function onRequest(context) {
   const { request, env } = context;
   const KEY = "store-hours";
-  const DEFAULT_HOURS = "Mon–Sat 11am–4pm";
+  const DEFAULT_HOURS = "Mon–Sat 10am–7pm";
 
   const corsHeaders = {
     "Access-Control-Allow-Origin": "*",

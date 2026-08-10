@@ -12,20 +12,24 @@
       brand who isn't already coming.
     -->
     <title>Thrift Store in Chicago — Toys, Retro Games, Sanrio &amp; Collectibles | Jojin's Kitty Thrift Shop</title>
-    <meta name="description" content="A unique thrift store in Chicago at 4100 N Pulaski Rd — around 800 secondhand toys, retro video games, Hello Kitty &amp; Sanrio, Funko Pop and collectibles, with new finds weekly. Open Mon–Sat, 11am–4pm." />
+    <meta name="description" content="A unique thrift store in Chicago at 4100 N Pulaski Rd — around 800 secondhand toys, retro video games, Hello Kitty &amp; Sanrio, Funko Pop and collectibles, with new finds weekly. Open Mon–Sat, 10am–7pm." />
     <link rel="canonical" href="https://jinkittys.com/" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Jojin's Kitty Thrift Shop" />
     <meta property="og:url" content="https://jinkittys.com/" />
     <meta property="og:title" content="Thrift Store in Chicago — Toys, Retro Games, Sanrio &amp; Collectibles" />
-    <meta property="og:description" content="Around 800 secondhand finds on Chicago's Northwest Side — toys, retro video games, Sanrio, Funko Pop and collectibles. Open Mon–Sat, 11am–4pm." />
+    <meta property="og:description" content="Around 800 secondhand finds on Chicago's Northwest Side — toys, retro video games, Sanrio, Funko Pop and collectibles. Open Mon–Sat, 10am–7pm." />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32'>🐾</text></svg>">
 
     <!--
       Structured data for search engines (schema.org LocalBusiness).
-      NOTE: openingHours below must stay in strict "Mo-Sa 11:00-16:00" format —
+      NOTE: openingHours below must stay in strict "Mo-Sa 10:00-19:00" format —
       it can't safely auto-sync with the freeform Store Hours field in admin.html.
-      If real hours change meaningfully, update the openingHours line here too.
+      If real hours change, update this line AND: the two meta descriptions above,
+      the announce-hours and footer-hours fallbacks below, llms.txt, tap/jojin/,
+      the DEFAULT_HOURS in functions/api/hours.js, and the five category landing
+      pages. The admin field only changes what visitors see -- everything a
+      crawler reads is hardcoded, so the two drift apart silently otherwise.
     -->
     <script type="application/ld+json">
     {
@@ -49,7 +53,7 @@
         "latitude": 41.9556017,
         "longitude": -87.7278817
       },
-      "openingHours": ["Mo-Sa 11:00-16:00"],
+      "openingHours": ["Mo-Sa 10:00-19:00"],
       "sameAs": [
         "https://www.yelp.com/biz/jojins-kitty-chicago-2",
         "https://www.facebook.com/p/Jojins-Kitty-Thrift-Shop-61585291957385/",
@@ -1704,7 +1708,7 @@
 
     <!-- Announce bar -->
     <div class="announce-bar">
-        🐾 Jojin's Kitty Thrift Shop &nbsp;·&nbsp; <span>Every item hand-picked by Jojin</span> &nbsp;·&nbsp; Chicago, IL &nbsp;·&nbsp; <span id="announce-hours">Mon–Sat 11am–4pm</span>
+        🐾 Jojin's Kitty Thrift Shop &nbsp;·&nbsp; <span>Every item hand-picked by Jojin</span> &nbsp;·&nbsp; Chicago, IL &nbsp;·&nbsp; <span id="announce-hours">Mon–Sat 10am–7pm</span>
     </div>
 
     <!-- Social bar -->
@@ -1891,7 +1895,7 @@
         <div class="wrap">
             <div class="footer-inner">
                 <div class="footer-text">
-                    <div>Come say hi — <strong id="footer-hours">Mon–Sat 11am–4pm</strong> at 4100 N. Pulaski Rd., Chicago</div>
+                    <div>Come say hi — <strong id="footer-hours">Mon–Sat 10am–7pm</strong> at 4100 N. Pulaski Rd., Chicago</div>
                     <div>Outside those hours? Leave a message or text and Jojin will get back to you.</div>
                     <div>Things move fast — give us a call at <strong>+1 (312) 610-0321</strong> to reserve something before you visit.</div>
                     <div style="margin-top:10px; opacity:.65; font-size:12px;">Site built by Lance Lee, who also mounts TVs around Chicago for $100 flat — <a href="https://tvserviceschicago.com" target="_blank" rel="noopener" style="color:inherit;">tvserviceschicago.com</a></div>

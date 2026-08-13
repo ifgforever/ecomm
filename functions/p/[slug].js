@@ -47,14 +47,23 @@ export async function onRequestGet(context) {
     return Response.redirect(`${SITE}/p/${canonicalSlug}`, 301);
   }
 
-  const related = products
-    .filter(
-      (p) =>
-        p.id !== product.id &&
-        isAvailable(p) &&
-        (p.category || "") === (product.category || "")
-    )
-    .slice(0, 4);
+  // Related picks are seeded on this product's SKU: stable for crawlers and
+  // the cache, but different on every page, so the catalogue cross-links as
+  // one connected mesh instead of every page in a category pointing at the
+  // same first four items. Categories are small and free-form, so when one
+  // runs short the remaining slots fill from the whole catalogue — that
+  // spillover is what ties the tiny categories into the rest of the shop.
+  const candidates = products.filter((p) => p.id !== product.id && isAvailable(p));
+  const sameCategory = candidates.filter(
+    (p) => (p.category || "") === (product.category || "")
+  );
+  const elsewhere = candidates.filter(
+    (p) => (p.category || "") !== (product.category || "")
+  );
+  const related = seededPicks(sameCategory, product.id, 4);
+  if (related.length < 4) {
+    related.push(...seededPicks(elsewhere, product.id, 4 - related.length));
+  }
 
   return new Response(renderPage(product, related, canonicalSlug), {
     headers: {
@@ -79,6 +88,27 @@ export function slugFor(product) {
 
 function isAvailable(p) {
   return !!p.inStock && (p.quantity ?? 1) > 0;
+}
+
+// Deterministic "random" selection: score every candidate by a hash of this
+// page's SKU plus the candidate's, sort, take the first n. Per-request
+// randomness would show crawlers different links on every visit; this stays
+// put until inventory itself changes.
+function seededPicks(candidates, seed, n) {
+  return candidates
+    .map((p) => ({ p, score: fnv1a(`${seed}::${p.id}`) }))
+    .sort((a, b) => a.score - b.score)
+    .slice(0, n)
+    .map(({ p }) => p);
+}
+
+function fnv1a(s) {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
 }
 
 function money(n) {
@@ -239,7 +269,7 @@ ${ogImage ? `<meta property="og:image" content="${esc(ogImage)}" />
   </article>
 
   ${related.length
-    ? `<h2 class="more">More in ${esc(category)}</h2>
+    ? `<h2 class="more">${related.every((p) => (p.category || "") === (product.category || "")) ? `More in ${esc(category)}` : "More from the shop"}</h2>
        <div class="grid">
          ${related
            .map(

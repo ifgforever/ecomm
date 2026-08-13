@@ -222,7 +222,6 @@ ${ogImage ? `<meta property="og:image" content="${esc(ogImage)}" />
   .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
   .btn{display:inline-flex;align-items:center;gap:7px;padding:12px 18px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;border:1px solid transparent;cursor:pointer;font-family:inherit}
   .btn-primary{background:var(--teal);color:#fff}
-  .btn-fb{background:#1877f2;color:#fff}
   .btn-ghost{background:transparent;border-color:var(--line);color:var(--ink)}
   .sold-note{background:rgba(168,71,31,.07);border:1px solid rgba(168,71,31,.25);border-radius:8px;padding:12px 14px;margin-top:16px;font-size:14px}
   h2.more{font-family:'Playfair Display',Georgia,serif;font-size:22px;margin:38px 0 14px}
@@ -255,13 +254,13 @@ ${ogImage ? `<meta property="og:image" content="${esc(ogImage)}" />
       ${available
         ? `<div class="actions">
              <a class="btn btn-primary" href="tel:${STORE_PHONE}">📞 Call to claim it</a>
-             <a class="btn btn-fb" href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}" target="_blank" rel="noopener">Share on Facebook</a>
+             <button type="button" class="btn btn-ghost" id="shareBtn">📤 Share</button>
              <button type="button" class="btn btn-ghost" id="copyBtn">Copy link</button>
            </div>`
         : `<div class="sold-note">This one found a home. Everything here is one-of-a-kind, so it won't be restocked — but new finds land most days.</div>
            <div class="actions">
              <a class="btn btn-primary" href="/">Browse what's in stock</a>
-             <a class="btn btn-fb" href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}" target="_blank" rel="noopener">Share on Facebook</a>
+             <button type="button" class="btn btn-ghost" id="shareBtn">📤 Share</button>
            </div>`}
 
       <div class="sku">SKU ${esc(product.id || "—")} · Pickup at 4100 N Pulaski Rd, Chicago</div>
@@ -284,6 +283,30 @@ ${ogImage ? `<meta property="og:image" content="${esc(ogImage)}" />
     : ""}
 </div>
 <script>
+  // <-escaped so a product name can never break out of this script tag.
+  var shareData = ${JSON.stringify({ title: name, text: shareText, url }).replace(/</g, "\\u003c")};
+  var shareBtn = document.getElementById('shareBtn');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', async function () {
+      if (navigator.share) {
+        try {
+          await navigator.share(shareData);
+        } catch (e) {
+          // Closing the share sheet rejects with AbortError — that's a
+          // cancel, not a failure.
+        }
+      } else {
+        // No native share (mostly desktop Firefox): fall back to copying.
+        try {
+          await navigator.clipboard.writeText(shareData.url);
+          shareBtn.textContent = 'Link copied!';
+          setTimeout(function () { shareBtn.textContent = '📤 Share'; }, 2000);
+        } catch (e) {
+          shareBtn.textContent = 'Copy failed';
+        }
+      }
+    });
+  }
   var copyBtn = document.getElementById('copyBtn');
   if (copyBtn) {
     copyBtn.addEventListener('click', async function () {

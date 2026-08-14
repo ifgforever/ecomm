@@ -18,6 +18,8 @@ const PROTECTED_PAGES = new Set([
   "/gallery-review.html", "/gallery-review",
   "/community-listings-review.html", "/community-listings-review",
   "/admin-price.html", "/admin-price",
+  // One-shot dupe cleanup tool — remove alongside admin-fix-dupes.html.
+  "/admin-fix-dupes.html", "/admin-fix-dupes",
 ]);
 
 const PROTECTED_WRITE_PATHS = new Set([

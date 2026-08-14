@@ -1,0 +1,98 @@
+<!doctype html>
+<!-- One-shot tool: delete the two duplicate DVD listings SEMrush flagged and
+     set the surviving listings to quantity 2. Delete this file (and its
+     _middleware.js entry) once it has run. -->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="robots" content="noindex" />
+<title>Fix Duplicate DVDs — Admin</title>
+<style>
+  body{margin:0;background:#12141c;color:#e8e6e1;font-family:system-ui,sans-serif;line-height:1.6;display:grid;place-items:center;min-height:100vh;padding:20px;box-sizing:border-box}
+  .card{max-width:520px;width:100%;background:#1b1e29;border:1px solid #333848;border-radius:14px;padding:22px}
+  h1{font-size:20px;margin:0 0 10px}
+  p{margin:8px 0;font-size:15px;color:#b8b4ac}
+  ul{margin:8px 0;padding-left:20px;font-size:14px;color:#b8b4ac}
+  button{width:100%;margin-top:16px;padding:16px;font-size:17px;font-weight:700;border:0;border-radius:10px;background:#397367;color:#fff;cursor:pointer}
+  button:disabled{background:#2a2e3b;color:#777;cursor:default}
+  .out{margin-top:14px;font-size:15px;font-weight:600}
+  .ok{color:#7fd8c5}.err{color:#ff8f6b}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Fix duplicate DVD listings</h1>
+  <p>This will, in one save:</p>
+  <ul>
+    <li>Delete <b>SKU-65728</b> (Harry Potter re-list) and <b>SKU-65788</b> (Monster-in-Law re-list)</li>
+    <li>Set <b>SKU-65717</b> and <b>SKU-65729</b> to <b>quantity 2</b> — one page per title, both copies sellable</li>
+  </ul>
+  <p id="state">Checking the catalogue…</p>
+  <button id="go" disabled>Delete duplicates &amp; set quantities</button>
+  <div class="out" id="out"></div>
+</div>
+<script>
+(async function () {
+  const DROP = ["SKU-65728", "SKU-65788"];
+  const BUMP = ["SKU-65717", "SKU-65729"];
+  const state = document.getElementById("state");
+  const out = document.getElementById("out");
+  const btn = document.getElementById("go");
+  let products = null;
+
+  try {
+    const res = await fetch("/api/products", { cache: "no-store" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    products = await res.json();
+  } catch (e) {
+    state.textContent = "Couldn't load the catalogue (" + e.message + "). Reload to retry.";
+    return;
+  }
+
+  const found = products.filter(p => DROP.includes(p.id)).map(p => p.id);
+  if (found.length === 0) {
+    state.textContent = "Both duplicates are already gone — nothing to do. (" + products.length + " items in catalogue.)";
+    return;
+  }
+  if (found.length !== 2) {
+    state.textContent = "Only found " + found.join(", ") + " — expected both duplicates, so nothing will be saved. Tell Claude.";
+    return;
+  }
+  state.textContent = "Ready — catalogue has " + products.length + " items, both duplicates found.";
+  btn.disabled = false;
+
+  btn.addEventListener("click", async function () {
+    btn.disabled = true;
+    btn.textContent = "Saving…";
+    const kept = products.filter(p => !DROP.includes(p.id));
+    if (kept.length !== products.length - 2) {
+      out.className = "out err";
+      out.textContent = "Sanity check failed — nothing saved.";
+      return;
+    }
+    for (const id of BUMP) {
+      const p = kept.find(x => x.id === id);
+      if (p) { p.quantity = 2; p.inStock = true; }
+    }
+    try {
+      const res = await fetch("/api/products", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(kept),
+      });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      out.className = "out ok";
+      out.textContent = "Done — " + products.length + " → " + kept.length + " items. Both keepers now quantity 2. You can close this page.";
+      btn.textContent = "Finished";
+    } catch (e) {
+      out.className = "out err";
+      out.textContent = "Save failed (" + e.message + "). Reload and try again.";
+      btn.disabled = false;
+      btn.textContent = "Delete duplicates & set quantities";
+    }
+  });
+})();
+</script>
+</body>
+</html>

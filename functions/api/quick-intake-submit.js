@@ -47,6 +47,8 @@ export async function onRequestPost(context) {
     }
 
     const { price } = body || {};
+    // How many copies came in — defaults to 1, floor of whatever was sent.
+    const addQty = Math.max(1, Math.floor(Number(body?.quantity)) || 1);
     const mediaType = String(body?.mediaType || "image/jpeg").trim().toLowerCase();
     const base64 = (body?.base64 || "").replace(/\s/g, "");
 
@@ -171,7 +173,7 @@ Respond with ONLY a raw JSON object — your entire reply must be the JSON objec
         Number(p.price) === Number(price)
     );
     if (dupe) {
-      dupe.quantity = (Number(dupe.quantity) || 0) + 1;
+      dupe.quantity = (Number(dupe.quantity) || 0) + addQty;
       dupe.inStock = true;
       stage = "saving inventory";
       await env.PRODUCTS_KV.put("products", JSON.stringify(products));
@@ -186,7 +188,7 @@ Respond with ONLY a raw JSON object — your entire reply must be the JSON objec
       name: draft.name || "Untitled item",
       price: Number(price), // fixed — from the app, never from the AI
       category: draft.category || "",
-      quantity: 1,
+      quantity: addQty,
       inStock: true,
       image: imageUrl,
       rotation: 0,

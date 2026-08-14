@@ -1287,7 +1287,7 @@ Respond with ONLY a raw JSON array — your entire reply must be the array itsel
                 const norm = s => String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
                 const dupe = PRODUCTS.find(x => norm(x.name) === norm(p.name) && Number(x.price) === Number(p.price));
                 if (dupe) {
-                    dupe.quantity = (Number(dupe.quantity) || 0) + 1;
+                    dupe.quantity = (Number(dupe.quantity) || 0) + Math.max(1, Number(p.quantity) || 1);
                     dupe.inStock = true;
                     render();
                     renderCategoryManager();

@@ -161,7 +161,21 @@ function renderPage(product, related, slug) {
         ? "https://schema.org/InStock"
         : "https://schema.org/SoldOut",
       itemCondition: "https://schema.org/UsedCondition",
-      seller: { "@type": "Store", name: SHOP_NAME },
+      seller: {
+        "@type": "Store",
+        name: SHOP_NAME,
+        // Store is a LocalBusiness subtype, and LocalBusiness validation
+        // requires an address — without it every product page fails
+        // structured-data checks.
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: "4100 N Pulaski Rd",
+          addressLocality: "Chicago",
+          addressRegion: "IL",
+          postalCode: "60641",
+          addressCountry: "US",
+        },
+      },
     },
   };
 

@@ -1269,7 +1269,24 @@ Respond with ONLY a raw JSON array — your entire reply must be the array itsel
 
             const idx = PRODUCTS.findIndex(x => x.id === id);
             if (idx >= 0) PRODUCTS[idx] = p;
-            else PRODUCTS.unshift(p);
+            else {
+                // Same name (ignoring case/punctuation) at the same price is
+                // a duplicate — bump that listing's quantity instead of
+                // creating a second page for the same item.
+                const norm = s => String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+                const dupe = PRODUCTS.find(x => norm(x.name) === norm(p.name) && Number(x.price) === Number(p.price));
+                if (dupe) {
+                    dupe.quantity = (Number(dupe.quantity) || 0) + 1;
+                    dupe.inStock = true;
+                    render();
+                    renderCategoryManager();
+                    clearForm();
+                    await saveToCloud();
+                    alert(`Already listed as ${dupe.id} — bumped its quantity to ${dupe.quantity} instead of adding a duplicate.`);
+                    return;
+                }
+                PRODUCTS.unshift(p);
+            }
 
             render();
             renderCategoryManager();

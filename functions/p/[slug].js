@@ -260,7 +260,7 @@ ${ogImage ? `<meta property="og:image" content="${esc(ogImage)}" />
       <span class="tag">${esc(category)}</span>
       <h1>${esc(name)}</h1>
       <div class="price">${esc(money(price))}</div>
-      <div class="stock ${available ? "in" : "out"}">${available ? "✓ In stock — one available" : "Sold"}</div>
+      <div class="stock ${available ? "in" : "out"}">${available ? `✓ In stock — ${(Number(product.quantity) || 1) > 1 ? `${Number(product.quantity)} available` : "one available"}` : "Sold"}</div>
 
       ${product.description ? `<p class="desc">${esc(product.description)}</p>` : ""}
       ${product.pickNote ? `<p class="pick">${esc(product.pickNote)}</p>` : ""}

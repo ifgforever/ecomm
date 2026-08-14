@@ -298,7 +298,12 @@
 
     const updated = PRODUCTS.map(p => {
       if (soldIds.has(p.id)) {
-        return { ...p, inStock: false, quantity: 0, featured: false };
+        // A tap means one copy sold. Multi-quantity listings count down and
+        // stay live until the last copy goes.
+        const left = Math.max(0, (Number(p.quantity) || 1) - 1);
+        return left > 0
+          ? { ...p, quantity: left }
+          : { ...p, inStock: false, quantity: 0, featured: false };
       }
       return p;
     });
@@ -313,7 +318,7 @@
 
       showToast(`Marked ${soldIds.size} item${soldIds.size === 1 ? '' : 's'} as sold`);
       PRODUCTS = updated;
-      liveItems = liveItems.filter(p => !soldIds.has(p.id));
+      liveItems = PRODUCTS.filter(p => p.inStock !== false);
       soldIds.clear();
       render();
       updateBar();

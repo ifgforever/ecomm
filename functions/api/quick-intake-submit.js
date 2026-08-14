@@ -158,6 +158,29 @@ Respond with ONLY a raw JSON object — your entire reply must be the JSON objec
     const raw = await env.PRODUCTS_KV.get("products");
     const products = raw ? JSON.parse(raw) : [];
 
+    // If this item is already listed — same name once normalized, same price
+    // — don't create a second listing (and a second, duplicate page for
+    // search engines). Bump the existing listing's quantity instead. A match
+    // against a sold-out listing revives it, which keeps the old URL and its
+    // history. The just-uploaded photo of the extra copy stays unused in R2;
+    // that's cheaper than another failure path here.
+    stage = "checking for an existing listing";
+    const dupe = products.find(
+      (p) =>
+        normalizeName(p.name) === normalizeName(draft.name) &&
+        Number(p.price) === Number(price)
+    );
+    if (dupe) {
+      dupe.quantity = (Number(dupe.quantity) || 0) + 1;
+      dupe.inStock = true;
+      stage = "saving inventory";
+      await env.PRODUCTS_KV.put("products", JSON.stringify(products));
+      return new Response(
+        JSON.stringify({ ok: true, merged: true, name: dupe.name, id: dupe.id, quantity: dupe.quantity }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
     const product = {
       id: nextSku(products),
       name: draft.name || "Untitled item",
@@ -184,6 +207,12 @@ Respond with ONLY a raw JSON object — your entire reply must be the JSON objec
   } catch (err) {
     return error(`Quick Add failed while ${stage}: ${err.message}`, 500);
   }
+}
+
+// The AI names the same item slightly differently across photos ("And The"
+// vs "and the"), so compare on letters and digits only.
+function normalizeName(name) {
+  return String(name || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 }
 
 function nextSku(products) {

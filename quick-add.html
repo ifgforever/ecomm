@@ -318,7 +318,9 @@
       }
       if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
 
-      successMsg.textContent = data.name ? `"${data.name}" is live — $${priceInput.value}` : 'It\'s live in inventory now.';
+      successMsg.textContent = data.merged
+        ? `Already listed as "${data.name}" (${data.id}) — quantity is now ${data.quantity}.`
+        : (data.name ? `"${data.name}" is live — $${priceInput.value}` : 'It\'s live in inventory now.');
       formCard.style.display = 'none';
       successBox.style.display = 'block';
     } catch (err) {

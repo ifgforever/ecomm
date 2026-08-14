@@ -494,6 +494,8 @@
                     <span class="muted" id="nearbyStatus" style="margin-left:8px;"></span>
                     <span class="ai-err" id="nearbyErr"></span>
                 </div>
+                <input id="listSearch" type="search" placeholder="Search by name, SKU, category, or price…"
+                    style="width:100%; box-sizing:border-box; margin-top:10px; padding:12px 14px; font-size:16px; border-radius:8px; border:1px solid #333848; background:#12141c; color:#e8e6e1;" />
                 <div style="overflow:auto; margin-top:10px;">
                     <table>
                         <thead>
@@ -932,6 +934,8 @@ Respond with ONLY a raw JSON array — your entire reply must be the array itsel
             renderCategoryManager();
         }
 
+        document.getElementById("listSearch").addEventListener("input", render);
+
         async function saveToCloud() {
             try {
                 const res = await fetch("/api/products", {
@@ -954,9 +958,16 @@ Respond with ONLY a raw JSON array — your entire reply must be the array itsel
 
         function render() {
             els.list.innerHTML = "";
-            els.stats.textContent = `${PRODUCTS.length} product(s)`;
 
-            for (const p of PRODUCTS) {
+            const q = (document.getElementById("listSearch")?.value || "").trim().toLowerCase();
+            const shown = q
+                ? PRODUCTS.filter(p => `${p.id} ${p.name || ""} ${p.category || ""} ${p.price ?? ""}`.toLowerCase().includes(q))
+                : PRODUCTS;
+            els.stats.textContent = q
+                ? `${shown.length} of ${PRODUCTS.length} product(s)`
+                : `${PRODUCTS.length} product(s)`;
+
+            for (const p of shown) {
                 const rotation = normalizeRotation(p.rotation || 0);
                 const tr = document.createElement("tr");
                 tr.innerHTML = `

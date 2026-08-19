@@ -496,6 +496,19 @@
                 </div>
                 <input id="listSearch" type="search" placeholder="Search by name, SKU, category, or price…"
                     style="width:100%; box-sizing:border-box; margin-top:10px; padding:12px 14px; font-size:16px; border-radius:8px; border:1px solid #333848; background:#12141c; color:#e8e6e1;" />
+                <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:10px;">
+                    <label class="muted" for="listSort">Sort</label>
+                    <select id="listSort"
+                        style="padding:10px 12px; font-size:15px; border-radius:8px; border:1px solid #333848; background:#12141c; color:#e8e6e1;">
+                        <option value="oldest">Oldest added first</option>
+                        <option value="newest">Newest added first</option>
+                        <option value="catalog">Catalog order</option>
+                    </select>
+                </div>
+                <div id="backfillRow" class="hidden" style="margin-top:10px;">
+                    <button type="button" class="btn small" id="backfillBtn">🗓️ Date the undated items</button>
+                    <span class="muted" id="backfillNote" style="margin-left:8px;"></span>
+                </div>
                 <div style="overflow:auto; margin-top:10px;">
                     <table>
                         <thead>
@@ -507,6 +520,7 @@
                                 <th>Price</th>
                                 <th>Cat</th>
                                 <th>Qty</th>
+                                <th>Added</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -935,6 +949,100 @@ Respond with ONLY a raw JSON array — your entire reply must be the array itsel
         }
 
         document.getElementById("listSearch").addEventListener("input", render);
+        document.getElementById("listSort").addEventListener("change", render);
+        document.getElementById("backfillBtn").addEventListener("click", backfillDates);
+
+        // ==========================
+        // WHEN WAS THIS ADDED?
+        // ==========================
+        // Only items saved through this page or Quick Add carry createdAt, so
+        // the shop's earliest listings have no date at all. Everything below
+        // treats a missing date as "older than anything we do know about",
+        // which is what lets the oldest-first sort put the real backlog on top.
+
+        function addedTime(p) {
+            const t = new Date(p.createdAt || 0).getTime();
+            return Number.isNaN(t) ? 0 : t;
+        }
+
+        // Quick Add hands out SKUs in ascending order, so the number is the
+        // best age signal we have for items that predate createdAt. Same
+        // tiebreaker /new-arrivals uses.
+        function skuNum(p) {
+            const m = /(\d+)/.exec(String(p.id || ""));
+            return m ? Number(m[1]) : 0;
+        }
+
+        function addedLabel(p) {
+            if (!p.createdAt) return "—";
+            const d = new Date(p.createdAt);
+            if (Number.isNaN(d.getTime())) return "—";
+            const shown = d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+            return p.createdAtEstimated ? `~${shown}` : shown;
+        }
+
+        function addedTitle(p) {
+            if (!p.createdAt) return "No date recorded";
+            return p.createdAtEstimated
+                ? "Estimated from SKU order — the exact date was never recorded"
+                : "Date this listing was created";
+        }
+
+        function undatedItems() {
+            return PRODUCTS.filter(p => !p.createdAt || Number.isNaN(new Date(p.createdAt).getTime()));
+        }
+
+        function renderBackfillPrompt() {
+            const n = undatedItems().length;
+            const row = document.getElementById("backfillRow");
+            row.classList.toggle("hidden", n === 0);
+            if (n === 0) return;
+            document.getElementById("backfillNote").textContent =
+                `${n} item${n === 1 ? " has" : "s have"} no date, so ${n === 1 ? "it sorts" : "they sort"} as unknown age.`;
+        }
+
+        // Stamps every undated item with an estimated createdAt so the
+        // oldest-first sort can place it. Dates are spread out in SKU order
+        // and land strictly BEFORE the earliest real date we have, because
+        // these items are by definition older than anything that was
+        // recorded — and because the live site treats anything within 15
+        // days as a New Arrival, so a too-recent guess would shove the whole
+        // backlog onto the front page.
+        async function backfillDates() {
+            const undated = undatedItems();
+            if (undated.length === 0) return;
+
+            const DAY = 24 * 60 * 60 * 1000;
+            const known = PRODUCTS.map(addedTime).filter(t => t > 0);
+            // With nothing dated at all there's no "earliest real item" to sit
+            // behind, so fall back to a point safely outside the live site's
+            // 15-day New Arrivals window rather than dating the whole backlog
+            // to yesterday.
+            const earliest = known.length ? Math.min(...known) : Date.now() - 30 * DAY;
+
+            // One day apart, finishing a day before the earliest known date.
+            const lastSlot = earliest - DAY;
+
+            const ordered = [...undated].sort((a, b) => skuNum(a) - skuNum(b));
+            const oldestLabel = new Date(lastSlot - (ordered.length - 1) * DAY).toLocaleDateString();
+
+            if (!confirm(
+                `Give ${ordered.length} undated item${ordered.length === 1 ? "" : "s"} an estimated date?\n\n` +
+                `They'll be dated in SKU order from ${oldestLabel} up to just before your earliest recorded item, ` +
+                `and shown with a ~ to mark them as estimates.\n\n` +
+                `Nothing else about the listings changes.`
+            )) return;
+
+            ordered.forEach((p, i) => {
+                const slot = lastSlot - (ordered.length - 1 - i) * DAY;
+                p.createdAt = new Date(slot).toISOString();
+                p.createdAtEstimated = true;
+            });
+
+            render();
+            const saved = await saveToCloud();
+            if (saved) showStatus(`✓ Dated ${ordered.length} item${ordered.length === 1 ? "" : "s"}`, "success");
+        }
 
         async function saveToCloud() {
             try {
@@ -960,12 +1068,23 @@ Respond with ONLY a raw JSON array — your entire reply must be the array itsel
             els.list.innerHTML = "";
 
             const q = (document.getElementById("listSearch")?.value || "").trim().toLowerCase();
-            const shown = q
+            let shown = q
                 ? PRODUCTS.filter(p => `${p.id} ${p.name || ""} ${p.category || ""} ${p.price ?? ""}`.toLowerCase().includes(q))
                 : PRODUCTS;
             els.stats.textContent = q
                 ? `${shown.length} of ${PRODUCTS.length} product(s)`
                 : `${PRODUCTS.length} product(s)`;
+
+            const sort = document.getElementById("listSort")?.value || "oldest";
+            if (sort !== "catalog") {
+                const dir = sort === "oldest" ? 1 : -1;
+                // Copy first — sorting `shown` in place would shuffle
+                // PRODUCTS itself whenever the search box is empty.
+                shown = [...shown].sort((a, b) =>
+                    dir * ((addedTime(a) - addedTime(b)) || (skuNum(a) - skuNum(b))));
+            }
+
+            renderBackfillPrompt();
 
             for (const p of shown) {
                 const rotation = normalizeRotation(p.rotation || 0);
@@ -993,6 +1112,7 @@ Respond with ONLY a raw JSON array — your entire reply must be the array itsel
                     <td>$${Number(p.price || 0).toFixed(2)}</td>
                     <td>${esc(p.category || "")}</td>
                     <td>${p.quantity ?? ""}</td>
+                    <td style="white-space:nowrap;" title="${esc(addedTitle(p))}">${esc(addedLabel(p))}</td>
                     <td style="white-space:nowrap;">
                         <button class="btn small" data-edit="${esc(p.id)}">Edit</button>
                         <button class="btn small" data-del="${esc(p.id)}">Del</button>
@@ -1275,7 +1395,10 @@ Respond with ONLY a raw JSON array — your entire reply must be the array itsel
                 description: els.description.value.trim(),
                 featured: els.featured.checked,
                 pickNote: els.pickNote.value.trim(),
-                createdAt: existing?.createdAt || new Date().toISOString()
+                createdAt: existing?.createdAt || new Date().toISOString(),
+                // An edit doesn't recover the real date, so a backfilled item
+                // stays flagged as an estimate.
+                createdAtEstimated: existing?.createdAtEstimated || undefined
             };
 
             const idx = PRODUCTS.findIndex(x => x.id === id);

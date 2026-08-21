@@ -21,6 +21,7 @@ const STATIC_PAGES = [
   { path: "/retro-video-games", priority: "0.8" },
   { path: "/toys", priority: "0.8" },
   { path: "/funko-pop", priority: "0.8" },
+  { path: "/monster-high", priority: "0.8" },
   // Server-rendered links to the newest 100 items — the crawlable entry
   // point into the /p/ product pages, which are otherwise only reachable
   // through client-side grids.

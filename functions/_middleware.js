@@ -20,6 +20,8 @@ const PROTECTED_PAGES = new Set([
   "/admin-price.html", "/admin-price",
   // One-shot dupe cleanup tool — remove alongside admin-fix-dupes.html.
   "/admin-fix-dupes.html", "/admin-fix-dupes",
+  // One-shot Monster High recategorize tool — remove alongside admin-monster-high.html.
+  "/admin-monster-high.html", "/admin-monster-high",
 ]);
 
 const PROTECTED_WRITE_PATHS = new Set([

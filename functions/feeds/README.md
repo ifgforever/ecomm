@@ -44,10 +44,15 @@ several of them silently do nothing if run early.
    are not eligible for local listings — the location has to arrive from a
    linked Business Profile.
 
-2. **Set a store code on that location** and write the same string into
-   `STORE_CODE` in `functions/_lib/catalog.js`. **It is case sensitive.** A
-   mismatch is the single most common failure here, and the worst-behaved:
-   the feed fetches successfully, reports no error, and shows nothing.
+2. **Set the store code to `JOJINS01`** on that location when Merchant
+   Center asks for one. This is not a value to go and find — a single-location
+   business has no store code until something needs one, so you pick it. It is
+   already set to `JOJINS01` in `functions/_lib/catalog.js`; use the same
+   string on the Merchant Center side and there is nothing to reconcile.
+
+   **It is case sensitive.** A mismatch is the single most common failure
+   here and the worst-behaved: the feed fetches successfully, reports no
+   error, and shows nothing.
 
 3. **Link Business Profile to Merchant Center.** Settings → Access and
    services → Apps and services → Add service → Google Business Profile.

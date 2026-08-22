@@ -13,11 +13,21 @@
 export const SITE = "https://jinkittys.com";
 export const SHOP_NAME = "Jojin's Kitty Thrift Shop";
 
-// Must match the store code on the location in the linked Google Business
-// Profile. Merchant Center joins the local inventory feed to a physical shop
-// on this string alone -- if it doesn't match, every local row is orphaned
-// and silently dropped, with no error that names the cause.
-export const STORE_CODE = "jojins-kitty-pulaski";
+// Merchant Center joins the local inventory feed to a physical shop on this
+// string alone. If it doesn't match the store code on the location in the
+// linked Business Profile, every local row is orphaned and silently dropped
+// -- the fetch still succeeds and still reports no error.
+//
+// This is NOT a value to look up. A single-location business has no store
+// code until something needs one; you pick it, and set the SAME string here
+// and on the store in Merchant Center. It only has to agree with itself.
+//
+// Kept strictly alphanumeric on purpose. The spec calls for a unique
+// alphanumeric code, and while separators are usually fine, the failure mode
+// if they aren't is the silent one above -- not worth finding out. The
+// trailing number leaves room for a second location without re-coding the
+// first.
+export const STORE_CODE = "JOJINS01";
 
 export const CURRENCY = "USD";
 

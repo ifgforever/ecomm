@@ -62,8 +62,15 @@ export const INCLUDED_DESTINATIONS = ["Free_local_listings"];
 // is deliberately sent with no google_product_category rather than a wrong
 // one, which is worse than none.
 //
-// Matched as lowercase substrings against the product's category AND name,
-// first hit wins, so order matters: put the specific before the general.
+// Matched as WHOLE WORDS against the product's category AND name, first hit
+// wins, so order matters: put the specific before the general.
+//
+// Whole words, not substrings, because substrings quietly mis-filed real
+// inventory: "McDonald's" contains "cd", which sent three Littlest Pet Shop
+// toys out as music recordings. Word boundaries are necessary but not
+// sufficient -- "World Cup" and "Sega Shoes" are genuine whole-word hits --
+// so bare console brand names and the word "cup" were dropped from the
+// needles, and wearables abstain in googleCategory() below.
 //
 // Apparel is deliberately absent. Declaring Apparel & Accessories in the US
 // makes color, gender and age_group required on the item, and size required
@@ -71,7 +78,7 @@ export const INCLUDED_DESTINATIONS = ["Free_local_listings"];
 // the category would opt every anime tee into a validation tier we cannot
 // satisfy and disapprove them. Left unset, Google classifies it itself.
 const CATEGORY_MAP = [
-  [["video game", "videogame", "retro game", "nintendo", "playstation", "sega", "xbox", "gameboy", "game boy"], "Software > Video Game Software"],
+  [["video game", "videogame", "retro game", "game cartridge", "cartridge", "gameboy", "game boy"], "Software > Video Game Software"],
   [["console"], "Electronics > Video Game Consoles"],
   [["labubu", "funko", "pop mart", "popmart", "action figure", "figurine", "figure"], "Toys & Games > Toys > Dolls, Playsets & Toy Figures"],
   [["doll", "monster high", "barbie"], "Toys & Games > Toys > Dolls, Playsets & Toy Figures"],
@@ -80,7 +87,7 @@ const CATEGORY_MAP = [
   [["book", "manga", "comic"], "Media > Books"],
   [["dvd", "vhs", "blu-ray", "bluray"], "Media > DVDs & Videos"],
   [["cd", "vinyl", "record"], "Media > Music & Sound Recordings"],
-  [["mug", "cup", "plate", "bowl"], "Home & Garden > Kitchen & Dining > Tableware"],
+  [["mug", "teacup", "tumbler", "plate", "bowl", "saucer"], "Home & Garden > Kitchen & Dining > Tableware"],
   [["toy", "sanrio", "hello kitty", "anime"], "Toys & Games > Toys"],
   [["collectible", "vintage"], "Arts & Entertainment > Hobbies & Creative Arts > Collectibles"],
 ];
@@ -227,10 +234,38 @@ export function feedDescription(p) {
   return clamp(text, 5000);
 }
 
+// Matched on WHOLE WORDS, not substrings. Naive substring matching looked
+// fine until it met the real catalogue: "cd" matched McDonald's and filed
+// three Littlest Pet Shop toys under music recordings, "cup" matched World
+// Cup and filed a football print under tableware, and "sega" filed a pair of
+// sneakers as video game software. A wrong category is worse than none --
+// Google infers a sensible one on its own when the field is absent.
+const CATEGORY_MATCHERS = CATEGORY_MAP.map(([needles, category]) => [
+  new RegExp(
+    `\\b(${needles.map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b`,
+    "i"
+  ),
+  category,
+]);
+
+// Wearables abstain outright. Anything the map would otherwise guess about a
+// tee or a pair of sneakers is a worse answer than none, and the one honest
+// answer -- Apparel & Accessories -- is the one we cannot give, because
+// declaring it in the US makes color, gender, age_group and size required and
+// none of those exist on a product in KV. So a "Sega Shoes Colorblock
+// Sneakers" gets no category rather than being filed as video game software.
+const APPAREL_RE = new RegExp(
+  "\\b(shoe|shoes|sneaker|sneakers|boot|boots|sandal|sandals|slipper|slippers|" +
+    "shirt|t-shirt|tshirt|tee|tees|hoodie|hoodies|sweater|sweatshirt|jacket|coat|" +
+    "pants|jeans|shorts|skirt|dress|socks|hat|cap|beanie|scarf|gloves)\\b",
+  "i"
+);
+
 export function googleCategory(p) {
-  const hay = `${p.category || ""} ${p.name || ""}`.toLowerCase();
-  for (const [needles, category] of CATEGORY_MAP) {
-    if (needles.some((n) => hay.includes(n))) return category;
+  const hay = `${p.category || ""} ${p.name || ""}`;
+  if (APPAREL_RE.test(hay)) return "";
+  for (const [re, category] of CATEGORY_MATCHERS) {
+    if (re.test(hay)) return category;
   }
   return "";
 }

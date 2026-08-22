@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Quick Delete — Jojin's Kitty Thrift</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32'>🐾</text></svg>">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #1c1610;
+    --ink-soft: #6b5d4f;
+    --paper: #f7f2eb;
+    --paper-warm: #f0e9de;
+    --tan: #d4c4a8;
+    --amber: #c8863a;
+    --amber-dark: #a06820;
+    --teal: #3d7a6e;
+    --rust: #b8522a;
+    --card: #ffffff;
+    --r: 4px;
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'Karla', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    color: var(--ink);
+    background: var(--paper);
+    padding-bottom: 24px;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .wrap { max-width: 420px; margin: 0 auto; padding: 28px 20px 20px; }
+
+  .navlink {
+    display: block;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--teal);
+    text-decoration: none;
+    margin-bottom: 16px;
+  }
+  .navlink:hover { text-decoration: underline; }
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 900;
+    text-align: center;
+    margin: 0 0 8px;
+    letter-spacing: -0.02em;
+  }
+  h1 em { font-style: italic; color: var(--rust); }
+  .sub {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 13.5px;
+    margin: 0 0 8px;
+  }
+  .count {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 0 0 18px;
+    min-height: 15px;
+  }
+
+  /* The card sits in a fixed-height stage so the page doesn't jump around
+     as it flies off and the next one takes its place. */
+  .stage {
+    position: relative;
+    /* Tall enough to actually see the item, short enough that the buttons
+       still fit on a small phone without scrolling. */
+    height: clamp(250px, 46vh, 460px);
+    touch-action: pan-y;
+  }
+
+  .card {
+    position: absolute;
+    inset: 0;
+    background: var(--card);
+    border: 1.5px solid var(--tan);
+    border-radius: var(--r);
+    padding: 16px;
+    box-shadow: 5px 5px 0 var(--amber);
+    display: flex;
+    flex-direction: column;
+    cursor: grab;
+  }
+  .card.dragging { cursor: grabbing; }
+  .card.animate { transition: transform .28s ease-out, opacity .28s ease-out; }
+
+  .photo {
+    flex: 1;
+    min-height: 0;
+    background: var(--paper-warm);
+    border-radius: var(--r);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .photo img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    -webkit-user-drag: none;
+    pointer-events: none;
+  }
+  .photo .placeholder { font-size: 44px; }
+
+  .meta { padding-top: 12px; text-align: center; }
+  .meta .name {
+    font-family: var(--font-display);
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.25;
+    margin: 0 0 4px;
+    /* Long AI-written names shouldn't push the photo out of the card. */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .meta .price { font-size: 17px; font-weight: 700; color: var(--amber-dark); }
+  .meta .sku {
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 4px;
+  }
+
+  /* Stamps that fade in as the card is dragged, so it's obvious which way
+     is which before you let go. */
+  .stamp {
+    position: absolute;
+    top: 18px;
+    z-index: 2;
+    background: var(--card);
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    padding: 6px 12px;
+    border: 3px solid;
+    border-radius: var(--r);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .stamp.del { left: 18px; color: var(--rust); border-color: var(--rust); transform: rotate(-12deg); }
+  .stamp.keep { right: 18px; color: var(--teal); border-color: var(--teal); transform: rotate(12deg); }
+
+  .hints {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    margin: 14px 2px 0;
+  }
+  .hints .left { color: var(--rust); }
+  .hints .right { color: var(--teal); }
+
+  .actions { display: flex; gap: 10px; margin-top: 12px; }
+  .actions button {
+    flex: 1;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 15px;
+    border-radius: var(--r);
+    padding: 14px;
+    cursor: pointer;
+    border: 2px solid;
+  }
+  .btn-del { background: var(--rust); border-color: var(--rust); color: #fff; }
+  .btn-keep { background: var(--teal); border-color: var(--teal); color: #fff; }
+  .actions button:disabled { opacity: .45; cursor: default; }
+
+  .undo-btn {
+    width: 100%;
+    margin-top: 10px;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 14px;
+    background: none;
+    border: 2px solid var(--tan);
+    color: var(--ink-soft);
+    border-radius: var(--r);
+    padding: 12px;
+    cursor: pointer;
+  }
+  .undo-btn:disabled { opacity: .45; cursor: default; }
+
+  .err {
+    margin-top: 10px;
+    font-size: 12.5px;
+    color: var(--rust);
+    display: none;
+    text-align: center;
+  }
+
+  .note {
+    display: none;
+    margin-top: 10px;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    text-align: center;
+  }
+
+  .msg {
+    display: none;
+    text-align: center;
+    padding: 40px 10px;
+  }
+  .msg .big { font-size: 40px; margin-bottom: 10px; }
+  .msg h2 { font-family: var(--font-display); font-size: 22px; margin: 0 0 8px; }
+  .msg p { color: var(--ink-soft); font-size: 14px; margin: 0; }
+  .msg a.button, .msg button {
+    display: inline-block;
+    margin-top: 18px;
+    background: none;
+    border: 2px solid var(--teal);
+    color: var(--teal);
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 14px;
+    border-radius: var(--r);
+    padding: 10px 18px;
+    cursor: pointer;
+    text-decoration: none;
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="navlink" href="/quick-add.html">＋ Quick Add</a>
+
+    <h1>Quick <em>Delete</em></h1>
+    <p class="sub">Swipe left to delete, right to keep.</p>
+    <p class="count" id="count"></p>
+
+    <div id="deckBox" style="display:none">
+      <div class="stage" id="stage">
+        <div class="stamp del" id="delStamp">DELETE</div>
+        <div class="stamp keep" id="keepStamp">KEEP</div>
+      </div>
+
+      <div class="hints">
+        <span class="left">◀ Delete</span>
+        <span class="right">Keep ▶</span>
+      </div>
+
+      <div class="actions">
+        <button class="btn-del" id="delBtn" type="button">Delete</button>
+        <button class="btn-keep" id="keepBtn" type="button">Keep</button>
+      </div>
+      <button class="undo-btn" id="undoBtn" type="button" disabled>↩ Undo</button>
+      <div class="err" id="errBox"></div>
+      <div class="note" id="noteBox"></div>
+    </div>
+
+    <div class="msg" id="loadingBox" style="display:block">
+      <div class="big">⏳</div>
+      <h2>Loading inventory…</h2>
+    </div>
+
+    <div class="msg" id="doneBox">
+      <div class="big">🎉</div>
+      <h2 id="doneTitle">All done!</h2>
+      <p id="doneMsg">You've been through everything.</p>
+      <div>
+        <button id="restartBtn" type="button">↻ Start Over</button>
+      </div>
+      <div>
+        <a class="button" href="/quick-add.html">＋ Quick Add</a>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function () {
+  const stage = document.getElementById('stage');
+  const delStamp = document.getElementById('delStamp');
+  const keepStamp = document.getElementById('keepStamp');
+  const deckBox = document.getElementById('deckBox');
+  const loadingBox = document.getElementById('loadingBox');
+  const doneBox = document.getElementById('doneBox');
+  const doneTitle = document.getElementById('doneTitle');
+  const doneMsg = document.getElementById('doneMsg');
+  const countEl = document.getElementById('count');
+  const delBtn = document.getElementById('delBtn');
+  const keepBtn = document.getElementById('keepBtn');
+  const undoBtn = document.getElementById('undoBtn');
+  const restartBtn = document.getElementById('restartBtn');
+  const errBox = document.getElementById('errBox');
+  const noteBox = document.getElementById('noteBox');
+
+  // How far a card has to travel before letting go counts as a decision.
+  const THRESHOLD = 90;
+
+  let items = [];      // everything loaded, in catalog order
+  let pos = 0;         // which one is on screen
+  let history = [];    // { type: 'delete' | 'keep', product, index }
+  let card = null;     // the DOM node for the current item
+  let busy = false;    // a delete/undo request is in flight
+
+  // ---- data ----------------------------------------------------------
+
+  async function load() {
+    try {
+      const res = await fetch('/api/products', { cache: 'no-store', credentials: 'same-origin' });
+      if (!res.ok) throw new Error(`Request failed (${res.status})`);
+      const data = await res.json();
+      items = Array.isArray(data) ? data.filter((p) => p && p.id) : [];
+    } catch (err) {
+      loadingBox.querySelector('.big').textContent = '⚠️';
+      loadingBox.querySelector('h2').textContent = "Couldn't load inventory";
+      loadingBox.insertAdjacentHTML('beforeend', `<p>${escapeHtml(err.message)}</p>`);
+      return;
+    }
+
+    loadingBox.style.display = 'none';
+    pos = 0;
+    history = [];
+    start();
+  }
+
+  function start() {
+    if (pos >= items.length) return finish();
+    deckBox.style.display = 'block';
+    doneBox.style.display = 'none';
+    renderCard();
+  }
+
+  function finish() {
+    deckBox.style.display = 'none';
+    doneBox.style.display = 'block';
+    countEl.textContent = '';
+
+    const deleted = history.filter((h) => h.type === 'delete').length;
+    if (!items.length) {
+      doneTitle.textContent = 'Nothing to review';
+      doneMsg.textContent = 'Inventory is empty.';
+    } else {
+      doneTitle.textContent = 'All done!';
+      doneMsg.textContent = deleted
+        ? `Deleted ${deleted} item${deleted === 1 ? '' : 's'} out of ${items.length}.`
+        : `Went through all ${items.length} items — nothing deleted.`;
+    }
+  }
+
+  // ---- the card ------------------------------------------------------
+
+  function renderCard() {
+    clearError();
+    clearNote();
+    if (card) card.remove();
+    delStamp.style.opacity = '0';
+    keepStamp.style.opacity = '0';
+
+    const p = items[pos];
+    countEl.textContent = `${pos + 1} of ${items.length}`;
+
+    card = document.createElement('div');
+    card.className = 'card';
+
+    const photo = document.createElement('div');
+    photo.className = 'photo';
+    if (p.image) {
+      const img = document.createElement('img');
+      img.src = p.image;
+      img.alt = p.name || 'Product photo';
+      const rotation = ((Number(p.rotation) || 0) % 360 + 360) % 360;
+      if (rotation) img.style.transform = `rotate(${rotation}deg)`;
+      img.addEventListener('error', () => {
+        // Broken image URL — show the same placeholder as a photo-less item
+        // so the card still says which listing this is.
+        photo.textContent = '';
+        const ph = document.createElement('div');
+        ph.className = 'placeholder';
+        ph.textContent = '🖼️';
+        photo.appendChild(ph);
+      });
+      photo.appendChild(img);
+    } else {
+      const ph = document.createElement('div');
+      ph.className = 'placeholder';
+      ph.textContent = '🖼️';
+      photo.appendChild(ph);
+    }
+
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+
+    const name = document.createElement('div');
+    name.className = 'name';
+    name.textContent = p.name || 'Untitled item';
+
+    const price = document.createElement('div');
+    price.className = 'price';
+    const qty = Number(p.quantity) || 0;
+    price.textContent = `$${Number(p.price) || 0}${qty > 1 ? ` · ${qty} in stock` : ''}`;
+
+    const sku = document.createElement('div');
+    sku.className = 'sku';
+    sku.textContent = p.id;
+
+    meta.append(name, price, sku);
+
+    card.append(photo, meta);
+    stage.appendChild(card);
+
+    attachDrag(card);
+  }
+
+  function attachDrag(el) {
+    let startX = 0;
+    let startY = 0;
+    let dx = 0;
+    let dragging = false;
+    let pointerId = null;
+
+    el.addEventListener('pointerdown', (e) => {
+      if (busy) return;
+      pointerId = e.pointerId;
+      startX = e.clientX;
+      startY = e.clientY;
+      dx = 0;
+      dragging = true;
+      el.classList.add('dragging');
+      el.classList.remove('animate');
+      el.setPointerCapture(pointerId);
+    });
+
+    el.addEventListener('pointermove', (e) => {
+      if (!dragging || e.pointerId !== pointerId) return;
+      dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      // Mostly-vertical drags are the page scrolling, not a decision.
+      if (Math.abs(dx) < 10 && Math.abs(dy) > 14) return;
+      paint(dx);
+    });
+
+    function release(e) {
+      if (!dragging || (e && e.pointerId !== pointerId)) return;
+      dragging = false;
+      el.classList.remove('dragging');
+      if (pointerId !== null && el.hasPointerCapture(pointerId)) {
+        el.releasePointerCapture(pointerId);
+      }
+      pointerId = null;
+
+      if (dx <= -THRESHOLD) return decide('delete');
+      if (dx >= THRESHOLD) return decide('keep');
+      el.classList.add('animate');
+      paint(0);
+    }
+
+    el.addEventListener('pointerup', release);
+    el.addEventListener('pointercancel', release);
+
+    function paint(x) {
+      el.style.transform = `translateX(${x}px) rotate(${x / 22}deg)`;
+      delStamp.style.opacity = x < 0 ? String(Math.min(1, -x / THRESHOLD)) : '0';
+      keepStamp.style.opacity = x > 0 ? String(Math.min(1, x / THRESHOLD)) : '0';
+    }
+  }
+
+  function flyOut(direction) {
+    if (!card) return;
+    const el = card;
+    el.classList.add('animate');
+    el.style.transform = `translateX(${direction * 600}px) rotate(${direction * 22}deg)`;
+    el.style.opacity = '0';
+    delStamp.style.opacity = '0';
+    keepStamp.style.opacity = '0';
+  }
+
+  // ---- decisions -----------------------------------------------------
+
+  async function decide(type) {
+    if (busy || pos >= items.length) return;
+    const product = items[pos];
+    clearError();
+    clearNote();
+
+    if (type === 'keep') {
+      history.push({ type: 'keep', product });
+      flyOut(1);
+      advance();
+      return;
+    }
+
+    setBusy(true);
+    flyOut(-1);
+    try {
+      const res = await fetch('/api/quick-delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ id: product.id }),
+      });
+      const data = await readJson(res);
+      if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+
+      history.push({ type: 'delete', product: data.product || product, index: data.index });
+      setBusy(false);
+      advance();
+    } catch (err) {
+      setBusy(false);
+      // Put the card back where it was — nothing was deleted.
+      renderCard();
+      showError(`Couldn't delete it (${err.message}). Try again.`);
+    }
+  }
+
+  function advance() {
+    pos += 1;
+    undoBtn.disabled = history.length === 0;
+    // Let the card finish flying off before the next one appears.
+    setTimeout(() => {
+      if (pos >= items.length) return finish();
+      renderCard();
+      undoBtn.disabled = history.length === 0;
+    }, 220);
+  }
+
+  async function undo() {
+    if (busy || !history.length) return;
+    const last = history[history.length - 1];
+    clearError();
+    clearNote();
+
+    if (last.type === 'delete') {
+      setBusy(true);
+      try {
+        const res = await fetch('/api/quick-delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ restore: last.product, index: last.index }),
+        });
+        const data = await readJson(res);
+        if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+      } catch (err) {
+        setBusy(false);
+        showError(`Couldn't undo (${err.message}). Try again.`);
+        return;
+      }
+      setBusy(false);
+    }
+
+    history.pop();
+    pos = Math.max(0, pos - 1);
+    deckBox.style.display = 'block';
+    doneBox.style.display = 'none';
+    renderCard();
+    undoBtn.disabled = history.length === 0;
+    showNote(last.type === 'delete' ? `Restored ${last.product.id} — it's back in inventory.` : 'Back to this one.');
+  }
+
+  function setBusy(state) {
+    busy = state;
+    delBtn.disabled = state;
+    keepBtn.disabled = state;
+    undoBtn.disabled = state || history.length === 0;
+  }
+
+  // ---- helpers -------------------------------------------------------
+
+  async function readJson(res) {
+    const text = await res.text();
+    try {
+      return text ? JSON.parse(text) : {};
+    } catch {
+      throw new Error(`The server returned an unreadable response (${res.status})`);
+    }
+  }
+
+  function showError(msg) {
+    errBox.textContent = msg;
+    errBox.style.display = 'block';
+  }
+  function clearError() {
+    errBox.style.display = 'none';
+    errBox.textContent = '';
+  }
+  function showNote(msg) {
+    noteBox.textContent = msg;
+    noteBox.style.display = 'block';
+  }
+  function clearNote() {
+    noteBox.style.display = 'none';
+    noteBox.textContent = '';
+  }
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    })[c]);
+  }
+
+  delBtn.addEventListener('click', () => decide('delete'));
+  keepBtn.addEventListener('click', () => decide('keep'));
+  undoBtn.addEventListener('click', undo);
+  restartBtn.addEventListener('click', () => { loadingBox.style.display = 'block'; doneBox.style.display = 'none'; load(); });
+
+  // Arrow keys for anyone doing this at a desk instead of on a phone.
+  document.addEventListener('keydown', (e) => {
+    if (deckBox.style.display === 'none') return;
+    if (e.key === 'ArrowLeft') decide('delete');
+    else if (e.key === 'ArrowRight') decide('keep');
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>

@@ -20,6 +20,9 @@ const PROTECTED_PAGES = new Set([
   "/admin-price.html", "/admin-price",
   // One-shot dupe cleanup tool — remove alongside admin-fix-dupes.html.
   "/admin-fix-dupes.html", "/admin-fix-dupes",
+  // Swipe-to-delete screen. quick-add.html stays open (adding is harmless),
+  // but removing listings is admin-only, same as deleting from admin.html.
+  "/quick-delete.html", "/quick-delete",
 ]);
 
 const PROTECTED_WRITE_PATHS = new Set([
@@ -31,6 +34,7 @@ const PROTECTED_WRITE_PATHS = new Set([
   "/api/upload-image",
   "/api/pending-intake",
   "/api/ai-assist",
+  "/api/quick-delete",
   // GET on this one is a dry-run preview and stays open; POST publishes to
   // the Facebook Page, so it must not be callable without the admin cookie.
   "/api/fb-post",

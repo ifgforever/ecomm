@@ -35,7 +35,18 @@
     background: var(--paper);
     padding-bottom: 40px;
   }
-  .wrap { max-width: 420px; margin: 0 auto; padding: 40px 20px 20px; }
+  .wrap { max-width: 420px; margin: 0 auto; padding: 28px 20px 20px; }
+
+  .navlink {
+    display: block;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--teal);
+    text-decoration: none;
+    margin-bottom: 16px;
+  }
+  .navlink:hover { text-decoration: underline; }
 
   h1 {
     font-family: var(--font-display);
@@ -154,6 +165,8 @@
 </head>
 <body>
   <div class="wrap">
+    <a class="navlink" href="/quick-delete.html">🗑 Quick Delete</a>
+
     <h1>Quick <em>Add</em></h1>
     <p class="sub">Snap it, price it, done — details get finished later.</p>
 

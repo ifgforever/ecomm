@@ -44,15 +44,20 @@ several of them silently do nothing if run early.
    are not eligible for local listings — the location has to arrive from a
    linked Business Profile.
 
-2. **Set the store code to `JOJINS01`** on that location when Merchant
-   Center asks for one. This is not a value to go and find — a single-location
-   business has no store code until something needs one, so you pick it. It is
-   already set to `JOJINS01` in `functions/_lib/catalog.js`; use the same
-   string on the Merchant Center side and there is nothing to reconcile.
+2. **Match the store code Google assigned.** Do NOT invent one. Google
+   auto-assigns a store code to a verified location; read it from the
+   **Store code** column at business.google.com/locations and put that exact
+   string in `STORE_CODE` in `functions/_lib/catalog.js`. For 4100 N Pulaski
+   that is `14376355877054648957`.
 
-   **It is case sensitive.** A mismatch is the single most common failure
-   here and the worst-behaved: the feed fetches successfully, reports no
-   error, and shows nothing.
+   Picking a code instead is what broke the first attempt: the local
+   inventory source fetched cleanly and recognised every attribute name, then
+   rejected all 1,113 rows as *[Business Profile] Invalid store code*. Nor is
+   renaming the store a way out — the field is only editable for profiles
+   inside a location group, and this one is standalone.
+
+   **It is case sensitive**, and a mismatch is the worst-behaved failure
+   here: the fetch succeeds, and the listings simply never appear.
 
 3. **Link Business Profile to Merchant Center.** Settings → Access and
    services → Apps and services → Add service → Google Business Profile.

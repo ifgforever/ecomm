@@ -18,16 +18,21 @@ export const SHOP_NAME = "Jojin's Kitty Thrift Shop";
 // linked Business Profile, every local row is orphaned and silently dropped
 // -- the fetch still succeeds and still reports no error.
 //
-// This is NOT a value to look up. A single-location business has no store
-// code until something needs one; you pick it, and set the SAME string here
-// and on the store in Merchant Center. It only has to agree with itself.
+// This IS a value to look up, and the lookup already happened. Google had
+// auto-assigned a store code to the Jojin's Kitty Thrift Shop location; it is
+// visible at business.google.com/locations in the "Store code" column, next to
+// 4100 N Pulaski Rd.
 //
-// Kept strictly alphanumeric on purpose. The spec calls for a unique
-// alphanumeric code, and while separators are usually fine, the failure mode
-// if they aren't is the silent one above -- not worth finding out. The
-// trailing number leaves room for a second location without re-coding the
-// first.
-export const STORE_CODE = "JOJINS01";
+// An earlier revision invented "JOJINS01" here on the theory that a
+// single-location business has no code until it needs one and can pick its
+// own. That produced exactly the silent-ish failure described above: the local
+// inventory feed fetched cleanly, every attribute name was recognised, and all
+// 1,113 rows were rejected as "[Business Profile] Invalid store code" because
+// no store by that name existed. Renaming the store on Google's side would
+// have worked too, but the field is not editable for a profile outside a
+// location group -- and matching what Google already has is the shorter path
+// and the one with nothing to keep in sync.
+export const STORE_CODE = "14376355877054648957";
 
 export const CURRENCY = "USD";
 

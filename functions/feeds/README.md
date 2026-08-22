@@ -7,6 +7,7 @@ typing a product into Merchant Center:
 |---|---|---|
 | `/feeds/google-products.xml` | The catalogue. RSS 2.0 + `g:` namespace. | Primary product data source, **scheduled fetch** |
 | `/feeds/google-local-inventory.txt` | Per-store stock. Tab-separated. | Supplemental source, type **Local product inventory**, **scheduled fetch** |
+| `/feeds/excluded.txt` | Everything in stock that is *not* being sent, and why. | Nothing — it is for us, not Google |
 
 Both read the same `PRODUCTS_KV` `"products"` array that `/api/products`,
 `/p/[slug]` and `/sitemap.xml` already read. Add an item in Quick Add and it
@@ -69,6 +70,34 @@ several of them silently do nothing if run early.
 
 7. **Wait 24–48h** for first processing.
 
+## Pop Mart is held back on purpose
+
+Everything in this shop is genuine secondhand, Labubu included. The filter is
+not about that. It is about how Google enforces if it ever decides otherwise.
+
+Counterfeit is an **egregious** violation: suspension on detection, no warning
+email, none of the 7-or-28-day window ordinary violations get, and the stated
+consequence is permanent. It lands on the **account**, not the item. So the
+exposure is not one figure being rejected -- it is all 600 listings going dark
+at once, with no chance to fix it first. Pop Mart is enforcing hard and has a
+direct reporting pipeline into Google; the September 2025 restraining order
+went against 7-Eleven *franchisees*, so reselling genuine stock was not a
+defence there.
+
+Against that, the cost of the filter is a handful of items not appearing on
+Google. They still sell in the shop, still have a product page, still show up
+in the sitemap and on `/labubu`.
+
+`EXCLUDE_RESTRICTED_BRANDS` in `_lib/catalog.js` turns it off in one line.
+Worth revisiting once the account has a clean history behind it — the
+argument for turning it back on gets stronger the longer nothing has gone
+wrong, and stronger again because used, own-photographed, visibly pre-owned
+pieces are a weak counterfeit signal compared with the sealed boxes that
+enforcement actually targets.
+
+Check `/feeds/excluded.txt` before assuming the filter is behaving. Some of
+the terms it matches are ordinary words.
+
 ## What to check when something is wrong
 
 Both endpoints send `X-Feed-Item-Count`, so a `curl -I` is enough to compare
@@ -81,17 +110,31 @@ If those two disagree with each other, something is wrong here. If they agree
 with each other but not with Merchant Center, the problem is on Google's side
 of the fetch — usually the store code.
 
-Items missing from the feeds entirely are being dropped by `feedable()` in
-`catalog.js`, which requires an id, a name, a price above zero and an
-absolute `https://` image. Products still carrying a relative path into the
-old `/images/` folder fail that last test — the image no longer resolves, and
-`image_link` is required, so feeding them would collect disapprovals instead
-of listings. To find them:
+For anything missing from the feeds, `/feeds/excluded.txt` answers it
+directly — every in-stock item that is not being sent, the reason, and a
+count per reason:
 
-    curl -s https://jinkittys.com/api/products \
-      | python3 -c "import json,sys; [print(p['id'], p.get('name')) for p in json.load(sys.stdin) if p.get('inStock') and not str(p.get('image','')).startswith('https://')]"
+    curl -s https://jinkittys.com/feeds/excluded.txt
 
-Re-uploading a photo for those in admin fixes them permanently.
+Three reasons show up there. `restricted-brand` is the Pop Mart hold above,
+and names the term that matched. `no-usable-image` is an item whose photo is
+missing or still points at the retired `/images/` folder — `image_link` is
+required, so feeding those would collect disapprovals instead of listings;
+re-uploading the photo in admin fixes them permanently. `incomplete` is a
+missing name, price or id.
+
+## Condition
+
+Every item is sent as `condition: used`, hardcoded. The shop resells used
+pieces only and stocks nothing new, so there is no case to branch on.
+
+This is worth keeping right. Google cross-checks `condition` against the
+landing page, and a mismatch there is the most likely disapproval this shop
+would ever see. `/p/[slug]` already emits `schema.org/UsedCondition` in its
+product markup, so the feed and the page agree by construction. If a sealed,
+never-opened item is ever stocked, `condition` becomes a real per-item
+decision rather than a constant — Google only counts unopened original
+packaging as `new`.
 
 ## The part that stays imperfect
 

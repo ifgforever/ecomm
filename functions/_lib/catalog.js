@@ -65,6 +65,64 @@ const CATEGORY_MAP = [
   [["collectible", "vintage"], "Arts & Entertainment > Hobbies & Creative Arts > Collectibles"],
 ];
 
+// ---------------------------------------------------------------------------
+// Restricted brands
+// ---------------------------------------------------------------------------
+//
+// Pop Mart items are held out of the Google feeds. Not because anything in
+// this shop is fake -- it isn't -- but because of how Google enforces if it
+// ever decides otherwise.
+//
+// Counterfeit is classed as an EGREGIOUS violation: suspension on detection,
+// no warning email, none of the 7-or-28-day window ordinary violations get,
+// and the consequence is stated as permanent. It lands on the ACCOUNT, not
+// the item. So the exposure is not "a Labubu gets rejected" -- it is all 600
+// listings going dark at once, over one item, with no chance to fix it first.
+//
+// The other side of it is that Pop Mart is enforcing hard right now and has a
+// direct reporting pipeline into Google. They won a restraining order against
+// 7-Eleven FRANCHISEES in September 2025 -- being a reseller of genuine stock
+// is not a defence there, which is the part that matters here.
+//
+// Weighed against that, the cost of this switch is a handful of items not
+// appearing on Google. They still sell in the shop, still have their own
+// product page, and still show up in the sitemap and on /labubu.
+//
+// Set EXCLUDE_RESTRICTED_BRANDS to false to feed them again -- worth
+// revisiting once the account has a clean history behind it.
+export const EXCLUDE_RESTRICTED_BRANDS = true;
+
+// Matched on whole words, against category + name + description, so an item
+// called "blind box figure" whose description mentions the series is caught
+// too. Deliberately wider than the Labubu line itself: the enforcement risk
+// attaches to the Pop Mart brand, not to one character.
+//
+// A false positive here costs one item not being listed on Google, which is
+// recoverable and visible at /feeds/excluded.txt. A false negative costs the
+// account. Erring wide is the cheap direction -- but check that page rather
+// than assuming, since some of these are ordinary words.
+const RESTRICTED_TERMS = [
+  "labubu", "pop mart", "popmart", "popmarts",
+  "the monsters", "zimomo", "mokoko", "tycoco",
+  "skullpanda", "skull panda", "dimoo", "crybaby", "cry baby",
+  "hirono", "pucky", "instinctoy", "hacipupu",
+];
+
+const RESTRICTED_RE = new RegExp(
+  `\\b(${RESTRICTED_TERMS.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b`,
+  "i"
+);
+
+// Returns the term that matched, so /feeds/excluded.txt can show WHY an item
+// is being held back -- an exclusion you cannot see the reason for is one
+// nobody will ever trust enough to narrow.
+export function restrictedReason(p) {
+  if (!EXCLUDE_RESTRICTED_BRANDS) return "";
+  const hay = `${p.category || ""} ${p.name || ""} ${p.description || ""}`;
+  const m = RESTRICTED_RE.exec(hay);
+  return m ? m[1].toLowerCase() : "";
+}
+
 export async function loadProducts(env) {
   if (!env.PRODUCTS_KV) return [];
   try {
@@ -126,7 +184,9 @@ export function feedable(p) {
 // account with items that can never be bought. When something sells it
 // simply stops appearing on the next fetch.
 export function feedProducts(products) {
-  return products.filter((p) => feedable(p) && isAvailable(p));
+  return products.filter(
+    (p) => feedable(p) && isAvailable(p) && !restrictedReason(p)
+  );
 }
 
 export function priceString(p) {

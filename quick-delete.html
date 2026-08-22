@@ -63,8 +63,30 @@
     text-align: center;
     color: var(--ink-soft);
     font-size: 13.5px;
-    margin: 0 0 8px;
+    margin: 0 0 16px;
   }
+
+  /* Mode switch — swipe one at a time, or pick several off a grid. */
+  .modes {
+    display: flex;
+    border: 1.5px solid var(--tan);
+    border-radius: var(--r);
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .modes button {
+    flex: 1;
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    background: var(--card);
+    border: none;
+    padding: 11px 6px;
+    cursor: pointer;
+  }
+  .modes button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+
   .count {
     text-align: center;
     color: var(--ink-soft);
@@ -72,17 +94,22 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    margin: 0 0 18px;
+    margin: 0 0 14px;
     min-height: 15px;
   }
+
+  /* ---- swipe mode ---- */
 
   /* The card sits in a fixed-height stage so the page doesn't jump around
      as it flies off and the next one takes its place. */
   .stage {
     position: relative;
-    /* Tall enough to actually see the item, short enough that the buttons
-       still fit on a small phone without scrolling. */
-    height: clamp(250px, 46vh, 460px);
+    /* Fill whatever's left after the header and buttons, so the photo is as
+       big as it can be while everything still fits without scrolling. The
+       dvh line is the one that counts on phones; the vh line covers older
+       Safari, which ignores it. */
+    height: clamp(190px, calc(100vh - 384px), 460px);
+    height: clamp(190px, calc(100dvh - 384px), 460px);
     touch-action: pan-y;
   }
 
@@ -143,7 +170,8 @@
   }
 
   /* Stamps that fade in as the card is dragged, so it's obvious which way
-     is which before you let go. */
+     is which before you let go. Anchored to the stage, not the card, so
+     they stay readable while the card slides away. */
   .stamp {
     position: absolute;
     top: 18px;
@@ -162,18 +190,7 @@
   .stamp.del { left: 18px; color: var(--rust); border-color: var(--rust); transform: rotate(-12deg); }
   .stamp.keep { right: 18px; color: var(--teal); border-color: var(--teal); transform: rotate(12deg); }
 
-  .hints {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--ink-soft);
-    margin: 14px 2px 0;
-  }
-  .hints .left { color: var(--rust); }
-  .hints .right { color: var(--teal); }
-
-  .actions { display: flex; gap: 10px; margin-top: 12px; }
+  .actions { display: flex; gap: 10px; margin-top: 14px; }
   .actions button {
     flex: 1;
     font-family: var(--font-body);
@@ -187,6 +204,131 @@
   .btn-del { background: var(--rust); border-color: var(--rust); color: #fff; }
   .btn-keep { background: var(--teal); border-color: var(--teal); color: #fff; }
   .actions button:disabled { opacity: .45; cursor: default; }
+
+  /* ---- grid mode ---- */
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 10px;
+  }
+  .tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--card);
+    border: 1.5px solid var(--tan);
+    border-radius: var(--r);
+    padding: 6px;
+    cursor: pointer;
+    text-align: left;
+    font-family: var(--font-body);
+    color: var(--ink);
+  }
+  .tile[aria-pressed="true"] {
+    border-color: var(--rust);
+    box-shadow: 0 0 0 2px var(--rust);
+    background: #fbf0ea;
+  }
+  .tile .shot {
+    aspect-ratio: 1;
+    background: var(--paper-warm);
+    border-radius: 3px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .tile .shot img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    -webkit-user-drag: none;
+    pointer-events: none;
+  }
+  .tile .shot .placeholder { font-size: 26px; }
+  .tile .tname {
+    font-size: 11.5px;
+    font-weight: 600;
+    line-height: 1.25;
+    margin-top: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .tile .tprice { font-size: 12px; font-weight: 700; color: var(--amber-dark); margin-top: 3px; }
+  .tile .tsku { font-size: 10px; color: var(--ink-soft); letter-spacing: 0.04em; }
+  .tile .check {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--rust);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .tile[aria-pressed="true"] .check { display: flex; }
+
+  .gridbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .gridbar .pages { font-size: 12px; font-weight: 700; color: var(--ink-soft); }
+  .gridbar button, .linkbtn {
+    font-family: var(--font-body);
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--teal);
+    background: none;
+    border: 1.5px solid var(--tan);
+    border-radius: var(--r);
+    padding: 7px 10px;
+    cursor: pointer;
+  }
+  .gridbar button:disabled { opacity: .4; cursor: default; }
+
+  .selbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 12px 0 0;
+  }
+  .selbar .linkbtn { border-color: transparent; padding: 7px 2px; }
+
+  /* Sticky so the delete button is always in reach on a long page. */
+  .batchwrap {
+    position: sticky;
+    bottom: 0;
+    background: linear-gradient(to top, var(--paper) 70%, transparent);
+    padding: 10px 0 4px;
+    margin-top: 10px;
+  }
+  .batch-btn {
+    width: 100%;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 15px;
+    color: #fff;
+    background: var(--rust);
+    border: 2px solid var(--rust);
+    border-radius: var(--r);
+    padding: 14px;
+    cursor: pointer;
+  }
+  .batch-btn:disabled { opacity: .4; cursor: default; }
+
+  /* ---- shared ---- */
 
   .undo-btn {
     width: 100%;
@@ -210,7 +352,6 @@
     display: none;
     text-align: center;
   }
-
   .note {
     display: none;
     margin-top: 10px;
@@ -248,24 +389,49 @@
     <a class="navlink" href="/quick-add.html">＋ Quick Add</a>
 
     <h1>Quick <em>Delete</em></h1>
-    <p class="sub">Swipe left to delete, right to keep.</p>
+    <p class="sub" id="sub">Swipe left to delete, right to keep.</p>
+
+    <div class="modes" id="modes" style="display:none">
+      <button type="button" id="swipeMode" aria-pressed="true">◀ Swipe</button>
+      <button type="button" id="gridMode" aria-pressed="false">▦ Grid</button>
+    </div>
+
     <p class="count" id="count"></p>
 
+    <!-- Swipe -->
     <div id="deckBox" style="display:none">
       <div class="stage" id="stage">
         <div class="stamp del" id="delStamp">DELETE</div>
         <div class="stamp keep" id="keepStamp">KEEP</div>
       </div>
 
-      <div class="hints">
-        <span class="left">◀ Delete</span>
-        <span class="right">Keep ▶</span>
-      </div>
-
       <div class="actions">
         <button class="btn-del" id="delBtn" type="button">Delete</button>
         <button class="btn-keep" id="keepBtn" type="button">Keep</button>
       </div>
+    </div>
+
+    <!-- Grid -->
+    <div id="gridBox" style="display:none">
+      <div class="gridbar">
+        <button type="button" id="prevBtn">‹ Older</button>
+        <span class="pages" id="pageLabel"></span>
+        <button type="button" id="nextBtn">Newer ›</button>
+      </div>
+
+      <div class="grid" id="grid"></div>
+
+      <div class="selbar">
+        <button class="linkbtn" type="button" id="selectPageBtn">Select all 20</button>
+        <button class="linkbtn" type="button" id="clearSelBtn">Clear</button>
+      </div>
+
+      <div class="batchwrap">
+        <button class="batch-btn" id="batchBtn" type="button" disabled>Delete selected</button>
+      </div>
+    </div>
+
+    <div id="sharedBox" style="display:none">
       <button class="undo-btn" id="undoBtn" type="button" disabled>↩ Undo</button>
       <div class="err" id="errBox"></div>
       <div class="note" id="noteBox"></div>
@@ -291,30 +457,57 @@
 
 <script>
 (function () {
-  const stage = document.getElementById('stage');
-  const delStamp = document.getElementById('delStamp');
-  const keepStamp = document.getElementById('keepStamp');
-  const deckBox = document.getElementById('deckBox');
-  const loadingBox = document.getElementById('loadingBox');
-  const doneBox = document.getElementById('doneBox');
-  const doneTitle = document.getElementById('doneTitle');
-  const doneMsg = document.getElementById('doneMsg');
-  const countEl = document.getElementById('count');
-  const delBtn = document.getElementById('delBtn');
-  const keepBtn = document.getElementById('keepBtn');
-  const undoBtn = document.getElementById('undoBtn');
-  const restartBtn = document.getElementById('restartBtn');
-  const errBox = document.getElementById('errBox');
-  const noteBox = document.getElementById('noteBox');
-
+  const PAGE_SIZE = 20;
   // How far a card has to travel before letting go counts as a decision.
   const THRESHOLD = 90;
 
-  let items = [];      // everything loaded, in catalog order
-  let pos = 0;         // which one is on screen
-  let history = [];    // { type: 'delete' | 'keep', product, index }
-  let card = null;     // the DOM node for the current item
-  let busy = false;    // a delete/undo request is in flight
+  const el = (id) => document.getElementById(id);
+  const stage = el('stage');
+  const delStamp = el('delStamp');
+  const keepStamp = el('keepStamp');
+  const deckBox = el('deckBox');
+  const gridBox = el('gridBox');
+  const sharedBox = el('sharedBox');
+  const modes = el('modes');
+  const swipeModeBtn = el('swipeMode');
+  const gridModeBtn = el('gridMode');
+  const sub = el('sub');
+  const loadingBox = el('loadingBox');
+  const doneBox = el('doneBox');
+  const doneTitle = el('doneTitle');
+  const doneMsg = el('doneMsg');
+  const countEl = el('count');
+  const delBtn = el('delBtn');
+  const keepBtn = el('keepBtn');
+  const undoBtn = el('undoBtn');
+  const restartBtn = el('restartBtn');
+  const errBox = el('errBox');
+  const noteBox = el('noteBox');
+  const grid = el('grid');
+  const pageLabel = el('pageLabel');
+  const prevBtn = el('prevBtn');
+  const nextBtn = el('nextBtn');
+  const selectPageBtn = el('selectPageBtn');
+  const clearSelBtn = el('clearSelBtn');
+  const batchBtn = el('batchBtn');
+
+  let all = [];                     // everything loaded, oldest first
+  let deleted = new Set();          // ids gone from inventory this session
+  let selected = new Set();         // ids ticked in grid mode
+  let history = [];                 // { type, entries } — newest last
+  let mode = 'swipe';
+  // The swipe card is tracked by id, not by position, so restoring or
+  // deleting something else (in the grid) can't slide a different listing
+  // under the card. swipePos is where to land if that listing is gone.
+  let swipeId = null;
+  let swipePos = 0;
+  let page = 0;
+  let card = null;
+  let busy = false;
+
+  // Everything still in inventory, oldest first. Derived rather than
+  // spliced so swipe and grid always agree on what's left.
+  const live = () => all.filter((p) => !deleted.has(p.id));
 
   // ---- data ----------------------------------------------------------
 
@@ -323,7 +516,7 @@
       const res = await fetch('/api/products', { cache: 'no-store', credentials: 'same-origin' });
       if (!res.ok) throw new Error(`Request failed (${res.status})`);
       const data = await res.json();
-      items = Array.isArray(data) ? data.filter((p) => p && p.id) : [];
+      all = oldestFirst(Array.isArray(data) ? data.filter((p) => p && p.id) : []);
     } catch (err) {
       loadingBox.querySelector('.big').textContent = '⚠️';
       loadingBox.querySelector('h2').textContent = "Couldn't load inventory";
@@ -332,75 +525,133 @@
     }
 
     loadingBox.style.display = 'none';
-    pos = 0;
+    deleted = new Set();
+    selected = new Set();
     history = [];
-    start();
+    swipeId = null;
+    swipePos = 0;
+    page = 0;
+    modes.style.display = 'flex';
+    render();
   }
 
-  function start() {
-    if (pos >= items.length) return finish();
-    deckBox.style.display = 'block';
+  // Oldest first, so the stuff that's been sitting longest comes up first.
+  // The catalog itself is newest-first (Quick Add unshifts onto the front),
+  // so plain array order is exactly backwards for this screen.
+  function oldestFirst(list) {
+    return list
+      .map((p, i) => ({ p, i }))
+      .sort((a, b) => {
+        const ta = added(a.p);
+        const tb = added(b.p);
+        if (ta !== tb) return ta - tb;
+        // Same timestamp, or neither has one: later in the catalog is older.
+        return b.i - a.i;
+      })
+      .map((x) => x.p);
+  }
+
+  function added(p) {
+    const t = Date.parse(p.createdAt || '');
+    // Listings from before createdAt existed are the oldest things here.
+    return Number.isNaN(t) ? -Infinity : t;
+  }
+
+  // ---- routing between the two views ---------------------------------
+
+  function render() {
+    clearError();
+    const remaining = live();
+
+    if (!remaining.length) return finish();
+
     doneBox.style.display = 'none';
-    renderCard();
+    sharedBox.style.display = 'block';
+    modes.style.display = 'flex';
+
+    if (mode === 'grid') {
+      deckBox.style.display = 'none';
+      gridBox.style.display = 'block';
+      sub.textContent = 'Tap items to select, then delete them all at once.';
+      renderGrid(remaining);
+    } else {
+      gridBox.style.display = 'none';
+      deckBox.style.display = 'block';
+      sub.textContent = 'Swipe left to delete, right to keep.';
+      const at = swipeTarget(remaining);
+      if (at === -1) return finish();
+      renderCard(remaining, at);
+    }
+    undoBtn.disabled = busy || history.length === 0;
+  }
+
+  function setMode(next) {
+    if (mode === next) return;
+    mode = next;
+    swipeModeBtn.setAttribute('aria-pressed', String(next === 'swipe'));
+    gridModeBtn.setAttribute('aria-pressed', String(next === 'grid'));
+    clearNote();
+    render();
   }
 
   function finish() {
     deckBox.style.display = 'none';
+    gridBox.style.display = 'none';
+    modes.style.display = 'none';
     doneBox.style.display = 'block';
+    // Keep Undo reachable here: deleting the last item lands straight on
+    // this screen, and that's exactly when you might want it back.
+    sharedBox.style.display = history.length ? 'block' : 'none';
+    undoBtn.disabled = busy || history.length === 0;
     countEl.textContent = '';
+    sub.textContent = '';
 
-    const deleted = history.filter((h) => h.type === 'delete').length;
-    if (!items.length) {
+    const gone = deleted.size;
+    if (!all.length) {
       doneTitle.textContent = 'Nothing to review';
       doneMsg.textContent = 'Inventory is empty.';
+    } else if (!live().length) {
+      doneTitle.textContent = 'Inventory is empty';
+      doneMsg.textContent = `Deleted all ${gone} item${gone === 1 ? '' : 's'}.`;
     } else {
       doneTitle.textContent = 'All done!';
-      doneMsg.textContent = deleted
-        ? `Deleted ${deleted} item${deleted === 1 ? '' : 's'} out of ${items.length}.`
-        : `Went through all ${items.length} items — nothing deleted.`;
+      doneMsg.textContent = gone
+        ? `Deleted ${gone} item${gone === 1 ? '' : 's'} out of ${all.length}.`
+        : `Went through all ${all.length} items — nothing deleted.`;
     }
   }
 
-  // ---- the card ------------------------------------------------------
+  // ---- swipe mode ----------------------------------------------------
 
-  function renderCard() {
-    clearError();
+  // Where the swipe card is pointing: the listing itself if it's still
+  // there, otherwise whatever has taken its place. -1 means we're through.
+  function swipeTarget(remaining) {
+    if (swipeId) {
+      const i = remaining.findIndex((p) => p.id === swipeId);
+      if (i !== -1) return i;
+    }
+    return swipePos < remaining.length ? swipePos : -1;
+  }
+
+  function renderCard(remaining, at) {
     clearNote();
     if (card) card.remove();
     delStamp.style.opacity = '0';
     keepStamp.style.opacity = '0';
 
-    const p = items[pos];
-    countEl.textContent = `${pos + 1} of ${items.length}`;
+    const p = remaining[at];
+    swipeId = p.id;
+    swipePos = at;
+    countEl.textContent = `${at + 1} of ${remaining.length} left`;
 
     card = document.createElement('div');
     card.className = 'card';
+    card.append(photoFor(p, 'photo'), metaFor(p));
+    stage.appendChild(card);
+    attachDrag(card);
+  }
 
-    const photo = document.createElement('div');
-    photo.className = 'photo';
-    if (p.image) {
-      const img = document.createElement('img');
-      img.src = p.image;
-      img.alt = p.name || 'Product photo';
-      const rotation = ((Number(p.rotation) || 0) % 360 + 360) % 360;
-      if (rotation) img.style.transform = `rotate(${rotation}deg)`;
-      img.addEventListener('error', () => {
-        // Broken image URL — show the same placeholder as a photo-less item
-        // so the card still says which listing this is.
-        photo.textContent = '';
-        const ph = document.createElement('div');
-        ph.className = 'placeholder';
-        ph.textContent = '🖼️';
-        photo.appendChild(ph);
-      });
-      photo.appendChild(img);
-    } else {
-      const ph = document.createElement('div');
-      ph.className = 'placeholder';
-      ph.textContent = '🖼️';
-      photo.appendChild(ph);
-    }
-
+  function metaFor(p) {
     const meta = document.createElement('div');
     meta.className = 'meta';
 
@@ -410,41 +661,36 @@
 
     const price = document.createElement('div');
     price.className = 'price';
-    const qty = Number(p.quantity) || 0;
-    price.textContent = `$${Number(p.price) || 0}${qty > 1 ? ` · ${qty} in stock` : ''}`;
+    price.textContent = priceLabel(p);
 
     const sku = document.createElement('div');
     sku.className = 'sku';
     sku.textContent = p.id;
 
     meta.append(name, price, sku);
-
-    card.append(photo, meta);
-    stage.appendChild(card);
-
-    attachDrag(card);
+    return meta;
   }
 
-  function attachDrag(el) {
+  function attachDrag(node) {
     let startX = 0;
     let startY = 0;
     let dx = 0;
     let dragging = false;
     let pointerId = null;
 
-    el.addEventListener('pointerdown', (e) => {
+    node.addEventListener('pointerdown', (e) => {
       if (busy) return;
       pointerId = e.pointerId;
       startX = e.clientX;
       startY = e.clientY;
       dx = 0;
       dragging = true;
-      el.classList.add('dragging');
-      el.classList.remove('animate');
-      el.setPointerCapture(pointerId);
+      node.classList.add('dragging');
+      node.classList.remove('animate');
+      node.setPointerCapture(pointerId);
     });
 
-    el.addEventListener('pointermove', (e) => {
+    node.addEventListener('pointermove', (e) => {
       if (!dragging || e.pointerId !== pointerId) return;
       dx = e.clientX - startX;
       const dy = e.clientY - startY;
@@ -456,23 +702,23 @@
     function release(e) {
       if (!dragging || (e && e.pointerId !== pointerId)) return;
       dragging = false;
-      el.classList.remove('dragging');
-      if (pointerId !== null && el.hasPointerCapture(pointerId)) {
-        el.releasePointerCapture(pointerId);
+      node.classList.remove('dragging');
+      if (pointerId !== null && node.hasPointerCapture(pointerId)) {
+        node.releasePointerCapture(pointerId);
       }
       pointerId = null;
 
       if (dx <= -THRESHOLD) return decide('delete');
       if (dx >= THRESHOLD) return decide('keep');
-      el.classList.add('animate');
+      node.classList.add('animate');
       paint(0);
     }
 
-    el.addEventListener('pointerup', release);
-    el.addEventListener('pointercancel', release);
+    node.addEventListener('pointerup', release);
+    node.addEventListener('pointercancel', release);
 
     function paint(x) {
-      el.style.transform = `translateX(${x}px) rotate(${x / 22}deg)`;
+      node.style.transform = `translateX(${x}px) rotate(${x / 22}deg)`;
       delStamp.style.opacity = x < 0 ? String(Math.min(1, -x / THRESHOLD)) : '0';
       keepStamp.style.opacity = x > 0 ? String(Math.min(1, x / THRESHOLD)) : '0';
     }
@@ -480,61 +726,212 @@
 
   function flyOut(direction) {
     if (!card) return;
-    const el = card;
-    el.classList.add('animate');
-    el.style.transform = `translateX(${direction * 600}px) rotate(${direction * 22}deg)`;
-    el.style.opacity = '0';
+    const node = card;
+    node.classList.add('animate');
+    node.style.transform = `translateX(${direction * 600}px) rotate(${direction * 22}deg)`;
+    node.style.opacity = '0';
     delStamp.style.opacity = '0';
     keepStamp.style.opacity = '0';
   }
 
-  // ---- decisions -----------------------------------------------------
-
   async function decide(type) {
-    if (busy || pos >= items.length) return;
-    const product = items[pos];
+    if (busy || mode !== 'swipe') return;
+    const remaining = live();
+    const at = swipeTarget(remaining);
+    const product = at === -1 ? null : remaining[at];
+    if (!product) return;
     clearError();
     clearNote();
 
     if (type === 'keep') {
-      history.push({ type: 'keep', product });
+      history.push({ type: 'keep', mode: 'swipe', id: product.id });
       flyOut(1);
-      advance();
+      swipePos = at + 1;
+      swipeId = remaining[at + 1] ? remaining[at + 1].id : null;
+      settle();
       return;
     }
 
     setBusy(true);
     flyOut(-1);
+    const result = await sendDelete([product.id]);
+    setBusy(false);
+
+    if (!result.ok) {
+      // Nothing was deleted — put the card back where it was.
+      render();
+      showError(`Couldn't delete it (${result.error}). Try again.`);
+      return;
+    }
+
+    result.removed.forEach((entry) => deleted.add(entry.id));
+    history.push({ type: 'delete', mode: 'swipe', entries: result.removed });
+    // This listing is gone, so the next one shifts into its slot.
+    swipeId = null;
+    swipePos = at;
+    settle();
+  }
+
+  // Let the card finish flying off before the next one appears.
+  function settle() {
+    undoBtn.disabled = true;
+    setTimeout(render, 220);
+  }
+
+  // ---- grid mode -----------------------------------------------------
+
+  function renderGrid(remaining) {
+    const pageCount = Math.max(1, Math.ceil(remaining.length / PAGE_SIZE));
+    page = Math.min(Math.max(0, page), pageCount - 1);
+
+    const start = page * PAGE_SIZE;
+    const slice = remaining.slice(start, start + PAGE_SIZE);
+
+    countEl.textContent = `${remaining.length} item${remaining.length === 1 ? '' : 's'} left`;
+    pageLabel.textContent = `Page ${page + 1} of ${pageCount}`;
+    prevBtn.disabled = page === 0;
+    nextBtn.disabled = page >= pageCount - 1;
+
+    grid.textContent = '';
+    slice.forEach((p) => grid.appendChild(tileFor(p)));
+
+    refreshSelectionUi();
+  }
+
+  // Just the bits that change when a tile is ticked — rebuilding the whole
+  // grid on every tap would re-request 20 photos.
+  function refreshSelectionUi() {
+    const slice = live().slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
+    selectPageBtn.textContent = slice.length && slice.every((p) => selected.has(p.id))
+      ? `Unselect these ${slice.length}`
+      : `Select all ${slice.length}`;
+    updateBatchButton();
+  }
+
+  function tileFor(p) {
+    const tile = document.createElement('button');
+    tile.type = 'button';
+    tile.className = 'tile';
+    tile.setAttribute('aria-pressed', String(selected.has(p.id)));
+    tile.dataset.id = p.id;
+
+    const name = document.createElement('div');
+    name.className = 'tname';
+    name.textContent = p.name || 'Untitled item';
+
+    const price = document.createElement('div');
+    price.className = 'tprice';
+    price.textContent = priceLabel(p);
+
+    const sku = document.createElement('div');
+    sku.className = 'tsku';
+    sku.textContent = p.id;
+
+    const check = document.createElement('span');
+    check.className = 'check';
+    check.textContent = '✓';
+
+    tile.append(photoFor(p, 'shot'), name, price, sku, check);
+    tile.addEventListener('click', () => {
+      if (busy) return;
+      if (selected.has(p.id)) selected.delete(p.id);
+      else selected.add(p.id);
+      tile.setAttribute('aria-pressed', String(selected.has(p.id)));
+      refreshSelectionUi();
+    });
+    return tile;
+  }
+
+  function updateBatchButton() {
+    const n = selected.size;
+    batchBtn.disabled = busy || n === 0;
+    batchBtn.textContent = n ? `Delete ${n} selected` : 'Delete selected';
+    clearSelBtn.disabled = n === 0;
+  }
+
+  async function deleteSelected() {
+    if (busy || !selected.size) return;
+    const ids = live().filter((p) => selected.has(p.id)).map((p) => p.id);
+    if (!ids.length) return;
+    clearError();
+    clearNote();
+
+    setBusy(true);
+    const result = await sendDelete(ids);
+    setBusy(false);
+
+    if (!result.ok) {
+      showError(`Couldn't delete (${result.error}). Nothing was removed — try again.`);
+      return;
+    }
+
+    result.removed.forEach((entry) => deleted.add(entry.id));
+    history.push({ type: 'delete', mode: 'grid', entries: result.removed });
+    selected = new Set();
+
+    const n = result.removed.length;
+    const skipped = (result.missing || []).length;
+    render();
+    showNote(
+      `Deleted ${n} item${n === 1 ? '' : 's'}.` +
+      (skipped ? ` ${skipped} ${skipped === 1 ? 'was' : 'were'} already gone.` : '') +
+      ' Undo puts them back.'
+    );
+  }
+
+  // ---- shared bits ---------------------------------------------------
+
+  function photoFor(p, className) {
+    const box = document.createElement('div');
+    box.className = className;
+
+    const placeholder = () => {
+      const ph = document.createElement('div');
+      ph.className = 'placeholder';
+      ph.textContent = '🖼️';
+      return ph;
+    };
+
+    if (!p.image) {
+      box.appendChild(placeholder());
+      return box;
+    }
+
+    const img = document.createElement('img');
+    img.src = p.image;
+    img.alt = p.name || 'Product photo';
+    img.loading = 'lazy';
+    const rotation = ((Number(p.rotation) || 0) % 360 + 360) % 360;
+    if (rotation) img.style.transform = `rotate(${rotation}deg)`;
+    img.addEventListener('error', () => {
+      // Broken image URL — show the same placeholder as a photo-less item
+      // so the tile still says which listing this is.
+      box.textContent = '';
+      box.appendChild(placeholder());
+    });
+    box.appendChild(img);
+    return box;
+  }
+
+  function priceLabel(p) {
+    const qty = Number(p.quantity) || 0;
+    return `$${Number(p.price) || 0}${qty > 1 ? ` · ${qty} in stock` : ''}`;
+  }
+
+  async function sendDelete(ids) {
     try {
       const res = await fetch('/api/quick-delete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'same-origin',
-        body: JSON.stringify({ id: product.id }),
+        body: JSON.stringify({ ids }),
       });
       const data = await readJson(res);
       if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
-
-      history.push({ type: 'delete', product: data.product || product, index: data.index });
-      setBusy(false);
-      advance();
+      return { ok: true, removed: data.removed || [], missing: data.missing || [] };
     } catch (err) {
-      setBusy(false);
-      // Put the card back where it was — nothing was deleted.
-      renderCard();
-      showError(`Couldn't delete it (${err.message}). Try again.`);
+      return { ok: false, error: err.message };
     }
-  }
-
-  function advance() {
-    pos += 1;
-    undoBtn.disabled = history.length === 0;
-    // Let the card finish flying off before the next one appears.
-    setTimeout(() => {
-      if (pos >= items.length) return finish();
-      renderCard();
-      undoBtn.disabled = history.length === 0;
-    }, 220);
   }
 
   async function undo() {
@@ -543,6 +940,8 @@
     clearError();
     clearNote();
 
+    let message;
+
     if (last.type === 'delete') {
       setBusy(true);
       try {
@@ -550,7 +949,7 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'same-origin',
-          body: JSON.stringify({ restore: last.product, index: last.index }),
+          body: JSON.stringify({ restore: last.entries }),
         });
         const data = await readJson(res);
         if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
@@ -560,15 +959,44 @@
         return;
       }
       setBusy(false);
+
+      last.entries.forEach((entry) => deleted.delete(entry.id));
+      const n = last.entries.length;
+      message = n === 1
+        ? `Restored ${last.entries[0].id} — it's back in inventory.`
+        : `Restored ${n} items — they're back in inventory.`;
+
+      // Show the restore where it happened: the grid jumps to the page
+      // holding it, and the swipe card only moves if the swipe deleted it.
+      const restoredIds = new Set(last.entries.map((e) => e.id));
+      const remaining = live();
+      const at = remaining.findIndex((p) => restoredIds.has(p.id));
+      if (at !== -1) {
+        page = Math.floor(at / PAGE_SIZE);
+        if (last.mode === 'swipe') {
+          swipeId = remaining[at].id;
+          swipePos = at;
+        }
+      }
+    } else {
+      // Undoing a keep just walks the card back to that listing.
+      const remaining = live();
+      const at = remaining.findIndex((p) => p.id === last.id);
+      if (at === -1) {
+        // It was deleted from the grid in the meantime — nothing to go back to.
+        swipeId = null;
+        swipePos = Math.max(0, swipePos - 1);
+      } else {
+        swipeId = last.id;
+        swipePos = at;
+        page = Math.floor(at / PAGE_SIZE);
+      }
+      message = 'Back to this one.';
     }
 
     history.pop();
-    pos = Math.max(0, pos - 1);
-    deckBox.style.display = 'block';
-    doneBox.style.display = 'none';
-    renderCard();
-    undoBtn.disabled = history.length === 0;
-    showNote(last.type === 'delete' ? `Restored ${last.product.id} — it's back in inventory.` : 'Back to this one.');
+    render();
+    showNote(message);
   }
 
   function setBusy(state) {
@@ -576,9 +1004,8 @@
     delBtn.disabled = state;
     keepBtn.disabled = state;
     undoBtn.disabled = state || history.length === 0;
+    updateBatchButton();
   }
-
-  // ---- helpers -------------------------------------------------------
 
   async function readJson(res) {
     const text = await res.text();
@@ -611,14 +1038,31 @@
     })[c]);
   }
 
+  swipeModeBtn.addEventListener('click', () => setMode('swipe'));
+  gridModeBtn.addEventListener('click', () => setMode('grid'));
   delBtn.addEventListener('click', () => decide('delete'));
   keepBtn.addEventListener('click', () => decide('keep'));
   undoBtn.addEventListener('click', undo);
-  restartBtn.addEventListener('click', () => { loadingBox.style.display = 'block'; doneBox.style.display = 'none'; load(); });
+  batchBtn.addEventListener('click', deleteSelected);
+  prevBtn.addEventListener('click', () => { page -= 1; render(); });
+  nextBtn.addEventListener('click', () => { page += 1; render(); });
+  clearSelBtn.addEventListener('click', () => { selected = new Set(); render(); });
+  selectPageBtn.addEventListener('click', () => {
+    const remaining = live();
+    const slice = remaining.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
+    const allOn = slice.every((p) => selected.has(p.id));
+    slice.forEach((p) => (allOn ? selected.delete(p.id) : selected.add(p.id)));
+    render();
+  });
+  restartBtn.addEventListener('click', () => {
+    loadingBox.style.display = 'block';
+    doneBox.style.display = 'none';
+    load();
+  });
 
   // Arrow keys for anyone doing this at a desk instead of on a phone.
   document.addEventListener('keydown', (e) => {
-    if (deckBox.style.display === 'none') return;
+    if (mode !== 'swipe' || deckBox.style.display === 'none') return;
     if (e.key === 'ArrowLeft') decide('delete');
     else if (e.key === 'ArrowRight') decide('keep');
   });

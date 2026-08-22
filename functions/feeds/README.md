@@ -141,6 +141,37 @@ never-opened item is ever stocked, `condition` becomes a real per-item
 decision rather than a constant — Google only counts unopened original
 packaging as `new`.
 
+## Two known gaps, both needing data the products don't carry
+
+Neither is fixable in the feed code. Both are the most likely source of
+disapprovals once this is live, so they are worth knowing about before
+Merchant Center tells you.
+
+**No `brand`.** Google wants `brand` on anything that has one. A product in
+KV has no brand field, so the feed omits it. For genuinely unbranded thrift
+(a loose 80s figure out of a bin) that is correct and allowed. For a boxed
+Nintendo game or a Funko it is a gap. Fixing it means adding a brand field
+to the product record and backfilling.
+
+**`identifier_exists` is `no` for everything.** The exemption actually turns
+on whether the item was ever *assigned* an identifier -- not on whether it is
+secondhand. A loose vintage piece with no packaging genuinely has none, and
+`no` is right. A current mass-produced product still in print does have a
+GTIN on its box, and Google can match the offer to its catalogue entry and
+know one exists; those can come back as "Incorrect product identifier". With
+no gtin field on the product there is nothing better to send, and inventing
+one would be worse. If disapprovals cluster here, the fix is a `gtin` field
+populated for the items that still have their box.
+
+## Apparel is left uncategorised on purpose
+
+If clothing is ever a real category here, note that declaring Apparel &
+Accessories in the US makes `color`, `gender` and `age_group` required, and
+`size` required on clothing and shoes. None of those exist on a product in
+KV, so naming the category would opt every tee into a validation tier the
+data cannot satisfy. `_lib/catalog.js` deliberately has no apparel mapping
+and lets Google classify those itself.
+
 ## The part that stays imperfect
 
 Google fetches once a day. Everything in this shop is one of one. So for up

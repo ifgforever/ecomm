@@ -48,7 +48,12 @@ export const CURRENCY = "USD";
 // instead -- the feed is still correct, it just stops asserting this itself.
 export const SCOPE_DESTINATIONS = true;
 export const EXCLUDED_DESTINATIONS = ["Shopping_ads", "Free_listings"];
-export const INCLUDED_DESTINATIONS = ["Free_local_listings", "Local_inventory_ads"];
+// Free local listings only. Local inventory ads are the paid version of the
+// same pipeline and need a Google Ads account, which this shop does not have
+// -- and since 31 August 2026 having the LIA add-on switched on turns local
+// on by default across Shopping campaigns. Nothing here needs that surface,
+// so it is not claimed. Add "Local_inventory_ads" back if ads ever start.
+export const INCLUDED_DESTINATIONS = ["Free_local_listings"];
 
 // Google's taxonomy is optional -- left off, Google classifies the item
 // itself, which for thrift inventory is usually as good as a guess we'd make
@@ -59,6 +64,12 @@ export const INCLUDED_DESTINATIONS = ["Free_local_listings", "Local_inventory_ad
 //
 // Matched as lowercase substrings against the product's category AND name,
 // first hit wins, so order matters: put the specific before the general.
+//
+// Apparel is deliberately absent. Declaring Apparel & Accessories in the US
+// makes color, gender and age_group required on the item, and size required
+// on clothing and shoes -- none of which exist on a product in KV. Naming
+// the category would opt every anime tee into a validation tier we cannot
+// satisfy and disapprove them. Left unset, Google classifies it itself.
 const CATEGORY_MAP = [
   [["video game", "videogame", "retro game", "nintendo", "playstation", "sega", "xbox", "gameboy", "game boy"], "Software > Video Game Software"],
   [["console"], "Electronics > Video Game Consoles"],
@@ -69,7 +80,6 @@ const CATEGORY_MAP = [
   [["book", "manga", "comic"], "Media > Books"],
   [["dvd", "vhs", "blu-ray", "bluray"], "Media > DVDs & Videos"],
   [["cd", "vinyl", "record"], "Media > Music & Sound Recordings"],
-  [["shirt", "hoodie", "jacket", "apparel", "clothing"], "Apparel & Accessories > Clothing"],
   [["mug", "cup", "plate", "bowl"], "Home & Garden > Kitchen & Dining > Tableware"],
   [["toy", "sanrio", "hello kitty", "anime"], "Toys & Games > Toys"],
   [["collectible", "vintage"], "Arts & Entertainment > Hobbies & Creative Arts > Collectibles"],

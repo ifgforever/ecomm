@@ -503,10 +503,15 @@
                 <span class="value highlight" id="changedCount">0</span>
             </div>
             <div class="summary-stat">
+                <span class="label">No Price</span>
+                <span class="value" id="noPriceCount">—</span>
+            </div>
+            <div class="summary-stat">
                 <span class="label">Last Loaded</span>
                 <span class="value" id="lastLoaded" style="font-size: 13px;">—</span>
             </div>
             <div class="action-buttons">
+                <button class="btn" id="unpricedBtn">🚫 Only unpriced</button>
                 <button class="btn" id="refreshBtn">🔄 Refresh</button>
                 <button class="btn" id="discardBtn" disabled>↩ Discard</button>
                 <button class="btn primary" id="saveAllBtn" disabled>💾 Save All Changes</button>
@@ -544,6 +549,7 @@
         let PRODUCTS = [];           // Current working data
         let ORIGINAL = [];           // Original data from last load (for change detection)
         let CHANGES = new Map();     // Map of productId -> { price?, quantity?, inStock? }
+        let UNPRICED_ONLY = false;   // List filter: only items that loaded without a price
 
         // === DOM ELEMENTS ===
         const els = {
@@ -551,6 +557,8 @@
             statusMsg: document.getElementById("statusMsg"),
             totalCount: document.getElementById("totalCount"),
             changedCount: document.getElementById("changedCount"),
+            noPriceCount: document.getElementById("noPriceCount"),
+            unpricedBtn: document.getElementById("unpricedBtn"),
             lastLoaded: document.getElementById("lastLoaded"),
             refreshBtn: document.getElementById("refreshBtn"),
             discardBtn: document.getElementById("discardBtn"),
@@ -744,10 +752,33 @@
             }
         }
 
+        // A price that isn't a positive number is no price at all: the
+        // storefront prints "$0" for it and the Google feed silently holds
+        // the item back. Covers missing, empty, zero and unparseable values
+        // ("$12" and "12 dollars" both come back NaN).
+        function isUnpriced(p) {
+            return !(Number(p?.price) > 0);
+        }
+
+        // Rows are chosen on the price the item LOADED with, so an item stays
+        // put while you type a price into it rather than vanishing mid-edit.
+        // The count next to it reads live, so it ticks down as you go.
+        function visibleProducts() {
+            if (!UNPRICED_ONLY) return PRODUCTS;
+            const wasUnpriced = new Set(ORIGINAL.filter(isUnpriced).map(p => p.id));
+            return PRODUCTS.filter(p => wasUnpriced.has(p.id));
+        }
+
         function updateSummary() {
             els.totalCount.textContent = PRODUCTS.length;
             els.changedCount.textContent = CHANGES.size;
-            
+
+            const unpriced = PRODUCTS.filter(isUnpriced).length;
+            els.noPriceCount.textContent = unpriced;
+            els.noPriceCount.classList.toggle("highlight", unpriced > 0);
+            els.unpricedBtn.classList.toggle("primary", UNPRICED_ONLY);
+            els.unpricedBtn.textContent = UNPRICED_ONLY ? "↩ Show all" : "🚫 Only unpriced";
+
             const hasChanges = CHANGES.size > 0;
             els.discardBtn.disabled = !hasChanges;
             els.saveAllBtn.disabled = !hasChanges;
@@ -757,18 +788,22 @@
         function render() {
             els.productList.innerHTML = "";
 
-            if (PRODUCTS.length === 0) {
+            const rows = visibleProducts();
+
+            if (rows.length === 0) {
                 els.productList.innerHTML = `
                     <tr>
                         <td colspan="6" style="text-align: center; padding: 40px; color: #6b7280;">
-                            No products found
+                            ${UNPRICED_ONLY && PRODUCTS.length
+                                ? "Every product has a price. 🎉"
+                                : "No products found"}
                         </td>
                     </tr>
                 `;
                 return;
             }
 
-            for (const p of PRODUCTS) {
+            for (const p of rows) {
                 const inStock = !!p.inStock;
                 const hasImage = !!p.image;
                 const isChanged = CHANGES.has(p.id);
@@ -1052,6 +1087,12 @@
         }
 
         // === EVENT HANDLERS ===
+        els.unpricedBtn.addEventListener("click", () => {
+            UNPRICED_ONLY = !UNPRICED_ONLY;
+            render();
+            updateSummary();
+        });
+
         els.refreshBtn.addEventListener("click", async () => {
             if (CHANGES.size > 0) {
                 if (!confirm(`You have ${CHANGES.size} unsaved changes. Refresh anyway?`)) {

@@ -175,6 +175,18 @@ function renderPage(product, related, slug) {
           postalCode: "60641",
           addressCountry: "US",
         },
+        // Phone, hours and coordinates are what Google's free local listings
+        // review looks for to confirm the offer is a real in-store one at a
+        // real place. Copied verbatim from the LocalBusiness block in
+        // index.html rather than read from KV — see the note there: everything
+        // a crawler reads is hardcoded on purpose, so the two can't drift.
+        telephone: STORE_PHONE,
+        openingHours: ["Mo-Sa 10:00-19:00"],
+        geo: {
+          "@type": "GeoCoordinates",
+          latitude: 41.9556017,
+          longitude: -87.7278817,
+        },
       },
     },
   };
@@ -233,6 +245,12 @@ ${ogImage ? `<meta property="og:image" content="${esc(ogImage)}" />
   .desc{margin:14px 0}
   .pick{border-left:3px solid var(--line);padding-left:12px;font-style:italic;color:#6a6055;margin:14px 0}
   .sku{font-size:12px;color:#8a8175;margin-top:14px}
+  .instore{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-top:14px;font-size:14px;line-height:1.5}
+  .instore-h{font-size:11px;letter-spacing:.09em;text-transform:uppercase;font-weight:700;color:var(--teal);margin-bottom:4px}
+  .instore-name{font-weight:700}
+  .instore-addr{font-style:normal;color:#6a6055}
+  .instore-hours{color:#6a6055}
+  .instore-tel{color:var(--teal);font-weight:600;text-decoration:none}
   .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
   .btn{display:inline-flex;align-items:center;gap:7px;padding:12px 18px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;border:1px solid transparent;cursor:pointer;font-family:inherit}
   .btn-primary{background:var(--teal);color:#fff}
@@ -260,7 +278,17 @@ ${ogImage ? `<meta property="og:image" content="${esc(ogImage)}" />
       <span class="tag">${esc(category)}</span>
       <h1>${esc(name)}</h1>
       <div class="price">${esc(money(price))}</div>
-      <div class="stock ${available ? "in" : "out"}">${available ? `✓ In stock — ${(Number(product.quantity) || 1) > 1 ? `${Number(product.quantity)} available` : "one available"}` : "Sold"}</div>
+      <div class="stock ${available ? "in" : "out"}">${available ? `✓ In stock in store — ${(Number(product.quantity) || 1) > 1 ? `${Number(product.quantity)} available` : "one available"}` : "Sold — no longer available at this store"}</div>
+
+      ${available
+        ? `<div class="instore">
+             <div class="instore-h">Available at this store</div>
+             <div class="instore-name">${esc(SHOP_NAME)}</div>
+             <address class="instore-addr">4100 N Pulaski Rd, Chicago, IL 60641</address>
+             <div class="instore-hours">Open Mon–Sat, 10am–7pm</div>
+             <a class="instore-tel" href="tel:${STORE_PHONE}">(312) 610-0321</a>
+           </div>`
+        : ""}
 
       ${product.description ? `<p class="desc">${esc(product.description)}</p>` : ""}
       ${product.pickNote ? `<p class="pick">${esc(product.pickNote)}</p>` : ""}

@@ -26,6 +26,11 @@ const KNOWN_FIELDS = new Set([
 ]);
 
 export function usingD1(env) {
+  // The Pages project's dashboard already carries a D1 binding named `jdb`
+  // (from an earlier experiment; nothing else reads it). Accept it as an
+  // alias so the cutover needs no dashboard edits at all — a binding named
+  // `DB` still wins if both exist.
+  if (!env.DB && env.jdb) env.DB = env.jdb;
   return !!env.DB;
 }
 
@@ -304,7 +309,7 @@ async function loadKvProducts(env) {
 // items table already having rows means D1 is live and KV is stale — copying
 // again would resurrect items sold since the cutover).
 export async function migrateFromKv(env) {
-  if (!env.DB) throw new Error("No D1 binding (DB)");
+  if (!usingD1(env)) throw new Error("No D1 binding (DB or jdb)");
   const existing = await env.DB.prepare("SELECT COUNT(*) AS n FROM items").first();
   if (Number(existing?.n) > 0) {
     return { migrated: 0, skipped: true, existing: Number(existing.n) };

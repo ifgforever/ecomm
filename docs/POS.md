@@ -18,16 +18,18 @@ every `/api/pos/*` endpoint require the admin cookie from `/admin-login`.
 
 ## One-time setup
 
-The D1 database **`jinkittys-pos`** already exists in the Cloudflare account
-(id `9a03a289-bba7-4388-aeeb-0a2d5d81f17e`) with the schema created. Two
-steps remain, in this order:
+The Pages project already carries a D1 binding — `jdb` → `jojin-thrift-db`
+— and the code accepts it (a binding named `DB` wins if one is ever added).
+The POS schema is already created in that database, so no dashboard changes
+are needed. One step remains, after this branch deploys:
 
-1. **Bind it**: Cloudflare dashboard → Workers & Pages → the jinkittys.com
-   Pages project → Settings → Bindings → Add → **D1 database** →
-   variable name `DB` → database `jinkittys-pos`. Redeploy.
-2. **Migrate**: log in at `/admin-login`, then open `/api/pos/setup` in the
-   browser. It copies the ~800 KV products into D1, once. It refuses to run
-   twice, so re-opening it later is harmless.
+- **Migrate**: log in at `/admin-login`, then open `/api/pos/setup` in the
+  browser. It copies the ~800 KV products into D1, once. It refuses to run
+  twice, so re-opening it later is harmless.
+
+(A separate empty database `jinkittys-pos` also exists in the account with
+the same schema, in case the POS ever wants its own database — rebinding
+`DB` to it is the only change that would take.)
 
 Until both steps happen the site keeps running exactly as before on
 PRODUCTS_KV — every reader and writer falls back automatically. After the

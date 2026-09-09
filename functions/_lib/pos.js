@@ -51,9 +51,12 @@ export function posError(message, status) {
 }
 
 export function requireDb(env) {
+  // Same aliasing as store.usingD1: the dashboard's existing `jdb` D1
+  // binding counts, so no Pages settings need touching.
+  if (!env.DB && env.jdb) env.DB = env.jdb;
   if (!env.DB) {
     return posError(
-      "The POS needs the D1 database. Bind a D1 database as DB in Pages > Settings > Bindings, then open /api/pos/setup.",
+      "The POS needs the D1 database. Bind a D1 database as DB (or jdb) in Pages > Settings > Bindings, then open /api/pos/setup.",
       503
     );
   }

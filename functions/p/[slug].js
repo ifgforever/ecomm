@@ -15,6 +15,8 @@
 // constantly; deleting the URL every time something sells would generate a
 // steady stream of dead links and throw away the visitor who searched for it.
 
+import { listProducts as loadProducts } from "../_lib/store.js";
+
 const SITE = "https://jinkittys.com";
 const SHOP_NAME = "Jojin's Kitty Thrift Shop";
 const STORE_PHONE = "+13126100321";
@@ -23,8 +25,6 @@ export async function onRequestGet(context) {
   const { params, env } = context;
   const slug = String(params.slug || "");
 
-  if (!env.PRODUCTS_KV) return notFound("Inventory is unavailable right now.");
-
   const skuMatch = /^(sku-\d+)/i.exec(slug);
   if (!skuMatch) return notFound();
 
@@ -32,8 +32,7 @@ export async function onRequestGet(context) {
 
   let products;
   try {
-    const raw = await env.PRODUCTS_KV.get("products");
-    products = raw ? JSON.parse(raw) : [];
+    products = await loadProducts(env);
   } catch {
     return notFound("Inventory is unavailable right now.");
   }

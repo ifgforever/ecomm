@@ -1,8 +1,14 @@
+// functions/api/products.js
+//
+// The catalogue read/write endpoint. Storage lives behind _lib/store.js:
+// D1 (items table) once a DB binding exists, the original PRODUCTS_KV
+// array until then. The JSON shape over the wire is unchanged — the
+// storefront and every admin page keep working either way.
+
+import { listProducts, replaceAllProducts, usingD1 } from "../_lib/store.js";
+
 export async function onRequest(context) {
   const { request, env } = context;
-
-  // Key where we store the full array
-  const KEY = "products";
 
   // CORS (optional, but handy for admin page)
   const corsHeaders = {
@@ -15,16 +21,15 @@ export async function onRequest(context) {
     return new Response(null, { headers: corsHeaders });
   }
 
-  if (!env.PRODUCTS_KV) {
-    return new Response(JSON.stringify({ error: "KV binding PRODUCTS_KV missing" }), {
+  if (!usingD1(env) && !env.PRODUCTS_KV) {
+    return new Response(JSON.stringify({ error: "No product storage: bind D1 as DB or KV as PRODUCTS_KV" }), {
       status: 500,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   }
 
   if (request.method === "GET") {
-    const raw = await env.PRODUCTS_KV.get(KEY);
-    const data = raw ? JSON.parse(raw) : [];
+    const data = await listProducts(env);
     return new Response(JSON.stringify(data), {
       headers: {
         "Content-Type": "application/json",
@@ -41,7 +46,13 @@ export async function onRequest(context) {
 
   if (request.method === "PUT") {
     const body = await request.json(); // expects an array
-    await env.PRODUCTS_KV.put(KEY, JSON.stringify(body));
+    if (!Array.isArray(body)) {
+      return new Response(JSON.stringify({ error: "Expected a JSON array" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+    await replaceAllProducts(env, body);
     return new Response(JSON.stringify({ ok: true, count: body.length }), {
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });

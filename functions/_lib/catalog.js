@@ -10,6 +10,8 @@
 // product into KV and the next feed fetch picks it up. That is the whole
 // point: 600 items, and no one types anything into Merchant Center.
 
+import { listProducts as storeListProducts } from "./store.js";
+
 export const SITE = "https://jinkittys.com";
 export const SHOP_NAME = "Jojin's Kitty Thrift Shop";
 
@@ -156,10 +158,8 @@ export function restrictedReason(p) {
 }
 
 export async function loadProducts(env) {
-  if (!env.PRODUCTS_KV) return [];
   try {
-    const raw = await env.PRODUCTS_KV.get("products");
-    return raw ? JSON.parse(raw) : [];
+    return await storeListProducts(env);
   } catch {
     return [];
   }

@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Label — Jojin's Kitty Thrift</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32'>🏷️</text></svg>">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900&family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!--
+  Label geometry: Brother QL-810W at 300 dpi on DK-2205 62mm continuous
+  tape prints 696 dots across. The canvas below is exactly 696 wide so the
+  Brother iPrint&Label app can print it at "fit to tape" with no scaling
+  blur on the QR. Height 320 dots ≈ 27mm of tape per label.
+
+  Print flow (one-time setup in iPrint&Label: pick the QL-810W + 62mm roll):
+    Tap "Print / Share" → share sheet → Brother iPrint&Label → Print.
+  On phones without the share sheet the button downloads a PNG instead;
+  print it from the Photos/Files app via iPrint&Label.
+-->
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+
+<style>
+  :root {
+    --ink: #1c1610;
+    --ink-soft: #6b5d4f;
+    --paper: #f7f2eb;
+    --paper-warm: #f0e9de;
+    --tan: #d4c4a8;
+    --amber: #c8863a;
+    --teal: #3d7a6e;
+    --rust: #b8522a;
+    --card: #ffffff;
+    --r: 4px;
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'Karla', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    color: var(--ink);
+    background: var(--paper);
+    padding-bottom: 40px;
+  }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 24px 20px; }
+  .navlink {
+    display: block; text-align: center; font-size: 13px; font-weight: 700;
+    color: var(--teal); text-decoration: none; margin-bottom: 14px;
+  }
+  h1 {
+    font-family: var(--font-display); font-size: 26px; font-weight: 900;
+    text-align: center; margin: 0 0 18px;
+  }
+  h1 em { font-style: italic; color: var(--amber); }
+  .card {
+    background: var(--card); border: 1.5px solid var(--tan);
+    border-radius: var(--r); padding: 18px; box-shadow: 5px 5px 0 var(--amber);
+  }
+  canvas#label {
+    width: 100%; height: auto; border: 1px dashed var(--tan);
+    border-radius: 2px; background: #fff; display: block;
+  }
+  .btn {
+    width: 100%; margin-top: 14px; font-family: var(--font-body);
+    font-weight: 700; font-size: 16px; color: #fff; background: var(--teal);
+    border: none; border-radius: var(--r); padding: 15px; cursor: pointer;
+  }
+  .btn.secondary { background: none; color: var(--teal); border: 2px solid var(--teal); }
+  .hint { font-size: 12.5px; color: var(--ink-soft); text-align: center; margin-top: 10px; }
+  .err { color: var(--rust); font-size: 13.5px; text-align: center; margin-top: 12px; display: none; }
+
+  /* Recent-items picker (no ?id in the URL) */
+  .pick-list { list-style: none; margin: 0; padding: 0; }
+  .pick-list li { border-bottom: 1px solid var(--paper-warm); }
+  .pick-list a {
+    display: flex; align-items: center; gap: 12px; padding: 10px 4px;
+    color: var(--ink); text-decoration: none;
+  }
+  .pick-list img, .pick-list .noimg {
+    width: 44px; height: 44px; object-fit: cover; border-radius: 4px;
+    background: var(--paper-warm); flex: none;
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+  }
+  .pick-list .meta { min-width: 0; }
+  .pick-list .name {
+    font-weight: 600; font-size: 14px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .pick-list .sub { font-size: 12px; color: var(--ink-soft); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="navlink" href="/pos">🧾 Checkout</a>
+    <h1>Print <em>Label</em></h1>
+
+    <div class="card" id="labelCard" style="display:none">
+      <canvas id="label" width="696" height="320"></canvas>
+      <button class="btn" id="shareBtn">🖨 Print / Share</button>
+      <button class="btn secondary" id="anotherBtn">Label another item</button>
+      <p class="hint">Share to <b>Brother iPrint&amp;Label</b> to print on the QL-810W (62&nbsp;mm roll, fit to tape).</p>
+    </div>
+
+    <div class="card" id="pickCard" style="display:none">
+      <p class="hint" style="margin:0 0 10px">Newest items first — tap one to make its label.</p>
+      <ul class="pick-list" id="pickList"></ul>
+    </div>
+
+    <div class="err" id="errBox"></div>
+  </div>
+
+<script>
+(function () {
+  const params = new URLSearchParams(location.search);
+  const id = (params.get('id') || '').trim().toUpperCase();
+  const canvas = document.getElementById('label');
+  const errBox = document.getElementById('errBox');
+
+  function fail(msg) {
+    errBox.textContent = msg;
+    errBox.style.display = 'block';
+  }
+
+  // Same slug rule as the site, so the QR is the product page URL — a
+  // customer scanning a shelf tag lands on the listing; the POS scanner
+  // just pulls the SKU back out of it.
+  function slugFor(p) {
+    const sku = String(p.id || '').toLowerCase();
+    const name = String(p.name || '').toLowerCase()
+      .replace(/['’]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    return name ? sku + '-' + name : sku;
+  }
+
+  async function drawLabel(item) {
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // QR on the left, 280px + quiet zone.
+    const qrUrl = 'https://jinkittys.com/p/' + slugFor(item);
+    const qrCanvas = document.createElement('canvas');
+    await QRCode.toCanvas(qrCanvas, qrUrl, { width: 280, margin: 1, errorCorrectionLevel: 'M' });
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(qrCanvas, 12, 20, 280, 280);
+
+    const textX = 312;
+    const maxWidth = canvas.width - textX - 12;
+
+    // Price, big — it's the thing a shopper and the register both read first.
+    ctx.fillStyle = '#000';
+    ctx.font = '900 84px Karla, sans-serif';
+    const priceText = '$' + Number(item.price).toFixed(Number.isInteger(Number(item.price)) ? 0 : 2);
+    ctx.fillText(priceText, textX, 96, maxWidth);
+
+    // Name, wrapped to at most 3 lines.
+    ctx.font = '600 30px Karla, sans-serif';
+    const words = String(item.name || '').split(/\s+/);
+    const lines = [];
+    let line = '';
+    for (const w of words) {
+      const test = line ? line + ' ' + w : w;
+      if (ctx.measureText(test).width > maxWidth && line) {
+        lines.push(line);
+        line = w;
+        if (lines.length === 3) break;
+      } else {
+        line = test;
+      }
+    }
+    if (lines.length < 3 && line) lines.push(line);
+    else if (line && lines.length === 3) lines[2] = lines[2].replace(/\s*\S*$/, '…');
+    lines.forEach((l, i) => ctx.fillText(l, textX, 150 + i * 38, maxWidth));
+
+    // SKU + site, small, at the bottom.
+    ctx.font = '700 26px Karla, sans-serif';
+    ctx.fillText(item.id, textX, 290, maxWidth);
+    ctx.font = '400 22px Karla, sans-serif';
+    ctx.fillStyle = '#444';
+    ctx.fillText('jinkittys.com', textX + ctx.measureText(item.id).width + 60, 290, maxWidth);
+  }
+
+  function canvasBlob() {
+    return new Promise((res, rej) =>
+      canvas.toBlob((b) => (b ? res(b) : rej(new Error('PNG failed'))), 'image/png'));
+  }
+
+  async function shareOrDownload(item) {
+    try {
+      const blob = await canvasBlob();
+      const file = new File([blob], item.id + '-label.png', { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: item.id + ' label' });
+        return;
+      }
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = file.name;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } catch (err) {
+      if (err && err.name === 'AbortError') return; // user closed the sheet
+      fail('Could not share the label (' + err.message + ').');
+    }
+  }
+
+  async function showLabel() {
+    try {
+      // Wait for fonts so the canvas doesn't render in a fallback face.
+      if (document.fonts && document.fonts.ready) await document.fonts.ready;
+      const res = await fetch('/api/pos/item?id=' + encodeURIComponent(id), { cache: 'no-store' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Lookup failed');
+      const item = data.item;
+      await drawLabel(item);
+      document.getElementById('labelCard').style.display = 'block';
+      document.getElementById('shareBtn').onclick = () => shareOrDownload(item);
+      document.getElementById('anotherBtn').onclick = () => { location.href = '/pos-label'; };
+    } catch (err) {
+      fail(err.message);
+    }
+  }
+
+  async function showPicker() {
+    try {
+      const res = await fetch('/api/products', { cache: 'no-store' });
+      const products = await res.json();
+      const list = document.getElementById('pickList');
+      const items = (Array.isArray(products) ? products : []).filter((p) => p && p.id).slice(0, 50);
+      if (!items.length) { fail('No items in inventory yet.'); return; }
+      for (const p of items) {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = '/pos-label?id=' + encodeURIComponent(p.id);
+        if (p.image && /^https:/.test(p.image)) {
+          const img = document.createElement('img');
+          img.src = p.image; img.loading = 'lazy'; img.alt = '';
+          a.appendChild(img);
+        } else {
+          const d = document.createElement('div');
+          d.className = 'noimg'; d.textContent = '🏷️';
+          a.appendChild(d);
+        }
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        const name = document.createElement('div');
+        name.className = 'name'; name.textContent = p.name || '(unnamed)';
+        const sub = document.createElement('div');
+        sub.className = 'sub';
+        sub.textContent = p.id + ' · $' + Number(p.price || 0).toFixed(2);
+        meta.appendChild(name); meta.appendChild(sub);
+        a.appendChild(meta);
+        li.appendChild(a);
+        list.appendChild(li);
+      }
+      document.getElementById('pickCard').style.display = 'block';
+    } catch (err) {
+      fail(err.message);
+    }
+  }
+
+  if (typeof QRCode === 'undefined' && id) {
+    fail('The QR library did not load — check the connection and reload.');
+  } else if (id) {
+    showLabel();
+  } else {
+    showPicker();
+  }
+})();
+</script>
+</body>
+</html>

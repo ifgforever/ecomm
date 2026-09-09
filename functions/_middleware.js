@@ -23,6 +23,10 @@ const PROTECTED_PAGES = new Set([
   // Swipe-to-delete screen. quick-add.html stays open (adding is harmless),
   // but removing listings is admin-only, same as deleting from admin.html.
   "/quick-delete.html", "/quick-delete",
+  // The point of sale. Checkout records money and customer emails; the
+  // label page exposes reprints. Staff log in once (30-day cookie).
+  "/pos.html", "/pos",
+  "/pos-label.html", "/pos-label",
 ]);
 
 const PROTECTED_WRITE_PATHS = new Set([
@@ -46,11 +50,16 @@ export async function onRequest(context) {
   const path = url.pathname;
 
   const isProtectedPage = PROTECTED_PAGES.has(path);
+  // The whole POS API is gated for EVERY method, unlike the write-only list
+  // below — its GETs return sales history and customer loyalty data, which
+  // have no business being publicly readable.
+  const isPosApi = path.startsWith("/api/pos/") || path === "/api/pos";
   const isProtectedWrite =
-    PROTECTED_WRITE_PATHS.has(path) &&
-    request.method !== "GET" &&
-    request.method !== "OPTIONS" &&
-    request.method !== "HEAD";
+    isPosApi ||
+    (PROTECTED_WRITE_PATHS.has(path) &&
+      request.method !== "GET" &&
+      request.method !== "OPTIONS" &&
+      request.method !== "HEAD");
 
   if (!isProtectedPage && !isProtectedWrite) {
     return next();

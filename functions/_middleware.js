@@ -27,6 +27,7 @@ const PROTECTED_PAGES = new Set([
   // label page exposes reprints. Staff log in once (30-day cookie).
   "/pos.html", "/pos",
   "/pos-label.html", "/pos-label",
+  "/pos-customers.html", "/pos-customers",
 ]);
 
 const PROTECTED_WRITE_PATHS = new Set([

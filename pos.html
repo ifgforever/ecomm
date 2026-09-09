@@ -1,0 +1,764 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Checkout — Jojin's Kitty Thrift</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32'>🧾</text></svg>">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900&family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- QR fallback decoder for browsers without the native BarcodeDetector
+     (iOS Safari, mostly — which is exactly the phone at the counter). -->
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+
+<style>
+  :root {
+    --ink: #1c1610; --ink-soft: #6b5d4f;
+    --paper: #f7f2eb; --paper-warm: #f0e9de;
+    --tan: #d4c4a8; --amber: #c8863a; --amber-dark: #a06820;
+    --teal: #3d7a6e; --rust: #b8522a; --card: #ffffff; --r: 4px;
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'Karla', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: var(--font-body); color: var(--ink);
+    background: var(--paper); padding-bottom: 60px;
+  }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 20px; }
+  h1 {
+    font-family: var(--font-display); font-size: 26px; font-weight: 900;
+    text-align: center; margin: 0 0 4px;
+  }
+  h1 em { font-style: italic; color: var(--amber-dark); }
+  .navrow { display: flex; justify-content: center; gap: 18px; margin-bottom: 14px; }
+  .navrow a { font-size: 13px; font-weight: 700; color: var(--teal); text-decoration: none; }
+
+  .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+  .tabs button {
+    flex: 1; font-family: var(--font-body); font-weight: 700; font-size: 14px;
+    padding: 11px; border-radius: var(--r); cursor: pointer;
+    border: 2px solid var(--teal); background: none; color: var(--teal);
+  }
+  .tabs button.active { background: var(--teal); color: #fff; }
+
+  .card {
+    background: var(--card); border: 1.5px solid var(--tan);
+    border-radius: var(--r); padding: 16px; box-shadow: 5px 5px 0 var(--amber);
+    margin-bottom: 16px;
+  }
+  .card h2 {
+    font-family: var(--font-display); font-size: 17px; margin: 0 0 10px;
+  }
+
+  .btn {
+    font-family: var(--font-body); font-weight: 700; font-size: 15px;
+    color: #fff; background: var(--teal); border: none; border-radius: var(--r);
+    padding: 13px 16px; cursor: pointer; width: 100%;
+  }
+  .btn.secondary { background: none; color: var(--teal); border: 2px solid var(--teal); }
+  .btn.small { width: auto; padding: 8px 12px; font-size: 13px; }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .btn.rust { background: var(--rust); }
+
+  .addrow { display: flex; gap: 10px; }
+  .addrow .btn { flex: 1; }
+
+  /* scanner overlay */
+  #scanOverlay {
+    position: fixed; inset: 0; background: rgba(20,15,10,.96); z-index: 50;
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+  }
+  #scanOverlay video { width: 100%; max-width: 480px; max-height: 62vh; object-fit: cover; }
+  #scanStatus { color: #fff; font-size: 14px; font-weight: 600; margin: 14px 0; min-height: 20px; text-align: center; padding: 0 20px;}
+  #scanClose { max-width: 200px; }
+
+  /* cart */
+  .cart-line { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--paper-warm); }
+  .cart-line .info { flex: 1; min-width: 0; }
+  .cart-line .name { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cart-line .sub { font-size: 12px; color: var(--ink-soft); }
+  .cart-line .sub .orig { text-decoration: line-through; }
+  .price-btn {
+    font-family: var(--font-body); font-weight: 700; font-size: 15px;
+    background: var(--paper-warm); border: 1px solid var(--tan); border-radius: var(--r);
+    padding: 8px 10px; cursor: pointer; color: var(--ink);
+  }
+  .qty-btns { display: flex; align-items: center; gap: 4px; }
+  .qty-btns button {
+    width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--tan);
+    background: none; font-size: 16px; font-weight: 700; cursor: pointer; color: var(--ink);
+  }
+  .qty-btns span { min-width: 18px; text-align: center; font-weight: 700; }
+  .x-btn { background: none; border: none; color: var(--rust); font-size: 18px; cursor: pointer; padding: 4px; }
+  .empty { color: var(--ink-soft); font-size: 13.5px; text-align: center; padding: 14px 0; }
+
+  label.f {
+    display: block; font-size: 12px; font-weight: 700; color: var(--ink-soft);
+    text-transform: uppercase; letter-spacing: .04em; margin: 12px 0 5px;
+  }
+  input[type=number], input[type=email], input[type=text] {
+    width: 100%; font-family: var(--font-body); font-size: 16px; font-weight: 600;
+    color: var(--ink); background: var(--paper-warm); border: 1px solid var(--tan);
+    border-radius: var(--r); padding: 11px 12px;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+  .chips button {
+    font-family: var(--font-body); font-size: 12.5px; font-weight: 700;
+    padding: 8px 11px; border-radius: 999px; border: 1.5px solid var(--tan);
+    background: none; cursor: pointer; color: var(--ink);
+  }
+  .chips button.on { background: var(--amber); border-color: var(--amber); color: #fff; }
+
+  /* loyalty */
+  .loyal { background: var(--paper-warm); border-radius: var(--r); padding: 10px 12px; margin-top: 10px; font-size: 13.5px; display: none; }
+  .loyal .punches { letter-spacing: 2px; font-size: 15px; }
+  .loyal .row { display: flex; justify-content: space-between; margin: 3px 0; }
+  .credit-row { display: none; align-items: center; gap: 8px; margin-top: 8px; }
+  .credit-row input { width: 90px; }
+
+  /* totals */
+  .totals .row { display: flex; justify-content: space-between; font-size: 14.5px; padding: 3px 0; }
+  .totals .row.total { font-size: 19px; font-weight: 700; border-top: 2px solid var(--ink); margin-top: 6px; padding-top: 8px; }
+  .payrow { display: flex; gap: 8px; margin-top: 14px; }
+  .payrow button {
+    flex: 1; font-family: var(--font-body); font-weight: 700; font-size: 14px;
+    padding: 12px 4px; border-radius: var(--r); cursor: pointer;
+    border: 2px solid var(--teal); background: none; color: var(--teal);
+  }
+  .payrow button.on { background: var(--teal); color: #fff; }
+
+  .err { color: var(--rust); font-size: 13.5px; text-align: center; margin-top: 10px; display: none; }
+  .done { text-align: center; padding: 22px 8px; }
+  .done .big { font-size: 42px; }
+  .done h2 { font-family: var(--font-display); margin: 8px 0; }
+  .done .loyalty-note { color: var(--amber-dark); font-weight: 700; margin: 4px 0; }
+  .done .sum { color: var(--ink-soft); font-size: 14px; }
+
+  /* returns */
+  .sale-block { border: 1px solid var(--tan); border-radius: var(--r); margin-bottom: 10px; overflow: hidden; }
+  .sale-head { padding: 10px 12px; background: var(--paper-warm); display: flex; justify-content: space-between; cursor: pointer; font-size: 13.5px; }
+  .sale-head b { font-size: 14px; }
+  .sale-body { padding: 6px 12px 12px; display: none; }
+  .ret-line { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--paper-warm); font-size: 13.5px; }
+  .ret-line input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--teal); }
+  .ret-line .rn { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ret-line .returned { color: var(--ink-soft); font-style: italic; }
+  .pill { font-size: 11px; font-weight: 700; border-radius: 999px; padding: 2px 8px; background: var(--tan); }
+  .pill.returned { background: var(--rust); color: #fff; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Jojin's <em>Register</em></h1>
+  <div class="navrow">
+    <a href="/quick-add">📷 Intake</a>
+    <a href="/pos-label">🏷️ Labels</a>
+    <a href="/pos-customers">💳 Cards</a>
+    <a href="/admin">⚙️ Admin</a>
+  </div>
+
+  <div class="tabs">
+    <button id="tabSale" class="active">Sale</button>
+    <button id="tabReturns">Returns</button>
+  </div>
+
+  <!-- ============================ SALE ============================ -->
+  <div id="salePanel">
+    <div class="card">
+      <div class="addrow">
+        <button class="btn" id="scanBtn">📷 Scan label</button>
+        <button class="btn secondary" id="manualBtn">＋ No label</button>
+      </div>
+
+      <div id="manualForm" style="display:none">
+        <label class="f">Category</label>
+        <div class="chips" id="manualChips"></div>
+        <label class="f">Price</label>
+        <input type="number" id="manualPrice" placeholder="0" min="0" step="0.01" inputmode="decimal" />
+        <label class="f">Name (optional)</label>
+        <input type="text" id="manualName" placeholder="e.g. Keroppi plush" />
+        <div style="margin-top:12px" class="addrow">
+          <button class="btn" id="manualAddBtn">Add to sale</button>
+          <button class="btn secondary" id="manualCancelBtn">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>This sale</h2>
+      <div id="cartLines"><div class="empty">Scan a label or add an item to start.</div></div>
+    </div>
+
+    <div class="card">
+      <h2>Customer <span style="font-weight:400;font-size:12px;color:var(--ink-soft)">(optional — for loyalty)</span></h2>
+      <input type="email" id="custEmail" placeholder="customer@email.com" autocomplete="off" />
+      <div class="loyal" id="loyalBox"></div>
+      <div class="credit-row" id="creditRow">
+        <input type="number" id="creditInput" min="0" step="0.01" inputmode="decimal" />
+        <span style="font-size:13px">of $<span id="creditAvail">0</span> credit</span>
+        <button class="btn small secondary" id="creditMaxBtn">Use all</button>
+      </div>
+      <button class="btn small" id="bdayBtn" style="display:none;margin-top:10px;background:var(--amber)">🎂 Give $50 birthday gift</button>
+    </div>
+
+    <div class="card totals" id="totalsCard">
+      <div class="row"><span>Subtotal</span><span id="tSub">$0.00</span></div>
+      <div class="row" id="tCreditRow" style="display:none"><span>Store credit</span><span id="tCredit">−$0.00</span></div>
+      <div class="row"><span>Tax (10.25%)</span><span id="tTax">$0.00</span></div>
+      <div class="row total"><span>Total</span><span id="tTotal">$0.00</span></div>
+
+      <div class="payrow" id="payRow">
+        <button data-pay="Cash">💵 Cash</button>
+        <button data-pay="Card">💳 Card</button>
+        <button data-pay="Zelle">📱 Zelle</button>
+      </div>
+      <p style="font-size:12px;color:var(--ink-soft);margin:8px 0 0;text-align:center" id="cardNote"></p>
+      <button class="btn" id="chargeBtn" style="margin-top:12px">Complete sale</button>
+      <div class="err" id="saleErr"></div>
+    </div>
+
+    <div class="card done" id="doneCard" style="display:none">
+      <div class="big">✅</div>
+      <h2>Sale recorded</h2>
+      <div id="doneLoyalty"></div>
+      <p class="sum" id="doneSum"></p>
+      <button class="btn" id="newSaleBtn">Start next sale</button>
+    </div>
+  </div>
+
+  <!-- ============================ RETURNS ============================ -->
+  <div id="returnsPanel" style="display:none">
+    <div class="card">
+      <h2>Recent sales</h2>
+      <p style="font-size:12.5px;color:var(--ink-soft);margin:0 0 10px">
+        Tap a sale, tick what's coming back. Returning restocks the item on
+        the site — reprint its label so it can go back on the shelf.
+      </p>
+      <div id="salesList"><div class="empty">Loading…</div></div>
+      <div class="err" id="retErr"></div>
+    </div>
+  </div>
+</div>
+
+<!-- scanner -->
+<div id="scanOverlay">
+  <video id="scanVideo" playsinline muted></video>
+  <div id="scanStatus">Point at a label's QR code</div>
+  <button class="btn rust" id="scanClose">Done scanning</button>
+</div>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const CATEGORIES = ["Labubu & Pop Mart", "Hello Kitty & Sanrio", "Retro Video Games",
+                      "Vintage Toys", "Funko Pop", "Monster High", "Other"];
+  const TAX_RATE = 0.1025;
+
+  // ------------------------------------------------------------------
+  // Cart state
+  // ------------------------------------------------------------------
+  let cart = [];          // {key, id?, manual?, name, category, price, originalPrice, qty}
+  let customer = null;    // summary from the API
+  let payment = 'Cash';
+  let birthdayGiftArmed = false;
+  let keySeq = 0;
+
+  function money(n) { return '$' + Number(n).toFixed(2); }
+
+  function renderCart() {
+    const box = $('cartLines');
+    box.innerHTML = '';
+    if (!cart.length) {
+      box.innerHTML = '<div class="empty">Scan a label or add an item to start.</div>';
+    }
+    for (const line of cart) {
+      const row = document.createElement('div');
+      row.className = 'cart-line';
+
+      const info = document.createElement('div');
+      info.className = 'info';
+      const name = document.createElement('div');
+      name.className = 'name';
+      name.textContent = line.name;
+      const sub = document.createElement('div');
+      sub.className = 'sub';
+      sub.textContent = (line.id || 'no label') + ' · ' + line.category;
+      if (line.originalPrice !== null && Number(line.price) !== Number(line.originalPrice)) {
+        const s = document.createElement('span');
+        s.className = 'orig';
+        s.textContent = ' ' + money(line.originalPrice);
+        sub.appendChild(s);
+      }
+      info.appendChild(name); info.appendChild(sub);
+
+      const priceBtn = document.createElement('button');
+      priceBtn.className = 'price-btn';
+      priceBtn.textContent = money(line.price);
+      priceBtn.title = 'Tap to change the price (haggling happens)';
+      priceBtn.onclick = () => {
+        const v = prompt('Price for "' + line.name + '"', Number(line.price).toFixed(2));
+        if (v === null) return;
+        const p = Number(v);
+        if (Number.isFinite(p) && p >= 0) { line.price = p; renderCart(); }
+      };
+
+      const qty = document.createElement('div');
+      qty.className = 'qty-btns';
+      const minus = document.createElement('button'); minus.textContent = '−';
+      const count = document.createElement('span'); count.textContent = line.qty;
+      const plus = document.createElement('button'); plus.textContent = '+';
+      minus.onclick = () => { line.qty = Math.max(1, line.qty - 1); renderCart(); };
+      plus.onclick = () => { line.qty += 1; renderCart(); };
+      qty.appendChild(minus); qty.appendChild(count); qty.appendChild(plus);
+
+      const x = document.createElement('button');
+      x.className = 'x-btn'; x.textContent = '✕';
+      x.onclick = () => { cart = cart.filter((l) => l.key !== line.key); renderCart(); };
+
+      row.appendChild(info); row.appendChild(priceBtn); row.appendChild(qty); row.appendChild(x);
+      box.appendChild(row);
+    }
+    renderTotals();
+  }
+
+  function subtotal() {
+    return cart.reduce((s, l) => s + Number(l.price) * l.qty, 0);
+  }
+
+  function creditApplied() {
+    const avail = customer ? customer.creditCents / 100 : 0;
+    const want = Number($('creditInput').value) || 0;
+    return Math.min(want, avail, subtotal());
+  }
+
+  function renderTotals() {
+    const sub = subtotal();
+    const credit = creditApplied();
+    const taxable = Math.max(0, sub - credit);
+    const tax = Math.round(taxable * TAX_RATE * 100) / 100;
+    $('tSub').textContent = money(sub);
+    $('tCreditRow').style.display = credit > 0 ? 'flex' : 'none';
+    $('tCredit').textContent = '−' + money(credit);
+    $('tTax').textContent = money(tax);
+    $('tTotal').textContent = money(taxable + tax);
+    $('cardNote').textContent = payment === 'Card'
+      ? 'Run ' + money(taxable + tax) + ' on the card terminal — this app just records it.'
+      : '';
+  }
+
+  function addItemToCart(item) {
+    const existing = cart.find((l) => l.id === item.id && Number(l.price) === Number(item.price));
+    if (existing) { existing.qty += 1; renderCart(); return; }
+    cart.push({
+      key: ++keySeq, id: item.id, name: item.name || item.id,
+      category: item.category || '', price: Number(item.price) || 0,
+      originalPrice: Number(item.price) || 0, qty: 1,
+    });
+    renderCart();
+  }
+
+  // ------------------------------------------------------------------
+  // Scanner
+  // ------------------------------------------------------------------
+  let scanStream = null, scanning = false;
+  const seenRecently = new Map(); // SKU -> timestamp, to debounce re-reads
+
+  async function lookupAndAdd(sku) {
+    const now = Date.now();
+    if ((seenRecently.get(sku) || 0) > now - 3000) return;
+    seenRecently.set(sku, now);
+    $('scanStatus').textContent = 'Looking up ' + sku + '…';
+    try {
+      const res = await fetch('/api/pos/item?id=' + encodeURIComponent(sku), { cache: 'no-store' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Not found');
+      addItemToCart(data.item);
+      if (navigator.vibrate) navigator.vibrate(80);
+      const warn = data.item.quantity <= 0 ? ' ⚠️ was marked sold out' : '';
+      $('scanStatus').textContent = '✅ ' + data.item.name + ' — ' + money(data.item.price) + warn;
+    } catch (err) {
+      $('scanStatus').textContent = '❌ ' + err.message;
+    }
+  }
+
+  function extractSku(text) {
+    const m = /SKU-\d+/i.exec(String(text || ''));
+    return m ? m[0].toUpperCase() : null;
+  }
+
+  async function startScan() {
+    const overlay = $('scanOverlay');
+    const video = $('scanVideo');
+    overlay.style.display = 'flex';
+    $('scanStatus').textContent = 'Point at a label\'s QR code';
+    try {
+      scanStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' }, audio: false,
+      });
+    } catch {
+      $('scanStatus').textContent = 'Camera blocked — allow camera access for this site.';
+      return;
+    }
+    video.srcObject = scanStream;
+    await video.play();
+    scanning = true;
+
+    if ('BarcodeDetector' in window) {
+      const detector = new BarcodeDetector({ formats: ['qr_code'] });
+      const tick = async () => {
+        if (!scanning) return;
+        try {
+          const codes = await detector.detect(video);
+          for (const c of codes) {
+            const sku = extractSku(c.rawValue);
+            if (sku) lookupAndAdd(sku);
+          }
+        } catch {}
+        requestAnimationFrame(tick);
+      };
+      tick();
+    } else if (typeof jsQR !== 'undefined') {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      const tick = () => {
+        if (!scanning) return;
+        if (video.readyState >= 2) {
+          canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+          ctx.drawImage(video, 0, 0);
+          const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const code = jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' });
+          if (code) {
+            const sku = extractSku(code.data);
+            if (sku) lookupAndAdd(sku);
+          }
+        }
+        setTimeout(tick, 150); // ~7 fps is plenty and keeps the phone cool
+      };
+      tick();
+    } else {
+      $('scanStatus').textContent = 'No QR decoder available — type the SKU via “No label” instead.';
+    }
+  }
+
+  function stopScan() {
+    scanning = false;
+    if (scanStream) { scanStream.getTracks().forEach((t) => t.stop()); scanStream = null; }
+    $('scanOverlay').style.display = 'none';
+  }
+
+  $('scanBtn').onclick = startScan;
+  $('scanClose').onclick = stopScan;
+
+  // ------------------------------------------------------------------
+  // Manual (unlabeled) items
+  // ------------------------------------------------------------------
+  let manualCategory = null;
+  const chipsBox = $('manualChips');
+  for (const c of CATEGORIES) {
+    const b = document.createElement('button');
+    b.textContent = c;
+    b.onclick = () => {
+      manualCategory = c;
+      [...chipsBox.children].forEach((x) => x.classList.toggle('on', x === b));
+    };
+    chipsBox.appendChild(b);
+  }
+
+  $('manualBtn').onclick = () => { $('manualForm').style.display = 'block'; $('manualPrice').focus(); };
+  $('manualCancelBtn').onclick = () => { $('manualForm').style.display = 'none'; };
+  $('manualAddBtn').onclick = () => {
+    const price = Number($('manualPrice').value);
+    if (!manualCategory) return saleError('Pick a category for the unlabeled item.');
+    if (!Number.isFinite(price) || price <= 0) return saleError('Enter the price.');
+    cart.push({
+      key: ++keySeq, id: null, manual: true,
+      name: $('manualName').value.trim() || (manualCategory + ' — unlabeled item'),
+      category: manualCategory, price, originalPrice: null, qty: 1,
+    });
+    $('manualPrice').value = ''; $('manualName').value = '';
+    $('manualForm').style.display = 'none';
+    saleError('');
+    renderCart();
+  };
+
+  // ------------------------------------------------------------------
+  // Customer / loyalty
+  // ------------------------------------------------------------------
+  let emailTimer = null;
+  $('custEmail').addEventListener('input', () => {
+    clearTimeout(emailTimer);
+    emailTimer = setTimeout(lookupCustomer, 500);
+  });
+
+  async function lookupCustomer() {
+    const email = $('custEmail').value.trim().toLowerCase();
+    customer = null; birthdayGiftArmed = false;
+    $('loyalBox').style.display = 'none';
+    $('creditRow').style.display = 'none';
+    $('bdayBtn').style.display = 'none';
+    renderTotals();
+    if (!email.includes('@')) return;
+    try {
+      const res = await fetch('/api/pos/customer?email=' + encodeURIComponent(email), { cache: 'no-store' });
+      const data = await res.json();
+      if (!res.ok) return;
+      customer = data.customer; // null for a brand-new email — that's fine
+      renderLoyalty(email);
+    } catch {}
+  }
+
+  function renderLoyalty(email) {
+    const box = $('loyalBox');
+    box.style.display = 'block';
+    if (!customer) {
+      box.innerHTML = '<b>New customer</b> — first punch starts with this sale ($20+).';
+      return;
+    }
+    const filled = '●'.repeat(customer.punches);
+    const open = '○'.repeat(Math.max(0, customer.punchesForCredit - customer.punches));
+    box.innerHTML =
+      '<div class="row"><span>Punch card</span><span class="punches">' + filled + open + '</span></div>' +
+      '<div class="row"><span>Visits</span><span>' + customer.lifetimeVisits +
+        (customer.isRegular ? ' ⭐ regular' : '') + '</span></div>' +
+      '<div class="row"><span>Store credit</span><span>$' + customer.credit + '</span></div>';
+    if (customer.creditCents > 0) {
+      $('creditRow').style.display = 'flex';
+      $('creditAvail').textContent = customer.credit;
+      $('creditInput').value = '';
+    }
+    const year = new Date().getFullYear();
+    if (customer.isRegular && customer.lastBirthdayGiftYear !== year) {
+      $('bdayBtn').style.display = 'block';
+      $('bdayBtn').textContent = '🎂 Give $50 birthday gift';
+      birthdayGiftArmed = false;
+    }
+  }
+
+  $('creditInput').addEventListener('input', renderTotals);
+  $('creditMaxBtn').onclick = () => {
+    $('creditInput').value = Math.min(customer ? customer.creditCents / 100 : 0, subtotal()).toFixed(2);
+    renderTotals();
+  };
+  $('bdayBtn').onclick = () => {
+    birthdayGiftArmed = !birthdayGiftArmed;
+    $('bdayBtn').textContent = birthdayGiftArmed
+      ? '🎂 Birthday gift will be added ✓ (tap to undo)'
+      : '🎂 Give $50 birthday gift';
+  };
+
+  // ------------------------------------------------------------------
+  // Payment + submit
+  // ------------------------------------------------------------------
+  for (const b of $('payRow').children) {
+    b.onclick = () => {
+      payment = b.dataset.pay;
+      [...$('payRow').children].forEach((x) => x.classList.toggle('on', x === b));
+      renderTotals();
+    };
+  }
+  $('payRow').children[0].classList.add('on');
+
+  function saleError(msg) {
+    const e = $('saleErr');
+    e.textContent = msg; e.style.display = msg ? 'block' : 'none';
+  }
+
+  $('chargeBtn').onclick = async () => {
+    if (!cart.length) return saleError('Nothing in the sale yet.');
+    saleError('');
+    $('chargeBtn').disabled = true;
+    $('chargeBtn').textContent = 'Recording…';
+    try {
+      const body = {
+        payment,
+        items: cart.map((l) => l.manual
+          ? { manual: true, category: l.category, name: l.name, price: l.price, qty: l.qty }
+          : { id: l.id, price: l.price, qty: l.qty }),
+      };
+      const email = $('custEmail').value.trim();
+      if (email) body.customerEmail = email;
+      const credit = creditApplied();
+      if (credit > 0) body.useCreditCents = Math.round(credit * 100);
+      if (birthdayGiftArmed) body.birthdayGift = true;
+
+      const res = await fetch('/api/pos/sale', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Sale failed (' + res.status + ')');
+
+      $('doneLoyalty').innerHTML = (data.loyalty || [])
+        .map((n) => '<div class="loyalty-note">' + n + '</div>').join('');
+      $('doneSum').textContent =
+        'Sale #' + data.sale.id + ' · ' + data.sale.items.length + ' item(s) · ' +
+        money(data.sale.total) + ' ' + data.sale.payment +
+        (Number(data.sale.creditUsed) > 0 ? ' (used $' + data.sale.creditUsed + ' credit)' : '');
+      $('salePanel').querySelectorAll('.card').forEach((c) => { if (c.id !== 'doneCard') c.style.display = 'none'; });
+      $('doneCard').style.display = 'block';
+      window.scrollTo(0, 0);
+    } catch (err) {
+      saleError(err.message);
+    } finally {
+      $('chargeBtn').disabled = false;
+      $('chargeBtn').textContent = 'Complete sale';
+    }
+  };
+
+  $('newSaleBtn').onclick = () => {
+    cart = []; customer = null; birthdayGiftArmed = false;
+    $('custEmail').value = ''; $('creditInput').value = '';
+    $('loyalBox').style.display = 'none';
+    $('creditRow').style.display = 'none';
+    $('bdayBtn').style.display = 'none';
+    $('doneCard').style.display = 'none';
+    $('salePanel').querySelectorAll('.card').forEach((c) => { if (c.id !== 'doneCard') c.style.display = 'block'; });
+    renderCart();
+  };
+
+  // ------------------------------------------------------------------
+  // Returns
+  // ------------------------------------------------------------------
+  function retError(msg) {
+    const e = $('retErr');
+    e.textContent = msg; e.style.display = msg ? 'block' : 'none';
+  }
+
+  async function loadSales() {
+    const box = $('salesList');
+    box.innerHTML = '<div class="empty">Loading…</div>';
+    retError('');
+    try {
+      const res = await fetch('/api/pos/sale?limit=25', { cache: 'no-store' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not load sales');
+      box.innerHTML = '';
+      if (!data.sales.length) {
+        box.innerHTML = '<div class="empty">No sales recorded yet.</div>';
+        return;
+      }
+      for (const sale of data.sales) box.appendChild(saleBlock(sale));
+    } catch (err) {
+      box.innerHTML = '';
+      retError(err.message);
+    }
+  }
+
+  function saleBlock(sale) {
+    const block = document.createElement('div');
+    block.className = 'sale-block';
+
+    const head = document.createElement('div');
+    head.className = 'sale-head';
+    const when = new Date(sale.createdAt);
+    const left = document.createElement('span');
+    left.innerHTML = '<b>#' + sale.id + '</b> · ' +
+      when.toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    const right = document.createElement('span');
+    right.innerHTML = money(sale.total) + ' ' + sale.payment +
+      (sale.status !== 'completed' ? ' <span class="pill returned">' + sale.status.replace('_', ' ') + '</span>' : '');
+    head.appendChild(left); head.appendChild(right);
+
+    const bodyEl = document.createElement('div');
+    bodyEl.className = 'sale-body';
+    head.onclick = () => {
+      bodyEl.style.display = bodyEl.style.display === 'block' ? 'none' : 'block';
+    };
+
+    const checks = [];
+    for (const item of sale.items) {
+      const line = document.createElement('div');
+      line.className = 'ret-line';
+      const remaining = item.qty - item.returnedQty;
+      if (remaining > 0) {
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.dataset.saleItemId = item.saleItemId;
+        cb.dataset.qty = remaining; // returns everything left on the line
+        checks.push(cb);
+        line.appendChild(cb);
+      }
+      const rn = document.createElement('span');
+      rn.className = 'rn' + (remaining === 0 ? ' returned' : '');
+      rn.textContent = (item.qty > 1 ? item.qty + '× ' : '') + item.name +
+        (remaining === 0 ? ' (returned)' : (item.returnedQty > 0 ? ' (' + item.returnedQty + ' returned)' : ''));
+      const pr = document.createElement('span');
+      pr.textContent = money(item.price);
+      line.appendChild(rn); line.appendChild(pr);
+      bodyEl.appendChild(line);
+    }
+
+    if (checks.length) {
+      const btn = document.createElement('button');
+      btn.className = 'btn rust';
+      btn.style.marginTop = '10px';
+      btn.textContent = 'Return checked items';
+      btn.onclick = async () => {
+        const picked = checks.filter((c) => c.checked);
+        if (!picked.length) return retError('Tick at least one item first.');
+        btn.disabled = true;
+        retError('');
+        try {
+          const res = await fetch('/api/pos/return', {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              saleId: sale.id,
+              items: picked.map((c) => ({ saleItemId: Number(c.dataset.saleItemId), qty: Number(c.dataset.qty) })),
+            }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Return failed');
+          let msg = 'Refund the customer ' + money(data.refund.cashOrCard) + '.';
+          if (Number(data.refund.creditBack) > 0) {
+            msg += ' $' + data.refund.creditBack + ' went back to their store credit.';
+          }
+          const note = document.createElement('div');
+          note.style.cssText = 'margin-top:10px;font-size:13.5px;font-weight:600;color:var(--teal)';
+          note.textContent = '✅ ' + msg;
+          bodyEl.appendChild(note);
+          for (const r of data.restocked) {
+            const a = document.createElement('a');
+            a.href = r.labelUrl;
+            a.textContent = '🏷️ Reprint label for ' + r.id;
+            a.style.cssText = 'display:block;margin-top:6px;font-size:13.5px;font-weight:700;color:var(--teal)';
+            bodyEl.appendChild(a);
+          }
+          setTimeout(loadSales, 2500);
+        } catch (err) {
+          retError(err.message);
+          btn.disabled = false;
+        }
+      };
+      bodyEl.appendChild(btn);
+    }
+
+    block.appendChild(head);
+    block.appendChild(bodyEl);
+    return block;
+  }
+
+  // ------------------------------------------------------------------
+  // Tabs
+  // ------------------------------------------------------------------
+  $('tabSale').onclick = () => {
+    $('tabSale').classList.add('active'); $('tabReturns').classList.remove('active');
+    $('salePanel').style.display = 'block'; $('returnsPanel').style.display = 'none';
+  };
+  $('tabReturns').onclick = () => {
+    $('tabReturns').classList.add('active'); $('tabSale').classList.remove('active');
+    $('salePanel').style.display = 'none'; $('returnsPanel').style.display = 'block';
+    loadSales();
+  };
+
+  renderCart();
+})();
+</script>
+</body>
+</html>

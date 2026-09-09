@@ -4,11 +4,30 @@
 //   1. Uploads the photo to R2
 //   2. Asks Claude to draft name/category/description/pick-note from the
 //      photo alone (no note field on this form — it's photo + price only)
-//   3. Writes a complete product straight into live inventory
+//   3. Writes a complete product straight into live inventory (D1 once the
+//      DB binding exists, PRODUCTS_KV until then — see _lib/store.js)
 //
 // The submitted price is the source of truth and is NEVER touched by the AI
 // — it's set once here and that's final, unless someone edits it later in
 // admin.html by hand.
+//
+// If the form sends a `category` (the intake page's chips, matching the
+// site's category pages), that category is final too — the AI only drafts
+// name/description/pick-note. With no category sent, the AI picks one, same
+// as it always has.
+
+import { listProducts, insertProduct, updateProduct, nextSku, usingD1 } from "../_lib/store.js";
+
+// The site's category pages. Intake chips send exactly these strings.
+export const SITE_CATEGORIES = [
+  "Labubu & Pop Mart",
+  "Hello Kitty & Sanrio",
+  "Retro Video Games",
+  "Vintage Toys",
+  "Funko Pop",
+  "Monster High",
+  "Other",
+];
 
 export async function onRequestPost(context) {
   let stage = "starting the request";
@@ -19,7 +38,7 @@ export async function onRequestPost(context) {
 
     if (!env.IMAGES) return error("Server is missing the IMAGES R2 binding.", 500);
     if (!env.IMAGE_BASE_URL) return error("Server is missing IMAGE_BASE_URL.", 500);
-    if (!env.PRODUCTS_KV) return error("Server is missing the PRODUCTS_KV binding.", 500);
+    if (!usingD1(env) && !env.PRODUCTS_KV) return error("Server is missing product storage (DB or PRODUCTS_KV).", 500);
     if (!env.ANTHROPIC_API_KEY) return error("Server is missing ANTHROPIC_API_KEY.", 500);
 
     const anthropicApiKey = String(env.ANTHROPIC_API_KEY)
@@ -51,6 +70,7 @@ export async function onRequestPost(context) {
     const addQty = Math.max(1, Math.floor(Number(body?.quantity)) || 1);
     const mediaType = String(body?.mediaType || "image/jpeg").trim().toLowerCase();
     const base64 = (body?.base64 || "").replace(/\s/g, "");
+    const pickedCategory = SITE_CATEGORIES.includes(body?.category) ? body.category : "";
 
     if (!price) return error("Missing price", 400);
     if (!base64) return error("Missing photo data", 400);
@@ -106,9 +126,12 @@ export async function onRequestPost(context) {
     //    than re-fetching the public URL. If the Images binding converted a
     //    phone-native format, send the resulting WebP to the AI as well.
     stage = "drafting the listing";
+    const categoryBullet = pickedCategory
+      ? `The category is already decided: "${pickedCategory}" — echo it back unchanged, do not choose a different one.`
+      : `a one or two word category (e.g. "Outerwear", "Denim", "Electronics", "Toys")`;
     const systemPrompt = `You draft resale listings for Jojin's Kitty Thrift, a small curated secondhand shop in Chicago, based only on a photo of the item — no note from the seller this time, work entirely from what's visible in the image. Write:
 - a short, honest, appealing product name (title case, no gimmicks)
-- a one or two word category (e.g. "Outerwear", "Denim", "Electronics", "Toys")
+- ${categoryBullet}
 - a 2-3 sentence description in a warm, honest voice — mention any visible condition issues, don't oversell
 - a short one-sentence "pick note" in Jojin's own voice, the kind of personal blurb she'd write if featuring this item
 
@@ -157,8 +180,7 @@ Respond with ONLY a raw JSON object — your entire reply must be the JSON objec
 
     // 4. Build the product and write it straight into live inventory
     stage = "loading inventory";
-    const raw = await env.PRODUCTS_KV.get("products");
-    const products = raw ? JSON.parse(raw) : [];
+    const products = await listProducts(env);
 
     // If this item is already listed — same name once normalized, same price
     // — don't create a second listing (and a second, duplicate page for
@@ -176,18 +198,25 @@ Respond with ONLY a raw JSON object — your entire reply must be the JSON objec
       dupe.quantity = (Number(dupe.quantity) || 0) + addQty;
       dupe.inStock = true;
       stage = "saving inventory";
-      await env.PRODUCTS_KV.put("products", JSON.stringify(products));
+      await updateProduct(env, dupe);
       return new Response(
-        JSON.stringify({ ok: true, merged: true, name: dupe.name, id: dupe.id, quantity: dupe.quantity }),
+        JSON.stringify({
+          ok: true,
+          merged: true,
+          name: dupe.name,
+          id: dupe.id,
+          quantity: dupe.quantity,
+          labelUrl: `/pos-label?id=${encodeURIComponent(dupe.id)}`,
+        }),
         { status: 200, headers: { "Content-Type": "application/json" } }
       );
     }
 
     const product = {
-      id: nextSku(products),
+      id: await nextSku(env),
       name: draft.name || "Untitled item",
       price: Number(price), // fixed — from the app, never from the AI
-      category: draft.category || "",
+      category: pickedCategory || draft.category || "",
       quantity: addQty,
       inStock: true,
       image: imageUrl,
@@ -198,14 +227,21 @@ Respond with ONLY a raw JSON object — your entire reply must be the JSON objec
       createdAt: new Date().toISOString(),
     };
 
-    products.unshift(product);
     stage = "saving inventory";
-    await env.PRODUCTS_KV.put("products", JSON.stringify(products));
+    await insertProduct(env, product);
 
-    return new Response(JSON.stringify({ ok: true, name: product.name, id: product.id }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({
+        ok: true,
+        name: product.name,
+        id: product.id,
+        labelUrl: `/pos-label?id=${encodeURIComponent(product.id)}`,
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   } catch (err) {
     return error(`Quick Add failed while ${stage}: ${err.message}`, 500);
   }
@@ -215,18 +251,6 @@ Respond with ONLY a raw JSON object — your entire reply must be the JSON objec
 // vs "and the"), so compare on letters and digits only.
 function normalizeName(name) {
   return String(name || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
-}
-
-function nextSku(products) {
-  let maxNum = 1000;
-  for (const p of products) {
-    const match = /^SKU-(\d+)$/.exec(p.id || "");
-    if (match) {
-      const num = parseInt(match[1], 10);
-      if (num > maxNum) maxNum = num;
-    }
-  }
-  return `SKU-${maxNum + 1}`;
 }
 
 function extractJson(text) {

@@ -161,10 +161,36 @@
     padding: 10px 18px;
     cursor: pointer;
   }
+  .success a.label-btn {
+    display: block;
+    margin-top: 18px;
+    background: var(--teal);
+    color: #fff;
+    font-weight: 700;
+    font-size: 15px;
+    border-radius: var(--r);
+    padding: 14px;
+    text-decoration: none;
+  }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+  .chips button {
+    font-family: var(--font-body);
+    font-size: 12.5px;
+    font-weight: 700;
+    padding: 8px 11px;
+    border-radius: 999px;
+    border: 1.5px solid var(--tan);
+    background: none;
+    cursor: pointer;
+    color: var(--ink);
+  }
+  .chips button.on { background: var(--amber); border-color: var(--amber); color: #fff; }
 </style>
 </head>
 <body>
   <div class="wrap">
+    <a class="navlink" href="/pos">🧾 Checkout</a>
     <a class="navlink" href="/quick-delete.html">🗑 Quick Delete</a>
 
     <h1>Quick <em>Add</em></h1>
@@ -180,6 +206,9 @@
       <label>Price</label>
       <input type="number" id="priceInput" placeholder="0" min="0" step="1" inputmode="decimal" />
 
+      <label>Category</label>
+      <div class="chips" id="categoryChips"></div>
+
       <label>Quantity</label>
       <input type="number" id="qtyInput" value="1" min="1" step="1" inputmode="numeric" />
 
@@ -191,6 +220,7 @@
       <div class="big">✅</div>
       <h2>Added!</h2>
       <p id="successMsg">It's live in inventory now.</p>
+      <a class="label-btn" id="labelBtn" href="#" style="display:none">🏷️ Print label</a>
       <button id="addAnotherBtn">+ Add Another</button>
     </div>
   </div>
@@ -212,6 +242,24 @@
   let base64 = null;
   let mediaType = null;
   let photoPreparing = false;
+
+  // The site's category pages — the chip strings must match them exactly so
+  // an intake lands on the right page without any later cleanup. The chip
+  // sticks between items, since intake usually happens a bin at a time.
+  const CATEGORIES = ["Labubu & Pop Mart", "Hello Kitty & Sanrio", "Retro Video Games",
+                      "Vintage Toys", "Funko Pop", "Monster High", "Other"];
+  let category = null;
+  const chipsBox = document.getElementById('categoryChips');
+  for (const c of CATEGORIES) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = c;
+    b.addEventListener('click', () => {
+      category = c;
+      [...chipsBox.children].forEach((x) => x.classList.toggle('on', x === b));
+    });
+    chipsBox.appendChild(b);
+  }
 
   photoInput.addEventListener('change', async () => {
     const file = photoInput.files && photoInput.files[0];
@@ -313,6 +361,7 @@
     if (photoPreparing) return showError('Wait for the photo to finish preparing.');
     if (!base64) return showError('Take a photo first.');
     if (!priceInput.value) return showError('Enter a price.');
+    if (!category) return showError('Tap a category.');
 
     submitBtn.disabled = true;
     submitBtn.textContent = 'Adding & drafting with AI…';
@@ -323,7 +372,7 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'same-origin',
-        body: JSON.stringify({ price: priceInput.value, quantity: qtyInput.value || 1, mediaType, base64 }),
+        body: JSON.stringify({ price: priceInput.value, quantity: qtyInput.value || 1, category, mediaType, base64 }),
       });
 
       const responseText = await res.text();
@@ -339,6 +388,13 @@
       successMsg.textContent = data.merged
         ? `Already listed as "${data.name}" (${data.id}) — quantity is now ${data.quantity}.`
         : (data.name ? `"${data.name}" is live — $${priceInput.value}${qtyNote}` : 'It\'s live in inventory now.');
+      const labelBtn = document.getElementById('labelBtn');
+      if (data.labelUrl) {
+        labelBtn.href = data.labelUrl;
+        labelBtn.style.display = 'block';
+      } else {
+        labelBtn.style.display = 'none';
+      }
       formCard.style.display = 'none';
       successBox.style.display = 'block';
     } catch (err) {

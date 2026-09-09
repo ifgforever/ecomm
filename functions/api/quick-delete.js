@@ -16,10 +16,14 @@
 // A batch is one KV read-modify-write, so the grid's "delete 12 selected"
 // can't half-apply, and Undo puts all 12 back in one go.
 
+import { listProducts, replaceAllProducts, usingD1 } from "../_lib/store.js";
+
 export async function onRequestPost(context) {
   const { env, request } = context;
 
-  if (!env.PRODUCTS_KV) return error("Server is missing the PRODUCTS_KV binding.", 500);
+  if (!usingD1(env) && !env.PRODUCTS_KV) {
+    return error("No product storage: bind D1 as DB or KV as PRODUCTS_KV.", 500);
+  }
 
   let body;
   try {
@@ -28,8 +32,7 @@ export async function onRequestPost(context) {
     return error("Invalid JSON body", 400);
   }
 
-  const raw = await env.PRODUCTS_KV.get("products");
-  const products = raw ? JSON.parse(raw) : [];
+  const products = await listProducts(env);
 
   if (body && body.restore) return restore(env, products, body);
   return remove(env, products, body);
@@ -68,7 +71,7 @@ async function remove(env, products, body) {
     );
   }
 
-  await env.PRODUCTS_KV.put("products", JSON.stringify(products));
+  await replaceAllProducts(env, products);
 
   // Photos stay in R2. They're small, and keeping them is what lets Undo put
   // a listing back exactly as it was.
@@ -104,7 +107,7 @@ async function restore(env, products, body) {
     restored += 1;
   }
 
-  if (restored) await env.PRODUCTS_KV.put("products", JSON.stringify(products));
+  if (restored) await replaceAllProducts(env, products);
 
   return json({ ok: true, restored, total: products.length });
 }

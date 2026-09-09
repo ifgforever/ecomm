@@ -11,6 +11,7 @@ removes it from all of them; returning it puts it back.
 | `/quick-add` | Intake: photo → price → category chip → **Add It** → **Print label**. AI drafts the listing text. ~10 seconds per item. |
 | `/pos` | Checkout: scan QR labels or add unlabeled items, price override, Cash/Card/Zelle, loyalty, tax. Second tab is Returns. |
 | `/pos-label` | Make/reprint a label for any item (newest first when opened with no item). |
+| `/pos-customers` | Type in an existing paper punch card or Notes-app balance: email → punches, visits, credit, birthday. Changes are logged to `loyalty_events`. |
 
 `/quick-add` itself stays login-free (as before); `/pos`, `/pos-label`, and
 every `/api/pos/*` endpoint require the admin cookie from `/admin-login`.

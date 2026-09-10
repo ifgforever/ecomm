@@ -9,10 +9,14 @@ typing a product into Merchant Center:
 | `/feeds/google-local-inventory.txt` | Per-store stock. Tab-separated. | Supplemental source, type **Local product inventory**, **scheduled fetch** |
 | `/feeds/excluded.txt` | Everything in stock that is *not* being sent, and why. | Nothing — it is for us, not Google |
 
-Both read the same `PRODUCTS_KV` `"products"` array that `/api/products`,
-`/p/[slug]` and `/sitemap.xml` already read. Add an item in Quick Add and it
-is in both feeds on the next pull, with nothing else touched. That is the
-entire point: ~1,230 items and climbing, no data entry.
+Both read the same product list that `/api/products`, `/p/[slug]` and
+`/sitemap.xml` already read, through `loadProducts()` in `_lib/catalog.js` →
+`listProducts()` in `_lib/store.js`. That resolves to the D1 `items` table
+when a `DB` (or `jdb`) binding exists, and falls back to the original
+`PRODUCTS_KV` `"products"` array when it does not. Either way the feeds do
+not care: add an item in Quick Add or sell one at the register and it is in
+both feeds on the next pull, with nothing else touched. That is the entire
+point: ~1,230 items and climbing, no data entry.
 
 Neither endpoint needs auth. `functions/_middleware.js` only gates non-GET
 requests to a fixed list of API paths, so these are public GETs like the

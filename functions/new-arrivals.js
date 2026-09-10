@@ -13,6 +13,8 @@
 // hundred thumbnails is the kind of page weight that tanked the homepage's
 // Lighthouse score when it rendered the full catalogue.
 
+import { listProducts as loadProducts } from "./_lib/store.js";
+
 const SITE = "https://jinkittys.com";
 const SHOP_NAME = "Jojin's Kitty Thrift Shop";
 const STORE_PHONE = "+13126100321";
@@ -20,14 +22,11 @@ const STORE_PHONE = "+13126100321";
 export async function onRequestGet(context) {
   const { env } = context;
 
-  // Same resilience posture as sitemap.xml.js: a KV blip renders an honest
-  // empty page, never an error.
+  // Same resilience posture as sitemap.xml.js: a storage blip renders an
+  // honest empty page, never an error.
   let products = [];
   try {
-    if (env.PRODUCTS_KV) {
-      const raw = await env.PRODUCTS_KV.get("products");
-      products = raw ? JSON.parse(raw) : [];
-    }
+    products = await loadProducts(env);
   } catch {
     products = [];
   }

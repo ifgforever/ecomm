@@ -7,6 +7,8 @@
 // If KV is unreachable this still returns the static pages rather than an
 // error, so a blip never leaves the site with no sitemap at all.
 
+import { listProducts as loadProducts } from "./_lib/store.js";
+
 const SITE = "https://jinkittys.com";
 
 const STATIC_PAGES = [
@@ -36,10 +38,7 @@ export async function onRequestGet(context) {
 
   let products = [];
   try {
-    if (env.PRODUCTS_KV) {
-      const raw = await env.PRODUCTS_KV.get("products");
-      products = raw ? JSON.parse(raw) : [];
-    }
+    products = await loadProducts(env);
   } catch {
     products = [];
   }

@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Customers — Jojin's Kitty Thrift</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32'>💳</text></svg>">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900&family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #1c1610; --ink-soft: #6b5d4f;
+    --paper: #f7f2eb; --paper-warm: #f0e9de;
+    --tan: #d4c4a8; --amber: #c8863a; --amber-dark: #a06820;
+    --teal: #3d7a6e; --rust: #b8522a; --card: #ffffff; --r: 4px;
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'Karla', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: var(--font-body); color: var(--ink); background: var(--paper); padding-bottom: 50px; }
+  .wrap { max-width: 440px; margin: 0 auto; padding: 22px 20px; }
+  .navlink { display: block; text-align: center; font-size: 13px; font-weight: 700; color: var(--teal); text-decoration: none; margin-bottom: 14px; }
+  h1 { font-family: var(--font-display); font-size: 26px; font-weight: 900; text-align: center; margin: 0 0 6px; }
+  h1 em { font-style: italic; color: var(--amber-dark); }
+  .sub { text-align: center; color: var(--ink-soft); font-size: 13px; margin: 0 0 20px; }
+  .card { background: var(--card); border: 1.5px solid var(--tan); border-radius: var(--r); padding: 18px; box-shadow: 5px 5px 0 var(--amber); }
+  label { display: block; font-size: 12px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .04em; margin: 14px 0 5px; }
+  input {
+    width: 100%; font-family: var(--font-body); font-size: 16px; font-weight: 600;
+    color: var(--ink); background: var(--paper-warm); border: 1px solid var(--tan);
+    border-radius: var(--r); padding: 11px 12px;
+  }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .btn {
+    width: 100%; margin-top: 18px; font-family: var(--font-body); font-weight: 700;
+    font-size: 15px; color: #fff; background: var(--teal); border: none;
+    border-radius: var(--r); padding: 14px; cursor: pointer;
+  }
+  .btn:disabled { opacity: .5; }
+  .status { margin-top: 12px; font-size: 13.5px; text-align: center; display: none; }
+  .status.ok { color: var(--teal); font-weight: 700; }
+  .status.bad { color: var(--rust); }
+  .loyal { background: var(--paper-warm); border-radius: var(--r); padding: 10px 12px; margin-top: 12px; font-size: 13.5px; display: none; }
+  .loyal .row { display: flex; justify-content: space-between; margin: 3px 0; }
+  .hint { font-size: 12px; color: var(--ink-soft); margin: 6px 0 0; }
+  .suggest {
+    position: absolute; left: 0; right: 0; top: 100%; z-index: 20;
+    background: #fff; border: 1.5px solid var(--tan); border-top: none;
+    border-radius: 0 0 var(--r) var(--r); box-shadow: 0 6px 12px rgba(28,22,16,.12);
+    display: none; max-height: 240px; overflow-y: auto;
+  }
+  .suggest button {
+    display: block; width: 100%; text-align: left; background: none; border: none;
+    border-bottom: 1px solid var(--paper-warm); padding: 10px 12px; cursor: pointer;
+    font-family: var(--font-body); color: var(--ink);
+  }
+  .suggest button .em { font-weight: 700; font-size: 14px; }
+  .suggest button .nm { font-size: 12px; color: var(--ink-soft); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="navlink" href="/pos">🧾 Back to checkout</a>
+  <h1>Punch <em>Cards</em></h1>
+  <p class="sub">Type in an existing paper card or Notes-app balance —
+  look up by email, set the punches and credit, save.</p>
+
+  <div class="card">
+    <label>Email</label>
+    <div style="position:relative">
+      <input type="email" id="email" placeholder="customer@email.com" autocomplete="off" />
+      <div class="suggest" id="suggest"></div>
+    </div>
+    <div class="loyal" id="current"></div>
+
+    <label>Name</label>
+    <input type="text" id="name" placeholder="(optional)" />
+
+    <div class="grid2">
+      <div>
+        <label>Punches on card (0–9)</label>
+        <input type="number" id="punches" min="0" max="9" step="1" inputmode="numeric" />
+        <p class="hint">A full card? Leave punches at 0 and put $20 into credit instead.</p>
+      </div>
+      <div>
+        <label>Total visits ever</label>
+        <input type="number" id="visits" min="0" step="1" inputmode="numeric" />
+        <p class="hint">10+ makes them a regular (birthday gift).</p>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <label>Store credit ($)</label>
+        <input type="number" id="credit" min="0" step="0.01" inputmode="decimal" />
+      </div>
+      <div>
+        <label>Birthday (MM-DD)</label>
+        <input type="text" id="birthday" placeholder="07-04" pattern="\d{2}-\d{2}" />
+      </div>
+    </div>
+
+    <button class="btn" id="saveBtn">Save customer</button>
+    <div class="status" id="statusBox"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+
+  function status(msg, ok) {
+    const box = $('statusBox');
+    box.textContent = msg;
+    box.className = 'status ' + (ok ? 'ok' : 'bad');
+    box.style.display = 'block';
+  }
+
+  function showCurrent(c) {
+    const box = $('current');
+    if (!c) { box.style.display = 'none'; return; }
+    box.style.display = 'block';
+    box.innerHTML =
+      '<div class="row"><span>On file</span><span>' + (c.name || '—') + '</span></div>' +
+      '<div class="row"><span>Punches</span><span>' + c.punches + '/10</span></div>' +
+      '<div class="row"><span>Visits</span><span>' + c.lifetimeVisits + (c.isRegular ? ' ⭐' : '') + '</span></div>' +
+      '<div class="row"><span>Credit</span><span>$' + c.credit + '</span></div>';
+  }
+
+  async function suggest() {
+    const box = $('suggest');
+    const q = $('email').value.trim();
+    box.style.display = 'none';
+    box.innerHTML = '';
+    if (q.length < 2) return;
+    try {
+      const res = await fetch('/api/pos/customer?q=' + encodeURIComponent(q), { cache: 'no-store' });
+      const data = await res.json();
+      if (!res.ok || !data.matches || !data.matches.length) return;
+      if (data.matches.length === 1 && data.matches[0].email === q.toLowerCase()) return;
+      for (const m of data.matches) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        const em = document.createElement('div');
+        em.className = 'em'; em.textContent = m.email;
+        const nm = document.createElement('div');
+        nm.className = 'nm';
+        nm.textContent = (m.name ? m.name + ' · ' : '') + m.punches + '/10 punches · $' + m.credit + ' credit';
+        b.appendChild(em); b.appendChild(nm);
+        b.onclick = () => {
+          $('email').value = m.email;
+          box.style.display = 'none';
+          $('email').dispatchEvent(new Event('input'));
+        };
+        box.appendChild(b);
+      }
+      box.style.display = 'block';
+    } catch {}
+  }
+  document.addEventListener('click', (e) => {
+    if (!$('suggest').contains(e.target) && e.target !== $('email')) $('suggest').style.display = 'none';
+  });
+
+  let lookupTimer = null;
+  $('email').addEventListener('input', () => {
+    clearTimeout(lookupTimer);
+    suggest();
+    lookupTimer = setTimeout(async () => {
+      const email = $('email').value.trim().toLowerCase();
+      showCurrent(null);
+      if (!email.includes('@')) return;
+      try {
+        const res = await fetch('/api/pos/customer?email=' + encodeURIComponent(email), { cache: 'no-store' });
+        const data = await res.json();
+        if (!res.ok) return;
+        showCurrent(data.customer);
+        if (data.customer) {
+          $('name').value = data.customer.name || '';
+          $('punches').value = data.customer.punches;
+          $('visits').value = data.customer.lifetimeVisits;
+          $('credit').value = (data.customer.creditCents / 100).toFixed(2);
+          $('birthday').value = data.customer.birthday || '';
+        }
+      } catch {}
+    }, 400);
+  });
+
+  $('saveBtn').addEventListener('click', async () => {
+    const email = $('email').value.trim().toLowerCase();
+    if (!email.includes('@')) return status('Enter the customer\'s email first.', false);
+    const birthday = $('birthday').value.trim();
+    if (birthday && !/^\d{2}-\d{2}$/.test(birthday)) return status('Birthday must look like 07-04.', false);
+
+    const body = { email, name: $('name').value };
+    if (birthday) body.birthday = birthday;
+    if ($('punches').value !== '') body.punches = Number($('punches').value);
+    if ($('visits').value !== '') body.lifetimeVisits = Number($('visits').value);
+    if ($('credit').value !== '') body.credit = Number($('credit').value);
+
+    $('saveBtn').disabled = true;
+    try {
+      const res = await fetch('/api/pos/customer', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Save failed (' + res.status + ')');
+      showCurrent(data.customer);
+      status('Saved — ' + data.customer.punches + ' punches, $' + data.customer.credit + ' credit' +
+        (data.customer.isRegular ? ', regular ⭐' : '') + '.', true);
+    } catch (err) {
+      status(err.message, false);
+    } finally {
+      $('saveBtn').disabled = false;
+    }
+  });
+})();
+</script>
+</body>
+</html>

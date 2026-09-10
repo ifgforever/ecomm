@@ -23,6 +23,8 @@
 // POST              publishes. Admin-gated: the path is in the middleware's
 //                   PROTECTED_WRITE_PATHS, so non-GET requires the admin cookie.
 
+import { listProducts } from "../_lib/store.js";
+
 const GRAPH = "https://graph.facebook.com/v21.0";
 const CYCLE_KEY = "fb-post-cycle";
 const SITE = "https://jinkittys.com";
@@ -50,7 +52,7 @@ async function handle({ request, env }, { publish }) {
     const count = clamp(parseInt(url.searchParams.get("count") || "", 10) || DEFAULT_COUNT, 2, 10);
     const wantCategory = (url.searchParams.get("category") || "").trim();
 
-    const products = JSON.parse((await env.PRODUCTS_KV.get("products")) || "[]");
+    const products = await listProducts(env);
     const cycle = JSON.parse((await env.PRODUCTS_KV.get(CYCLE_KEY)) || '{"used":[],"started":null}');
     let used = new Set(cycle.used || []);
 

@@ -68,7 +68,26 @@ up with a price + category; the sale creates a real inventory record
 - Store credit is applied at checkout (tax is charged on the after-credit
   amount) and refunded proportionally when a credit-paid sale is returned.
 
-Customers are keyed by email; entering it at checkout is optional.
+Customers are keyed by email; entering it at checkout is optional. Typing
+two characters brings up matching existing customers to tap (typos would
+fork a punch card). Any new email entered at checkout creates the customer
+record automatically — typing it once IS the registration.
+
+## Receipts
+
+Every sale gets a private receipt page at `/r/<32-hex-token>` — public by
+design (the customer opens it), guarded by the unguessable token, showing
+only that one sale plus the customer's own punch-card status. The register
+offers a **Share receipt** button (share sheet / copy link) after every
+sale.
+
+With a Resend account connected, the receipt also emails automatically to
+the address entered at checkout. Setup: verify `jinkittys.com` under
+Resend > Domains (add the DNS records in Cloudflare), create an API key,
+add it to the Pages project as the secret `RESEND_API_KEY`, redeploy.
+Optional `RECEIPT_FROM` overrides the sender (default
+"Jojin's Kitty Thrift <receipts@jinkittys.com>"). Without the key, the
+share button is the receipt path and nothing errors.
 
 ## Tax
 

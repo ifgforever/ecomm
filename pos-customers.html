@@ -47,6 +47,19 @@
   .loyal { background: var(--paper-warm); border-radius: var(--r); padding: 10px 12px; margin-top: 12px; font-size: 13.5px; display: none; }
   .loyal .row { display: flex; justify-content: space-between; margin: 3px 0; }
   .hint { font-size: 12px; color: var(--ink-soft); margin: 6px 0 0; }
+  .suggest {
+    position: absolute; left: 0; right: 0; top: 100%; z-index: 20;
+    background: #fff; border: 1.5px solid var(--tan); border-top: none;
+    border-radius: 0 0 var(--r) var(--r); box-shadow: 0 6px 12px rgba(28,22,16,.12);
+    display: none; max-height: 240px; overflow-y: auto;
+  }
+  .suggest button {
+    display: block; width: 100%; text-align: left; background: none; border: none;
+    border-bottom: 1px solid var(--paper-warm); padding: 10px 12px; cursor: pointer;
+    font-family: var(--font-body); color: var(--ink);
+  }
+  .suggest button .em { font-weight: 700; font-size: 14px; }
+  .suggest button .nm { font-size: 12px; color: var(--ink-soft); }
 </style>
 </head>
 <body>
@@ -58,7 +71,10 @@
 
   <div class="card">
     <label>Email</label>
-    <input type="email" id="email" placeholder="customer@email.com" autocomplete="off" />
+    <div style="position:relative">
+      <input type="email" id="email" placeholder="customer@email.com" autocomplete="off" />
+      <div class="suggest" id="suggest"></div>
+    </div>
     <div class="loyal" id="current"></div>
 
     <label>Name</label>
@@ -115,9 +131,44 @@
       '<div class="row"><span>Credit</span><span>$' + c.credit + '</span></div>';
   }
 
+  async function suggest() {
+    const box = $('suggest');
+    const q = $('email').value.trim();
+    box.style.display = 'none';
+    box.innerHTML = '';
+    if (q.length < 2) return;
+    try {
+      const res = await fetch('/api/pos/customer?q=' + encodeURIComponent(q), { cache: 'no-store' });
+      const data = await res.json();
+      if (!res.ok || !data.matches || !data.matches.length) return;
+      if (data.matches.length === 1 && data.matches[0].email === q.toLowerCase()) return;
+      for (const m of data.matches) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        const em = document.createElement('div');
+        em.className = 'em'; em.textContent = m.email;
+        const nm = document.createElement('div');
+        nm.className = 'nm';
+        nm.textContent = (m.name ? m.name + ' · ' : '') + m.punches + '/10 punches · $' + m.credit + ' credit';
+        b.appendChild(em); b.appendChild(nm);
+        b.onclick = () => {
+          $('email').value = m.email;
+          box.style.display = 'none';
+          $('email').dispatchEvent(new Event('input'));
+        };
+        box.appendChild(b);
+      }
+      box.style.display = 'block';
+    } catch {}
+  }
+  document.addEventListener('click', (e) => {
+    if (!$('suggest').contains(e.target) && e.target !== $('email')) $('suggest').style.display = 'none';
+  });
+
   let lookupTimer = null;
   $('email').addEventListener('input', () => {
     clearTimeout(lookupTimer);
+    suggest();
     lookupTimer = setTimeout(async () => {
       const email = $('email').value.trim().toLowerCase();
       showCurrent(null);

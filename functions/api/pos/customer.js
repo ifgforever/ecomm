@@ -29,6 +29,31 @@ export async function onRequestGet(context) {
   if (dbMissing) return dbMissing;
 
   const url = new URL(request.url);
+
+  // ?q= — typeahead for the checkout email field: existing customers whose
+  // email or name contains what's been typed so far, so staff tap a match
+  // instead of retyping (a typo'd email silently forks the punch card).
+  const q = String(url.searchParams.get("q") || "").trim().toLowerCase();
+  if (q) {
+    if (q.length < 2) return json({ ok: true, matches: [] });
+    const like = "%" + q.replace(/[%_]/g, "") + "%";
+    const { results } = await env.DB.prepare(
+      `SELECT email, name, punches, lifetime_visits, credit_cents FROM customers
+       WHERE email LIKE ? OR lower(name) LIKE ?
+       ORDER BY lifetime_visits DESC, email LIMIT 8`
+    ).bind(like, like).all();
+    return json({
+      ok: true,
+      matches: (results || []).map((c) => ({
+        email: c.email,
+        name: c.name || "",
+        punches: c.punches,
+        visits: c.lifetime_visits,
+        credit: (c.credit_cents / 100).toFixed(2),
+      })),
+    });
+  }
+
   const email = normalizeEmail(url.searchParams.get("email"));
   if (!email) return posError("Missing email", 400);
 

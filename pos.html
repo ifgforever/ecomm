@@ -114,6 +114,21 @@
   }
   .chips button.on { background: var(--amber); border-color: var(--amber); color: #fff; }
 
+  /* customer typeahead */
+  .suggest {
+    position: absolute; left: 0; right: 0; top: 100%; z-index: 20;
+    background: #fff; border: 1.5px solid var(--tan); border-top: none;
+    border-radius: 0 0 var(--r) var(--r); box-shadow: 0 6px 12px rgba(28,22,16,.12);
+    display: none; max-height: 240px; overflow-y: auto;
+  }
+  .suggest button {
+    display: block; width: 100%; text-align: left; background: none; border: none;
+    border-bottom: 1px solid var(--paper-warm); padding: 10px 12px; cursor: pointer;
+    font-family: var(--font-body); color: var(--ink);
+  }
+  .suggest button .em { font-weight: 700; font-size: 14px; }
+  .suggest button .nm { font-size: 12px; color: var(--ink-soft); }
+
   /* loyalty */
   .loyal { background: var(--paper-warm); border-radius: var(--r); padding: 10px 12px; margin-top: 10px; font-size: 13.5px; display: none; }
   .loyal .punches { letter-spacing: 2px; font-size: 15px; }
@@ -196,7 +211,10 @@
 
     <div class="card">
       <h2>Customer <span style="font-weight:400;font-size:12px;color:var(--ink-soft)">(optional — for loyalty)</span></h2>
-      <input type="email" id="custEmail" placeholder="customer@email.com" autocomplete="off" />
+      <div style="position:relative">
+        <input type="email" id="custEmail" placeholder="customer@email.com" autocomplete="off" />
+        <div class="suggest" id="custSuggest"></div>
+      </div>
       <div class="loyal" id="loyalBox"></div>
       <div class="credit-row" id="creditRow">
         <input type="number" id="creditInput" min="0" step="0.01" inputmode="decimal" />
@@ -227,6 +245,8 @@
       <h2>Sale recorded</h2>
       <div id="doneLoyalty"></div>
       <p class="sum" id="doneSum"></p>
+      <p class="sum" id="doneEmail" style="display:none;color:var(--teal);font-weight:700"></p>
+      <button class="btn secondary" id="shareReceiptBtn" style="display:none;margin-bottom:10px">🧾 Share receipt</button>
       <button class="btn" id="newSaleBtn">Start next sale</button>
     </div>
   </div>
@@ -492,7 +512,45 @@
   let emailTimer = null;
   $('custEmail').addEventListener('input', () => {
     clearTimeout(emailTimer);
-    emailTimer = setTimeout(lookupCustomer, 500);
+    emailTimer = setTimeout(() => { suggestCustomers(); lookupCustomer(); }, 400);
+  });
+
+  // Typeahead: show existing customers matching what's typed, so a regular
+  // is picked by tap instead of retyped (typos would fork their punch card).
+  async function suggestCustomers() {
+    const box = $('custSuggest');
+    const q = $('custEmail').value.trim();
+    box.style.display = 'none';
+    box.innerHTML = '';
+    if (q.length < 2) return;
+    try {
+      const res = await fetch('/api/pos/customer?q=' + encodeURIComponent(q), { cache: 'no-store' });
+      const data = await res.json();
+      if (!res.ok || !data.matches || !data.matches.length) return;
+      if (data.matches.length === 1 && data.matches[0].email === q.toLowerCase()) return;
+      for (const m of data.matches) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        const em = document.createElement('div');
+        em.className = 'em'; em.textContent = m.email;
+        const nm = document.createElement('div');
+        nm.className = 'nm';
+        nm.textContent = (m.name ? m.name + ' · ' : '') + m.punches + '/10 punches · $' + m.credit + ' credit';
+        b.appendChild(em); b.appendChild(nm);
+        b.onclick = () => {
+          $('custEmail').value = m.email;
+          box.style.display = 'none';
+          lookupCustomer();
+        };
+        box.appendChild(b);
+      }
+      box.style.display = 'block';
+    } catch {}
+  }
+  document.addEventListener('click', (e) => {
+    if (!$('custSuggest').contains(e.target) && e.target !== $('custEmail')) {
+      $('custSuggest').style.display = 'none';
+    }
   });
 
   async function lookupCustomer() {
@@ -600,6 +658,23 @@
         'Sale #' + data.sale.id + ' · ' + data.sale.items.length + ' item(s) · ' +
         money(data.sale.total) + ' ' + data.sale.payment +
         (Number(data.sale.creditUsed) > 0 ? ' (used $' + data.sale.creditUsed + ' credit)' : '');
+
+      const emailNote = $('doneEmail');
+      emailNote.style.display = data.emailed ? 'block' : 'none';
+      if (data.emailed) emailNote.textContent = '📧 Receipt emailed to the customer';
+      const shareBtn = $('shareReceiptBtn');
+      if (data.sale.receiptUrl) {
+        const url = location.origin + data.sale.receiptUrl;
+        shareBtn.style.display = 'block';
+        shareBtn.onclick = async () => {
+          try {
+            if (navigator.share) await navigator.share({ title: 'Your receipt', url });
+            else { await navigator.clipboard.writeText(url); shareBtn.textContent = '🧾 Link copied!'; }
+          } catch {}
+        };
+      } else {
+        shareBtn.style.display = 'none';
+      }
       $('salePanel').querySelectorAll('.card').forEach((c) => { if (c.id !== 'doneCard') c.style.display = 'none'; });
       $('doneCard').style.display = 'block';
       window.scrollTo(0, 0);

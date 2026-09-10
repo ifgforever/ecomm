@@ -73,7 +73,7 @@ const MANUAL_CATEGORIES = new Set([
 ]);
 
 export async function onRequestPost(context) {
-  const { request, env } = context;
+  const { request, env, waitUntil } = context;
   const dbMissing = requireDb(env);
   if (dbMissing) return dbMissing;
   const db = env.DB;
@@ -277,12 +277,15 @@ export async function onRequestPost(context) {
   // Record the sale, its lines, and the loyalty movements in one batch —
   // D1 batches are transactional, so the ledger can't half-write.
   // -------------------------------------------------------------------
+  // The receipt link's whole security is this token: unguessable, and only
+  // ever handed to the customer of this one sale.
+  const receiptToken = crypto.randomUUID().replace(/-/g, "");
   const saleResult = await db
     .prepare(
       `INSERT INTO sales (created_at, subtotal_cents, tax_rate, tax_cents,
         credit_used_cents, total_cents, payment, customer_id, customer_email,
-        status, note)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'completed', ?)`
+        status, note, receipt_token)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'completed', ?, ?)`
     )
     .bind(
       nowIso,
@@ -294,7 +297,8 @@ export async function onRequestPost(context) {
       payment,
       customer ? customer.id : null,
       email,
-      String(body?.note || "")
+      String(body?.note || ""),
+      receiptToken
     )
     .run();
   const saleId = saleResult.meta.last_row_id;
@@ -341,10 +345,32 @@ export async function onRequestPost(context) {
 
   const updatedCustomer = customer ? await findCustomerByEmail(db, email) : null;
 
+  // Email the receipt when there's an address and a Resend key. Fire and
+  // forget via waitUntil — a mail hiccup must never fail a recorded sale;
+  // the response's `emailed` flag just tells the register what happened
+  // so it can fall back to the share button.
+  const receiptUrl = `https://jinkittys.com/r/${receiptToken}`;
+  let emailed = false;
+  if (email && env.RESEND_API_KEY) {
+    emailed = true;
+    const send = sendReceiptEmail(env, {
+      to: email,
+      saleId,
+      receiptUrl,
+      totalCents,
+      payment,
+      loyaltyNotes,
+    }).catch(() => {});
+    if (typeof waitUntil === "function") waitUntil(send);
+    else await send;
+  }
+
   return json({
+    emailed,
     ok: true,
     sale: {
       id: saleId,
+      receiptUrl: `/r/${receiptToken}`,
       createdAt: nowIso,
       subtotal: centsToStr(subtotalCents),
       creditUsed: centsToStr(creditUsedCents),
@@ -401,9 +427,46 @@ export async function onRequestGet(context) {
   return json({ ok: true, sales: out });
 }
 
+async function sendReceiptEmail(env, { to, saleId, receiptUrl, totalCents, payment, loyaltyNotes }) {
+  // RECEIPT_FROM must be an address on a domain verified in Resend,
+  // e.g. "Jojin's Kitty Thrift <receipts@jinkittys.com>".
+  const from = String(env.RECEIPT_FROM || "Jojin's Kitty Thrift <receipts@jinkittys.com>");
+  const total = centsToStr(totalCents);
+  const loyaltyHtml = (loyaltyNotes || []).length
+    ? `<p style="color:#a06820;font-weight:bold">${loyaltyNotes.map(escHtml).join("<br>")}</p>`
+    : "";
+  await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${String(env.RESEND_API_KEY).trim()}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from,
+      to: [to],
+      subject: `Your Jojin's Kitty Thrift receipt — $${total}`,
+      html: `<div style="font-family:Georgia,serif;max-width:420px;margin:0 auto;padding:20px">
+        <h1 style="font-size:22px">Jojin's <em style="color:#a06820">Kitty Thrift</em></h1>
+        <p>Thanks for stopping by! Your total today was <b>$${total}</b>, paid by ${escHtml(payment)}.</p>
+        ${loyaltyHtml}
+        <p><a href="${receiptUrl}" style="color:#3d7a6e;font-weight:bold">View your full receipt (sale #${saleId})</a></p>
+        <p style="color:#6b5d4f;font-size:13px">4100 N Pulaski Rd, Chicago · Everything is one-of-a-kind and sold as-is.<br>
+        <a href="https://jinkittys.com" style="color:#3d7a6e">jinkittys.com</a> 🐾</p>
+      </div>`,
+    }),
+  });
+}
+
+function escHtml(s) {
+  return String(s ?? "").replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[c]));
+}
+
 function saleJson(sale, items) {
   return {
     id: sale.id,
+    receiptUrl: sale.receipt_token ? `/r/${sale.receipt_token}` : "",
     createdAt: sale.created_at,
     subtotal: centsToStr(sale.subtotal_cents),
     creditUsed: centsToStr(sale.credit_used_cents),

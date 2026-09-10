@@ -83,9 +83,11 @@ export async function ensureSchema(db) {
       customer_id INTEGER,
       customer_email TEXT NOT NULL DEFAULT '',
       status TEXT NOT NULL DEFAULT 'completed',
-      note TEXT NOT NULL DEFAULT ''
+      note TEXT NOT NULL DEFAULT '',
+      receipt_token TEXT NOT NULL DEFAULT ''
     )`,
     `CREATE INDEX IF NOT EXISTS idx_sales_created ON sales (created_at)`,
+    `CREATE INDEX IF NOT EXISTS idx_sales_receipt ON sales (receipt_token)`,
 
     `CREATE TABLE IF NOT EXISTS sale_items (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -113,6 +115,19 @@ export async function ensureSchema(db) {
   ];
   for (const sql of statements) {
     await db.prepare(sql).run();
+  }
+
+  // Columns added after the first release. ALTER TABLE has no IF NOT EXISTS,
+  // so each is tried and an "already exists" failure is the normal case on
+  // every run after the first.
+  for (const sql of [
+    "ALTER TABLE sales ADD COLUMN receipt_token TEXT NOT NULL DEFAULT ''",
+  ]) {
+    try {
+      await db.prepare(sql).run();
+    } catch {
+      // Column already there.
+    }
   }
 }
 

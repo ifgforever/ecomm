@@ -22,7 +22,11 @@
   On phones without the share sheet the button downloads a PNG instead;
   print it from the Photos/Files app via iPrint&Label.
 -->
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<!-- Served from this site (vendor/qrcode.min.js, an esbuild IIFE bundle of
+     the npm `qrcode` package) rather than a CDN: the first CDN path 404'd
+     in production, and a label printer must not depend on a third party
+     being up anyway. -->
+<script src="/vendor/qrcode.min.js"></script>
 
 <style>
   :root {

@@ -73,6 +73,22 @@ two characters brings up matching existing customers to tap (typos would
 fork a punch card). Any new email entered at checkout creates the customer
 record automatically — typing it once IS the registration.
 
+## Customer check-in (NFC sticker / QR at the counter)
+
+`/checkin` is a public page customers open on their own phone from an NFC
+sticker or printed QR card at the counter (or on a shop tablet on a
+stand). They enter their email — their phone autofills it — and the
+register picks the entry up within ~3 seconds and attaches it to the sale
+being rung, but only while a sale is open and the register's email box is
+empty. Entries live in a two-minute pairing buffer (`kiosk_entries`),
+capped and self-cleaning; writing to it grants nothing, and reading it
+stays admin-only.
+
+To make the sticker: buy NTAG213/215 NFC stickers (a 10-pack is ~$8),
+write `https://jinkittys.com/checkin` to one with any free NFC-tools app,
+stick it on the counter. Print the same URL as a QR next to it for phones
+with NFC off.
+
 ## Receipts
 
 Every sale gets a private receipt page at `/r/<32-hex-token>` — public by

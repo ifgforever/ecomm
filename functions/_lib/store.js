@@ -112,6 +112,17 @@ export async function ensureSchema(db) {
       created_at TEXT NOT NULL DEFAULT ''
     )`,
     `CREATE INDEX IF NOT EXISTS idx_loyalty_customer ON loyalty_events (customer_id)`,
+
+    // The customer-facing kiosk drops typed emails here; the register polls
+    // and consumes the newest one. Tiny and self-cleaning (consumed rows and
+    // stale rows are deleted on read).
+    `CREATE TABLE IF NOT EXISTS kiosk_entries (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT NOT NULL,
+      name TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL DEFAULT '',
+      consumed INTEGER NOT NULL DEFAULT 0
+    )`,
   ];
   for (const sql of statements) {
     await db.prepare(sql).run();

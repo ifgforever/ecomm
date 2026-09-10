@@ -285,6 +285,7 @@
   // ------------------------------------------------------------------
   let cart = [];          // {key, id?, manual?, name, category, price, originalPrice, qty}
   let customer = null;    // summary from the API
+  let kioskName = null;   // name typed on the check-in page, saved with the sale
   let payment = 'Cash';
   let birthdayGiftArmed = false;
   let keySeq = 0;
@@ -554,6 +555,25 @@
     }
   });
 
+  // Customer check-in pairing: customers open /checkin from the counter's
+  // NFC sticker / QR card (or the shop tablet) and submit their own email;
+  // this poll picks it up and fills the box — only while a sale is being
+  // rung and the box is empty, so it never stomps on what staff typed.
+  setInterval(async () => {
+    if (!cart.length || $('custEmail').value.trim()) return;
+    if ($('doneCard').style.display === 'block') return;
+    try {
+      const res = await fetch('/api/pos/kiosk', { cache: 'no-store', credentials: 'same-origin' });
+      const data = await res.json();
+      if (res.ok && data.entry) {
+        $('custEmail').value = data.entry.email;
+        kioskName = data.entry.name || null;
+        lookupCustomer();
+        if (navigator.vibrate) navigator.vibrate(40);
+      }
+    } catch {}
+  }, 3000);
+
   async function lookupCustomer() {
     const email = $('custEmail').value.trim().toLowerCase();
     customer = null; birthdayGiftArmed = false;
@@ -641,6 +661,7 @@
       };
       const email = $('custEmail').value.trim();
       if (email) body.customerEmail = email;
+      if (email && kioskName) body.customerName = kioskName;
       const credit = creditApplied();
       if (credit > 0) body.useCreditCents = Math.round(credit * 100);
       if (birthdayGiftArmed) body.birthdayGift = true;
@@ -688,7 +709,7 @@
   };
 
   $('newSaleBtn').onclick = () => {
-    cart = []; customer = null; birthdayGiftArmed = false;
+    cart = []; customer = null; kioskName = null; birthdayGiftArmed = false;
     $('custEmail').value = ''; $('creditInput').value = '';
     $('loyalBox').style.display = 'none';
     $('creditRow').style.display = 'none';

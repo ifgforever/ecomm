@@ -9,10 +9,14 @@ typing a product into Merchant Center:
 | `/feeds/google-local-inventory.txt` | Per-store stock. Tab-separated. | Supplemental source, type **Local product inventory**, **scheduled fetch** |
 | `/feeds/excluded.txt` | Everything in stock that is *not* being sent, and why. | Nothing — it is for us, not Google |
 
-Both read the same `PRODUCTS_KV` `"products"` array that `/api/products`,
-`/p/[slug]` and `/sitemap.xml` already read. Add an item in Quick Add and it
-is in both feeds on the next pull, with nothing else touched. That is the
-entire point: 600 items, no data entry.
+Both read the same product list that `/api/products`, `/p/[slug]` and
+`/sitemap.xml` already read, through `loadProducts()` in `_lib/catalog.js` →
+`listProducts()` in `_lib/store.js`. That resolves to the D1 `items` table
+when a `DB` (or `jdb`) binding exists, and falls back to the original
+`PRODUCTS_KV` `"products"` array when it does not. Either way the feeds do
+not care: add an item in Quick Add or sell one at the register and it is in
+both feeds on the next pull, with nothing else touched. That is the entire
+point: ~1,230 items and climbing, no data entry.
 
 Neither endpoint needs auth. `functions/_middleware.js` only gates non-GET
 requests to a fixed list of API paths, so these are public GETs like the
@@ -65,9 +69,27 @@ several of them silently do nothing if run early.
    long to sync, and inventory submitted earlier lands against a store
    Merchant Center cannot see yet.
 
-4. **Turn on the add-on.** Settings → Add-ons → Free local listings → add
-   country (United States) → Continue setup. When asked, say you know
-   per-store inventory.
+4. **Turn on the add-on AND finish the country wizard.** Settings → Add-ons →
+   "Your add-ons" → Free local listings → Go to Free local listings → Add
+   country → United States.
+
+   **Adding the country is not the same as finishing setup, and this is the
+   step that cost weeks.** The country row then reads "Continue setup" and
+   the program does not serve until every sub-step is done. Nothing warns
+   you: no banner, no error, no product disapproval. Open the row (it later
+   reads "Review setup status") and work all of it:
+
+   - **Add stores** → the verified Business Profile location.
+   - **Your in-store product availability** → you provide inventory per
+     store, not ship-to-store.
+   - **Your product page experience** → see the section below. This is the
+     one that gets skipped.
+   - **Your pick-up experience** → genuinely optional, and skipping it is
+     correct here; the shop runs no pickup service.
+   - **Add inventory** → sits at "In progress", which is just the local
+     inventory feed doing its nightly job.
+
+   Ignore the Google Ads linking prompt. That is for local inventory ads.
 
 5. **Register the primary feed.** Data sources → Add product source →
    scheduled fetch → `https://jinkittys.com/feeds/google-products.xml`.
@@ -78,7 +100,53 @@ several of them silently do nothing if run early.
    `https://jinkittys.com/feeds/google-local-inventory.txt`. The type matters:
    a generic supplemental source accepts the file and then powers nothing.
 
-7. **Wait 24–48h** for first processing.
+7. **Opt the primary source into the local marketing method.** Data sources →
+   Primary sources → PRODUCTS SOURCE 1 → Data source setup → "How the data
+   will be used" → Marketing methods → tick **Free local listings**.
+
+   Products inherit marketing methods from the source that created them. The
+   per-item `included_destination` in the feed cannot rescue this: it can
+   re-include a product within destinations the account and source already
+   have, but it cannot create one they are not enrolled in. Until this is
+   ticked the tag is a no-op.
+
+8. **Wait 24–48h** for first processing.
+
+## Your product page experience — the step that blocks everything
+
+Three options, and the choice has real consequences:
+
+| Option | Requires | Audit |
+|---|---|---|
+| Product pages with in-store availability | Page shows in-store availability + store location | **No** |
+| Store-specific product pages | `link_template` with a `{store_code}` placeholder | No |
+| Product pages without in-store availability | Nothing — Google hosts it | **Yes** |
+
+**Use the first one.** Google's implementation guide recommends it for
+single-store merchants showing in-store availability.
+
+The second would disapprove the entire catalogue on day one: it needs a
+`link_template` attribute carrying `{store_code}`, and `google-products.xml.js`
+emits a plain `<link>`.
+
+The third is the only one that mandates in-store inventory verification — a
+roughly two-hour store visit sampling 100 feed-listed products and
+photographing their price tags, with "Ineligible" as the failure verdict. For
+one-of-a-kind stock at quantity 1 that turns over daily, that is 100 chances
+to hit something that sold since Google's last pull. Avoid it.
+
+**`/p/[slug]` is written to satisfy option one and must stay that way.** It
+renders "In stock in store", an "Available at this store" block with the shop
+name, full address, hours and phone, and a schema.org `Store` seller carrying
+address, telephone, openingHours and geo. Before that wording existed the page
+said only "In stock — one available", which reads as *online* stock, with the
+address in 12px grey text. If someone ever simplifies that block away, this
+setup step silently stops qualifying.
+
+Submit a **multi-quantity** item as the example URL. Everything here is
+one-of-one, and if the sample sells during the week-long review Google crawls
+a "Sold" page. `/api/products` has a few dozen items with `quantity > 1`; pick
+the highest.
 
 ## Pop Mart is held back on purpose
 
@@ -110,15 +178,42 @@ the terms it matches are ordinary words.
 
 ## What to check when something is wrong
 
-Both endpoints send `X-Feed-Item-Count`, so a `curl -I` is enough to compare
-what the shop is publishing against what Merchant Center says it received:
+**Start by asking whether the program is even live**, because for a long time
+it was not, and every data-side check came back green the whole while. The
+tell is inverted and easy to miss: Google *hides* Products → "Sales channels"
+and the "Add products to stores" button from accounts enrolled in free local
+listings. If you can see that tab and the manual store picker works, the
+program is **not** running, and no amount of feed debugging will change it.
+Go back to steps 4 and 7. Never use that manual picker — it caps at 50 items,
+it cannot enrol the account, and manually associated stores are not eligible
+for free local listings anyway.
 
-    curl -sI https://jinkittys.com/feeds/google-products.xml | grep -i item-count
-    curl -sI https://jinkittys.com/feeds/google-local-inventory.txt | grep -i item-count
+Both endpoints send `X-Feed-Item-Count`, so one request each is enough to
+compare what the shop is publishing against what Merchant Center says it
+received. **Use GET, not HEAD** — both functions export only `onRequestGet`,
+so `curl -I` returns 404 and looks alarming for no reason:
+
+    curl -s -D - -o /dev/null https://jinkittys.com/feeds/google-products.xml | grep -i item-count
+    curl -s -D - -o /dev/null https://jinkittys.com/feeds/google-local-inventory.txt | grep -i item-count
 
 If those two disagree with each other, something is wrong here. If they agree
 with each other but not with Merchant Center, the problem is on Google's side
 of the fetch — usually the store code.
+
+**"Matched products: 1,232" on the local inventory source proves less than it
+looks.** It means Google joined the inventory rows to the primary feed on the
+`id` column. It does not validate the store code, does not test eligibility,
+and does not mean the account is enrolled. A green "no issues found" there is
+compatible with nothing serving at all.
+
+Likewise a clean **Needs attention** tab. With no live destination there is
+nothing to evaluate, so silence means "not assessed", not "approved". Expect
+real issues to appear once the program goes live — that is progress, not a
+regression.
+
+And **"Not showing on Google: 1.2K"** under the *Free listings* filter is
+permanent and correct. The feed excludes that destination on purpose. Judge
+by the *Free local listings* filter instead.
 
 For anything missing from the feeds, `/feeds/excluded.txt` answers it
 directly — every in-stock item that is not being sent, the reason, and a
